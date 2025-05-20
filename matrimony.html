@@ -1,36 +1,49 @@
+<!-- File: matrimony.html -->
 <!DOCTYPE html>
-<html lang="or">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Oriya:wght@400;700&display=swap" rel="stylesheet">
-  <title>Matrimony • ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</title>
-  <link rel="stylesheet" href="assets/css/main.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrimony | Nikhila Odisha Pandara Samaja</title>
+  <link rel="stylesheet" href="assets/css/matrimony.css">
 </head>
 <body>
-  <header>
-    <nav class="navbar">
-      <div class="brand">
-        <img src="assets/img/pandara logo.png" alt="Pandara Samaja Logo" />
-        <span>ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</span>
-      </div>
-      <button class="nav-toggle" aria-label="Toggle navigation"><span class="hamburger"></span></button>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="members.html">Members</a></li>
-        <li><a href="matrimony.html" class="active">Matrimony</a></li>
-      </ul>
-    </nav>
+  <header class="matrimony-header">
+    <h1>ନିଖିଳ ଓଡିଶା ପଣ୍ଡାରା ସମାଜ</h1>
+    <div class="gender-buttons">
+      <button id="showGirls">Girls</button>
+      <button id="showBoys">Boys</button>
+    </div>
   </header>
 
   <main>
-    <section>
-      <h1>Matrimony</h1>
-      <p>Introduce your matrimony services or provide links/forms here.</p>
-    </section>
+    <section id="profile-list"></section>
+    <div id="profile-modal" class="hidden">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <div class="modal-body">
+          <div class="modal-left">
+            <img id="modal-photo" src="" alt="Profile Photo">
+          </div>
+          <div class="modal-right">
+            <h2 id="modal-name"></h2>
+            <p><strong>Age:</strong> <span id="modal-age"></span></p>
+            <p><strong>Height:</strong> <span id="modal-height"></span></p>
+            <p><strong>Blood Group:</strong> <span id="modal-blood"></span></p>
+            <p><strong>Gotra:</strong> <span id="modal-gotra"></span></p>
+            <p><strong>Education:</strong> <span id="modal-edu"></span></p>
+            <p><strong>Occupation:</strong> <span id="modal-occ"></span></p>
+            <p><strong>Father:</strong> <span id="modal-father"></span></p>
+            <p><strong>Mother:</strong> <span id="modal-mother"></span></p>
+            <p><strong>Phone:</strong> <span id="modal-phone"></span></p>
+            <p><strong>Email:</strong> <span id="modal-email"></span></p>
+            <p><strong>Address:</strong> <span id="modal-address"></span></p>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
-  <script src="assets/js/main.js"></script>
+  <script src="assets/js/matrimony.js"></script>
 </body>
 </html>
