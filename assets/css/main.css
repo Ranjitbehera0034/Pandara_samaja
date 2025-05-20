@@ -1,0 +1,109 @@
+/* ===== COLOR PALETTE ===== */
+:root {
+  --blue-900: #005bbb;   /* dark brand blue */
+  --blue-200: #4f9bff;   /* lighter accent blue */
+  --white    : #ffffff;  /* white */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Noto Sans Oriya", sans-serif;
+  background: var(--white);
+  color: #222;
+  line-height: 1.5;
+}
+
+/* ---------- HEADER ---------- */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 1.2rem;
+  background: var(--blue-900);
+  color: var(--white);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.brand img { height: 42px; width: auto; }
+
+/* ---------- NAV LINKS ---------- */
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1.4rem;
+}
+
+.nav-links a {
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a.active { color: var(--blue-200); }
+
+/* ---------- HAMBURGER ---------- */
+.nav-toggle {
+  display: none;
+  background: none;
+  border: 2px solid var(--blue-200);
+  padding: 0.35rem 0.4rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.hamburger,
+.hamburger::before,
+.hamburger::after {
+  content: "";
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--white);
+  transition: transform 0.3s;
+}
+
+.hamburger::before { transform: translateY(-6px); }
+.hamburger::after  { transform: translateY( 4px); }
+
+/* ---------- BREAKPOINT ---------- */
+@media (max-width: 680px) {
+  .nav-toggle { display: block; }
+
+  .nav-links {
+    position: absolute;
+    top: 60px; right: 0; left: 0;
+    flex-direction: column;
+    background: var(--blue-900);
+    display: none;
+    padding: 0.8rem 0;
+  }
+
+  .nav-links.open { display: flex; }
+  .nav-links li { text-align: center; }
+}
+
+/* ---------- MAIN CONTENT ---------- */
+main {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+section   { margin-bottom: 2.5rem; }
+h1        { font-size: 1.9rem; margin-bottom: 0.8rem; color: var(--blue-900); }
+p         { font-size: 1rem; }
+
+a         { color: var(--blue-900); }
+a:hover   { color: var(--blue-200); }
