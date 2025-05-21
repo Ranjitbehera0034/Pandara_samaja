@@ -148,48 +148,41 @@ function groupByAge(list) {
 }
 
 function renderProfiles(gender) {
-  
   container.innerHTML = "";
-  const filtered = candidates.filter(c => c.gender === gender);
-  const grouped = groupByAge(filtered);
-  const sortedAges = Object.keys(grouped).sort((a, b) => b - a);
+  // Sort by age (youngest first)
+  const filtered = candidates
+    .filter(c => c.gender === gender)
+    .sort((a, b) => a.age - b.age).reverse();
 
-  sortedAges.forEach(age => {
-    const groupSection = document.createElement("div");
-    groupSection.className = "age-group";
-    groupSection.innerHTML = `<h3>Age: ${age}</h3>`;
+  const cardList = document.createElement("div");
+  cardList.className = "card-list";
 
-    const cardList = document.createElement("div");
-    cardList.className = "card-list";
+  filtered.forEach((person, index) => {
+    const card = document.createElement("div");
+    card.className = "profile-card";
+    card.innerHTML = `
+      <img src="${person.photo}" alt="${person.name}" />
+      <p>${person.name} <span style="font-size:0.9em;color:#888;">(${person.age})</span></p>
+    `;
+    card.querySelector("img").addEventListener("click", () => showModal(person));
+    if (isAdmin) {
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "Edit";
+      editBtn.className = "editBtn";
+      // TODO: Attach edit logic here
 
-    grouped[age].forEach((person, index) => {
-      const card = document.createElement("div");
-      card.className = "profile-card";
-      card.innerHTML = `
-        <img src="${person.photo}" alt="${person.name}" />
-        <p>${person.name}</p>       
-      `;
-        card.querySelector("img").addEventListener("click", () => showModal(person));
-      if (isAdmin) {
-        const editBtn = document.createElement("button");
-        editBtn.textContent = "Edit";
-        editBtn.className = "editBtn";
-        // TODO: Attach edit logic here
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "Delete";
+      deleteBtn.className = "deleteBtn";
+      deleteBtn.addEventListener("click", () => deleteCandidate(index));
 
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Delete";
-        deleteBtn.className = "deleteBtn";
-        deleteBtn.addEventListener("click", () => deleteCandidate(index));
-
-        card.appendChild(editBtn);
-        card.appendChild(deleteBtn);
-      }      
-      cardList.appendChild(card);
-    });
-
-    groupSection.appendChild(cardList);
-    container.appendChild(groupSection);
+      card.appendChild(editBtn);
+      card.appendChild(deleteBtn);
+    }
+    cardList.appendChild(card);
   });
+
+  container.appendChild(cardList);
 }
 
 function showModal(person) {

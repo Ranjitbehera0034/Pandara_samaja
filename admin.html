@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin | Nikhila Odisha Pandara Samaja</title>
+  <link rel="stylesheet" href="assets/css/matrimony.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="brand">
+        <img src="assets/img/pandara logo.png" alt="Pandara Samaja Logo" />
+        <span>ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</span>
+      </div>
+      <button class="nav-toggle" aria-label="Toggle navigation"><span class="hamburger"></span></button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="members.html">Members</a></li>
+        <li><a href="matrimony.html">Matrimony</a></li>
+        <li><a href="admin.html" class="active">Admin</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <div id="admin-login" style="max-width:350px;margin:3rem auto;">
+      <h2>Admin Login</h2>
+      <form id="adminLoginForm">
+        <input type="text" id="loginUser" placeholder="Username" required style="width:100%;margin-bottom:1rem;">
+        <input type="password" id="loginPass" placeholder="Password" required style="width:100%;margin-bottom:1rem;">
+        <button type="submit" style="width:100%;">Login</button>
+      </form>
+    </div>
+    <div id="admin-panel" style="display:none;max-width:600px;margin:2rem auto;">
+      <h2>Candidate Management</h2>
+      <form id="addCandidateForm" style="margin-bottom:2rem;">
+        <input type="text" id="adminName" placeholder="Name" required>
+        <select id="adminGender" required>
+          <option value="">Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+        <input type="number" id="adminAge" placeholder="Age" required>
+        <input type="text" id="adminPhoto" placeholder="Photo URL" required>
+        <button type="submit">Add Candidate</button>
+      </form>
+      <div id="adminCandidates"></div>
+    </div>
+  </main>
+  <script src="assets/js/admin.js"></script>
+</body>
+</html>
