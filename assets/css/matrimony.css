@@ -130,3 +130,48 @@ body {
     height: auto;
   }
 }
+
+.gender-panel {
+  text-align: center;
+  padding: 2rem;
+}
+
+.gender-choices {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.gender-card {
+  background: white;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  padding: 1rem;
+  width: 150px;
+  height: 150px;
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.gender-card img {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 0.5rem;
+}
+
+.gender-card:hover {
+  border-color: #005bbb;
+  background: #e8f0ff;
+}
+
+.gender-card p {
+  font-weight: bold;
+  margin: 0;
+  font-size: 1rem;
+}

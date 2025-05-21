@@ -1,4 +1,3 @@
-<!-- File: matrimony.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,18 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Matrimony | Nikhila Odisha Pandara Samaja</title>
   <link rel="stylesheet" href="assets/css/matrimony.css">
+  <link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body>
-  <header class="matrimony-header">
-    <h1>ନିଖିଳ ଓଡିଶା ପଣ୍ଡାରା ସମାଜ</h1>
-    <div class="gender-buttons">
-      <button id="showGirls">Girls</button>
-      <button id="showBoys">Boys</button>
-    </div>
+   <header>
+    <nav class="navbar">
+      <div class="brand">
+        <img src="assets/img/pandara logo.png" alt="Pandara Samaja Logo" />
+        <span>ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</span>
+      </div>
+      <button class="nav-toggle" aria-label="Toggle navigation"><span class="hamburger"></span></button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="members.html" class="active">Members</a></li>
+        <li><a href="matrimony.html">Matrimony</a></li>
+      </ul>
+    </nav>
   </header>
 
   <main>
+    <!-- Gender Selection Panel -->
+    <div id="gender-selection" class="gender-panel">
+      <h2>Looking for?</h2>
+      <div class="gender-choices">
+        <div id="selectMale" class="gender-card male">
+          <img src="assets/img/male.jpg" alt="Male">
+          <p>Male</p>
+        </div>
+        <div id="selectFemale" class="gender-card female">
+          <img src="assets/img/female.jpg" alt="Female">
+          <p>Female</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Candidate Cards -->
     <section id="profile-list"></section>
+
+    <!-- Modal View -->
     <div id="profile-modal" class="hidden">
       <div class="modal-content">
         <span class="close-btn">&times;</span>

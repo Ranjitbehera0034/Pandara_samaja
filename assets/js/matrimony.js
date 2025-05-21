@@ -123,9 +123,20 @@ const candidates = [
   }
 ];
 
+let isAdmin = false;
 const container = document.getElementById("profile-list");
 const modal = document.getElementById("profile-modal");
 const closeBtn = document.querySelector(".close-btn");
+const genderSelection = document.getElementById("gender-selection");
+const maleBtn = document.getElementById("selectMale");
+const femaleBtn = document.getElementById("selectFemale");
+const adminLogin = document.getElementById("admin-login");
+const adminPanel = document.getElementById("admin-panel");
+const adminBtn = document.getElementById("adminBtn");
+const adminForm = document.getElementById("adminLoginForm");
+const loginUser = document.getElementById("loginUser");
+const loginPass = document.getElementById("loginPass");
+const adminSubmit = document.getElementById("adminSubmit");
 
 function groupByAge(list) {
   const grouped = {};
@@ -137,6 +148,7 @@ function groupByAge(list) {
 }
 
 function renderProfiles(gender) {
+  
   container.innerHTML = "";
   const filtered = candidates.filter(c => c.gender === gender);
   const grouped = groupByAge(filtered);
@@ -150,14 +162,28 @@ function renderProfiles(gender) {
     const cardList = document.createElement("div");
     cardList.className = "card-list";
 
-    grouped[age].forEach(person => {
+    grouped[age].forEach((person, index) => {
       const card = document.createElement("div");
       card.className = "profile-card";
       card.innerHTML = `
         <img src="${person.photo}" alt="${person.name}" />
-        <p>${person.name}</p>
+        <p>${person.name}</p>       
       `;
-      card.addEventListener("click", () => showModal(person));
+        card.querySelector("img").addEventListener("click", () => showModal(person));
+      if (isAdmin) {
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.className = "editBtn";
+        // TODO: Attach edit logic here
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.className = "deleteBtn";
+        deleteBtn.addEventListener("click", () => deleteCandidate(index));
+
+        card.appendChild(editBtn);
+        card.appendChild(deleteBtn);
+      }      
       cardList.appendChild(card);
     });
 
@@ -180,8 +206,14 @@ function showModal(person) {
   document.getElementById("modal-phone").textContent = person.phone;
   document.getElementById("modal-email").textContent = person.email;
   document.getElementById("modal-address").textContent = person.address;
-
   modal.classList.remove("hidden");
+}
+
+function deleteCandidate(index) {
+  if (confirm("Are you sure you want to delete this candidate?")) {
+    candidates.splice(index, 1);
+    container.innerHTML = "";
+  }
 }
 
 closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
@@ -189,8 +221,58 @@ window.addEventListener("click", e => {
   if (e.target === modal) modal.classList.add("hidden");
 });
 
-document.getElementById("showGirls").addEventListener("click", () => renderProfiles("female"));
-document.getElementById("showBoys").addEventListener("click", () => renderProfiles("male"));
+maleBtn.addEventListener("click", () => {
+  genderSelection.style.display = "none";
+  renderProfiles("male");
+});
 
-// Load girls by default
-renderProfiles("female");
+femaleBtn.addEventListener("click", () => {
+  genderSelection.style.display = "none";
+  renderProfiles("female");
+});
+
+adminBtn.addEventListener("click", () => {
+  adminLogin.style.display = "block";
+  adminPanel.style.display = "none";
+});
+
+adminForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const user = loginUser.value.trim();
+  const pass = loginPass.value.trim();
+  if (user === "admin" && pass === "pandara123") {
+    adminLogin.style.display = "none";
+    adminPanel.style.display = "block";
+  } else {
+    alert("Invalid credentials");
+  }
+});
+
+adminSubmit.addEventListener("click", () => {
+  const name = document.getElementById("adminName").value;
+  const gender = document.getElementById("adminGender").value;
+  const age = parseInt(document.getElementById("adminAge").value);
+  const photo = document.getElementById("adminPhoto").value;
+  if (!name || !gender || !age || !photo) return alert("Fill all fields");
+  candidates.push({
+    name,
+    gender,
+    dob: "",
+    age,
+    height: "",
+    bloodGroup: "",
+    gotra: "",
+    bansha: "",
+    education: "",
+    technicalEducation: "",
+    professionalEducation: "",
+    occupation: "",
+    father: "",
+    mother: "",
+    address: "",
+    phone: "",
+    email: "",
+    photo
+  });
+  alert("Candidate added");
+});
