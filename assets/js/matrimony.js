@@ -162,7 +162,7 @@ function renderProfiles(gender) {
     card.className = "profile-card";
     card.innerHTML = `
       <img src="${person.photo}" alt="${person.name}" />
-      <p>${person.name} <span style="font-size:0.9em;color:#888;">(${person.age})</span></p>
+      <p>${person.name} </p>
     `;
     card.querySelector("img").addEventListener("click", () => showModal(person));
     if (isAdmin) {
