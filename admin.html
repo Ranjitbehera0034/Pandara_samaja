@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Admin | Nikhila Odisha Pandara Samaja</title>
+  <link rel="stylesheet" href="assets/css/admin.css">
   <link rel="stylesheet" href="assets/css/matrimony.css">
   <link rel="stylesheet" href="assets/css/main.css">
 </head>
@@ -13,7 +14,6 @@
         <img src="assets/img/pandara logo.png" alt="Pandara Samaja Logo" />
         <span>ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</span>
       </div>
-      <button class="nav-toggle" aria-label="Toggle navigation"><span class="hamburger"></span></button>
       <ul class="nav-links" id="navLinks">
         <li><a href="index.html">Home</a></li>
         <li><a href="about.html">About</a></li>
@@ -32,22 +32,114 @@
         <button type="submit" style="width:100%;">Login</button>
       </form>
     </div>
-    <div id="admin-panel" style="display:none;max-width:600px;margin:2rem auto;">
-      <h2>Candidate Management</h2>
-      <form id="addCandidateForm" style="margin-bottom:2rem;">
-        <input type="text" id="adminName" placeholder="Name" required>
-        <select id="adminGender" required>
-          <option value="">Gender</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-        </select>
-        <input type="number" id="adminAge" placeholder="Age" required>
-        <input type="text" id="adminPhoto" placeholder="Photo URL" required>
-        <button type="submit">Add Candidate</button>
-      </form>
-      <div id="adminCandidates"></div>
+
+    <div id="admin-panel" style="display:none;max-width:1000px;margin:2rem auto;">
+      <h2>Admin Dashboard</h2>
+      <div class="admin-sections">
+        <button onclick="showSection('matrimonySection')">Matrimony Candidate Management</button>
+        <button onclick="showSection('memberSection')">Member Management</button>
+        <button onclick="showSection('postSection')">Post Management</button>
+      </div>
+
+      <section id="matrimonySection" class="admin-section">
+        <h3>Add / Update Matrimony Candidate</h3>
+        <input type="file" id="ocrImageInput" accept="image/*" style="margin-top:1rem;">
+<button type="button" id="ocrUploadBtn">Upload & Extract Data</button>
+<div id="ocrStatus" style="margin:0.5rem 0;color:#007bff;"></div>
+        <form id="addCandidateForm" enctype="multipart/form-data">
+          <input type="text" id="adminName" placeholder="Name" required>
+          <select id="adminGender" required>
+            <option value="">Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+          <input type="date" id="adminDob" placeholder="Date of Birth">
+          <input type="number" id="adminAge" placeholder="Age" required>
+          <input type="text" id="adminHeight" placeholder="Height">
+          <input type="text" id="adminBloodGroup" placeholder="Blood Group">
+          <input type="text" id="adminGotra" placeholder="Gotra">
+          <input type="text" id="adminBansha" placeholder="Bansha">
+          <input type="text" id="adminEducation" placeholder="Education">
+          <input type="text" id="adminTechnicalEducation" placeholder="Technical Education">
+          <input type="text" id="adminProfessionalEducation" placeholder="Professional Education">
+          <input type="text" id="adminOccupation" placeholder="Occupation">
+          <input type="text" id="adminFather" placeholder="Father">
+          <input type="text" id="adminMother" placeholder="Mother">
+          <input type="text" id="adminAddress" placeholder="Address">
+          <input type="text" id="adminPhone" placeholder="Phone">
+          <input type="email" id="adminEmail" placeholder="Email">
+          <input type="file" id="adminPhotoFile" accept="image/*" required>
+          <button type="submit">Add/Update Candidate</button>
+        </form>
+        <div id="adminCandidates"></div>
+      </section>
+
+      <!----- member management (replace entire old memberSection) --->
+<section id="memberSection" class="admin-section" style="display:none;">
+  <h3>Member Management</h3>
+
+  <!-- level-0: two action cards -->
+  <div class="member-action-grid" id="memberActionGrid">
+    <div class="action-card" id="bulkUploadCard">
+      <img src="assets/img/excel-icon.svg" alt="" />
+      <h4>Bulk Upload</h4>
+      <p>Import members from Excel sheet</p>
+    </div>
+    <div class="action-card" id="singleUpdateCard">
+      <img src="assets/img/user-add.svg" alt="" />
+      <h4>Single Update</h4>
+      <p>Add or edit one member</p>
+    </div>
+  </div>
+
+  <!-- level-1A: bulk uploader (hidden until Bulk Upload card is clicked) -->
+  <div id="bulkUploadPane" class="member-pane" style="display:none;">
+    <button class="backBtn" data-target="memberActionGrid">&larr; Back</button>
+    <h4>Bulk Excel Import <small>(.xlsx)</small></h4>
+
+    <input type="file" id="excelFileInput" accept=".xlsx,.xls"/>
+    <button id="uploadExcelBtn">Start Upload</button>
+
+    <!-- loader + status -->
+    <div id="excelStatus" class="status"></div>
+    <div id="excelLoader" class="loader" hidden></div>
+  </div>
+
+  <!-- level-1B: single-member form (hidden until Single Update card is clicked) -->
+  <div id="singleUpdatePane" class="member-pane" style="display:none;">
+    <button class="backBtn" data-target="memberActionGrid">&larr; Back</button>
+    <h4>Add / Update Member</h4>
+
+    <form id="addMemberForm">
+      <input type="text" id="memberName" placeholder="Member Name" required>
+      <input type="text" id="memberRole" placeholder="Role">
+      <input type="email" id="memberEmail" placeholder="Email">
+      <button type="submit">Save</button>
+    </form>
+    <div id="adminMembers"></div>
+  </div>
+</section>
+
+
+      <section id="postSection" class="admin-section" style="display:none;">
+        <h3>Add / Manage Posts</h3>
+        <form id="addPostForm">
+          <input type="text" placeholder="Post Title" required>
+          <textarea placeholder="Post Content" rows="4"></textarea>
+          <button type="submit">Add Post</button>
+        </form>
+        <div id="adminPosts"></div>
+      </section>
     </div>
   </main>
+
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('.admin-section').forEach(sec => sec.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+    }
+  </script>
   <script src="assets/js/admin.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </body>
 </html>

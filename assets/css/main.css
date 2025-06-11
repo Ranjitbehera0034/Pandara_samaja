@@ -107,3 +107,63 @@ p         { font-size: 1rem; }
 
 a         { color: var(--blue-900); }
 a:hover   { color: var(--blue-200); }
+
+/* ───── WELCOME / HERO ───────────────────────────── */
+#welcome, .welcome { }   /* keep the old anchor working if linked elsewhere */
+
+.welcome{
+  /* full-width banner with soft gradient top+bottom */
+  background: linear-gradient(180deg, #f1f7ff 0%, #ffffff 60%);
+  /* optional subtle texture
+     background-image:url('../img/pattern.svg'); background-size:280px; */
+  border-top: 4px solid var(--blue-900);
+  padding-block: clamp(3rem, 6vw, 5rem);
+}
+
+.welcome-inner{
+  max-width: 960px;
+  margin-inline: auto;
+  padding-inline: 1.2rem;
+}
+
+.welcome h1{
+  font-size: clamp(2.2rem, 4vw + 1rem, 3rem);
+  font-weight: 700;
+  color: var(--blue-900);
+  margin-bottom: 1.2rem;
+  text-align: center;
+}
+
+.welcome h1 span{            /* Odia word in same font but bigger weight */
+  font-family: "Noto Sans Oriya", sans-serif;
+  font-weight: 700;
+}
+
+.welcome p{
+  font-size: 1.15rem;
+  line-height: 1.9;
+  letter-spacing: .005em;
+  text-align: justify;
+  color:#222;
+  /* two columns on wide screens for magazine feel */
+  column-width: 340px;
+  column-gap: 2.2rem;
+}
+
+.welcome p:first-letter{
+  float:left;
+  font-size:3.8rem;
+  line-height:1;
+  padding-right:.35rem;
+  padding-left:.05rem;
+  font-weight:700;
+  color: var(--blue-900);
+  font-family: "Noto Sans Oriya", sans-serif;
+}
+
+/* fade-in animation */
+@keyframes fadeSlide{
+  from{opacity:0; transform:translateY(20px);}
+  to  {opacity:1; transform:none;}
+}
+.welcome-inner{ animation: fadeSlide .8s ease-out both; }

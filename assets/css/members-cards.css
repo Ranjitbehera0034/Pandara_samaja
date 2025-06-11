@@ -1,0 +1,23 @@
+/* assets/css/members-cards.css — import after main.css */
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
+  gap:1rem;
+  margin-block:1rem;
+}
+.card{
+  padding:1rem;
+  text-align:center;
+  border-radius:8px;
+  box-shadow:0 1px 4px rgba(0,0,0,.12);
+  background:#fff;
+  cursor:pointer;
+  user-select:none;
+  transition:.2s transform;
+}
+.card:hover{transform:translateY(-3px);}
+.card.selected{background:#0066ff;color:#fff;font-weight:700;}
+/* simple mobile-first tweaks */
+@media(min-width:600px){.card{padding:1.2rem;}}
+table{width:100%;border-collapse:collapse;margin-block:1rem;}
+th,td{border:1px solid #ddd;padding:.5rem;text-align:left;}
