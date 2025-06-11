@@ -6,6 +6,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Oriya:wght@400;700&display=swap" rel="stylesheet">
   <title>Members • ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</title>
   <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/members-cards.css" />
 </head>
 <body>
   <header>
@@ -26,12 +27,41 @@
   </header>
 
   <main>
-    <section>
-      <h1>Member Directory</h1>
-      <p>Showcase member profiles or statistics here.</p>
-    </section>
-  </main>
+    <!-- members.html -->
+<section>
+  <h1>Member Directory</h1>
+  <input type="text" id="searchInput"
+         placeholder="Search by name or mobile…" />
 
-  <script src="assets/js/main.js"></script>
+  <!-- level-1 cards (districts) -->
+  <h2 id="districtHeading" hidden>Choose District</h2>
+  <div id="districtContainer" class="card-grid"></div>
+
+  <!-- level-2 cards (talukas) -->
+  <h2 id="talukaHeading" hidden>Choose Taluka</h2>
+  <div id="talukaContainer" class="card-grid"></div>
+
+  <!-- level-3 cards (panchayats) -->
+  <h2 id="panchayatHeading" hidden>Choose Panchayat</h2>
+  <div id="panchayatContainer" class="card-grid"></div>
+
+  <!-- member table appears after panchayat is chosen -->
+  <div id="memberWrapper" hidden>
+    <h2 id="membersTitle"></h2>
+    <button id="downloadBtn">Download CSV</button>
+    <table id="memberTable">
+      <thead>
+        <tr>
+          <th>Name</th><th>Mobile</th>
+          <th>Male</th><th>Female</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+  </main>  
+  <script src="assets/js/members.js"></script>
 </body>
 </html>

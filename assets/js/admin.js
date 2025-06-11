@@ -1,4 +1,5 @@
 // File: assets/js/admin.js
+import { API_BASE_URL } from './config.js';
 
 const adminLogin = document.getElementById("admin-login");
 const adminPanel = document.getElementById("admin-panel");
@@ -55,7 +56,7 @@ addCandidateForm.onsubmit = async function (e) {
   formData.append("photo", photoFile);
 
   try {
-    await fetch("http://localhost:5000/api/candidates", {
+    await fetch(`${API_BASE_URL}/api/candidates`, {
       method: "POST",
       body: formData,
     });
@@ -73,7 +74,7 @@ addCandidateForm.onsubmit = async function (e) {
 async function renderCandidates() {
   adminCandidates.innerHTML = "<p>Loading...</p>";
   try {
-    const res = await fetch("http://localhost:5000/api/candidates");
+    const res = await fetch(`${API_BASE_URL}/api/candidates`);
     candidates = await res.json();
 
     if (candidates.length === 0) {
@@ -99,7 +100,7 @@ async function renderCandidates() {
         const id = this.getAttribute("data-id");
         if (confirm("Delete this candidate?")) {
           try {
-            await fetch(`http://localhost:5000/api/candidates/${id}`, {
+            await fetch(`${API_BASE_URL}/api/candidates/${id}`, {
               method: "DELETE"
             });
             await renderCandidates();
@@ -317,7 +318,7 @@ if (uploadBtn) {
     excelStatus.textContent = `Uploading ${rows.length} members…`;
 
     try {
-      const res = await fetch("http://localhost:5000/api/members/bulk-import", {
+      const res = await fetch(`${API_BASE_URL}/api/members/bulk-import`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({rows})

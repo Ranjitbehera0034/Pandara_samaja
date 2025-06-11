@@ -16,7 +16,7 @@ let allMembers = [];
 let currentDistrict='', currentTaluka='', currentPanchayat='';
 
 (async function init(){
-  const res = await fetch('http://localhost:5000/api/members');
+  const res = await fetch(`${API_BASE_URL}/api/members`);
   allMembers = await res.json();
   renderDistrictCards();
 })();
@@ -49,7 +49,7 @@ function renderPanchayatCards(){
 async function renderMembersTable(){
   if(!currentDistrict||!currentTaluka||!currentPanchayat)return;
   const res = await fetch(
-    `http://localhost:5000/api/members/by-location?district=${currentDistrict}&taluka=${currentTaluka}&panchayat=${currentPanchayat}`
+    `${API_BASE_URL}/api/members/by-location?district=${currentDistrict}&taluka=${currentTaluka}&panchayat=${currentPanchayat}`
   );
   const members = await res.json();
   membersTitle.textContent =
@@ -94,7 +94,7 @@ function resetBelow(level){
 searchInput.addEventListener('input',async e=>{
   const kw = e.target.value.trim().toLowerCase();
   if(!kw){memberWrap.hidden=true;tblBody.innerHTML='';return;}
-  const res = await fetch(`http://localhost:5000/api/members/search?keyword=${kw}`);
+  const res = await fetch(`${API_BASE_URL}/api/members/search?keyword=${kw}`);
   const members = await res.json();
   membersTitle.textContent = `Search results (${members.length})`;
   tblBody.innerHTML = members.map(m=>`
