@@ -1,120 +1,98 @@
-// assets/js/members.js
+/* assets/js/members.js — cascading dropdowns + DataTable (fixed) */
 
-const districtEl   = document.getElementById('districtContainer');
-const talukaEl     = document.getElementById('talukaContainer');
-const panchayatEl  = document.getElementById('panchayatContainer');
-const searchInput  = document.getElementById('searchInput');
-const tblBody      = document.querySelector('#memberTable tbody');
-const memberWrap   = document.getElementById('memberWrapper');
-const membersTitle = document.getElementById('membersTitle');
-const downloadBtn  = document.getElementById('downloadBtn');
-
-const hdDistrict = document.getElementById('districtHeading');
-const hdTaluka   = document.getElementById('talukaHeading');
-const hdPanchayat= document.getElementById('panchayatHeading');
+const districtSelect  = document.getElementById('districtSelect');
+const talukaSelect    = document.getElementById('talukaSelect');
+const panchayatSelect = document.getElementById('panchayatSelect');
 
 let allMembers = [];
-let currentDistrict='', currentTaluka='', currentPanchayat='';
-const API_BASE_URL = window.API_BASE_URL;   
-console.log('API_BASE_URL:', window.API_BASE_URL);
+let dataTable;
 
-(async function init(){
+/* ───── 1. Fetch data and initialise table ───── */
+(async function init () {
   const res = await fetch(`${API_BASE_URL}/api/members`);
   allMembers = await res.json();
-  renderDistrictCards();
+
+  /* populate District dropdown */
+  [...new Set(allMembers.map(m => m.district))]        // unique districts
+    .sort()
+    .forEach(d =>
+      districtSelect.insertAdjacentHTML('beforeend',
+        `<option value="${d}">${d}</option>`));
+
+  /* boot DataTable */
+  dataTable = $('#memberTable').DataTable({
+    data   : allMembers,
+    columns: [
+      { data: 'name'      },
+      { data: 'mobile'    },
+      { data: 'male'      },
+      { data: 'female'    },
+      { data: 'district'  },
+      { data: 'taluka'    },
+      { data: 'panchayat' },
+      { data: 'village',  defaultContent: '' }  // ← fix: safe fallback
+    ],
+    dom     : 'Bfrtip',            // Buttons, filter, table, pagination
+    buttons : ['csv']              // needs DataTables Buttons extension
+  });
 })();
 
-function renderDistrictCards(){
-  resetBelow('district');
-  const districts = uniq(allMembers.map(m=>m.district));
-  hdDistrict.hidden = false;
-  districtEl.innerHTML = districts.map(d=>card(d)).join('');
-  addCardHandlers(districtEl,'district');
-}
-function renderTalukaCards(){
-  resetBelow('taluka');
-  const talukas = uniq(allMembers
-    .filter(m=>m.district===currentDistrict)
-    .map(m=>m.taluka));
-  hdTaluka.hidden = false;
-  talukaEl.innerHTML = talukas.map(t=>card(t)).join('');
-  addCardHandlers(talukaEl,'taluka');
-}
-function renderPanchayatCards(){
-  resetBelow('panchayat');
-  const panchayats = uniq(allMembers
-    .filter(m=>m.district===currentDistrict && m.taluka===currentTaluka)
-    .map(m=>m.panchayat));
-  hdPanchayat.hidden = false;
-  panchayatEl.innerHTML = panchayats.map(p=>card(p)).join('');
-  addCardHandlers(panchayatEl,'panchayat');
-}
-async function renderMembersTable(){
-  if(!currentDistrict||!currentTaluka||!currentPanchayat)return;
-  const res = await fetch(
-    `${API_BASE_URL}/api/members/by-location?district=${currentDistrict}&taluka=${currentTaluka}&panchayat=${currentPanchayat}`
-  );
-  const members = await res.json();
-  membersTitle.textContent =
-    `${currentPanchayat}, ${currentTaluka}, ${currentDistrict}`;
-  tblBody.innerHTML = members.map(m=>`
-    <tr>
-      <td>${m.name}</td><td>${m.mobile}</td>
-      <td>${m.male}</td><td>${m.female}</td>
-    </tr>`).join('');
-  memberWrap.hidden = false;
-}
-/* ------- helpers ------- */
-function card(text){return `<div class="card" data-val="${text}">${text}</div>`;}
-function uniq(arr){return [...new Set(arr)].sort();}
-function addCardHandlers(container,level){
-  container.querySelectorAll('.card').forEach(card=>{
-    card.addEventListener('click',e=>{
-      // visual selection
-      container.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
-      card.classList.add('selected');
-      // set state and cascade
-      if(level==='district'){currentDistrict = card.dataset.val; renderTalukaCards();}
-      else if(level==='taluka'){currentTaluka = card.dataset.val; renderPanchayatCards();}
-      else if(level==='panchayat'){currentPanchayat = card.dataset.val; renderMembersTable();}
-    });
-  });
-}
-function resetBelow(level){
-  if(level==='district'){
-    talukaEl.innerHTML = panchayatEl.innerHTML = '';
-    hdTaluka.hidden = hdPanchayat.hidden = true;
-    memberWrap.hidden = true; tblBody.innerHTML = '';
-    currentTaluka=currentPanchayat='';
+/* ───── 2. Cascading dropdown logic ───── */
+districtSelect.addEventListener('change', () => {
+  const d = districtSelect.value;
+
+  /* rebuild Taluka list */
+  talukaSelect.disabled = !d;
+  talukaSelect.innerHTML = '<option value="">Select Taluka</option>';
+  if (d) {
+    [...new Set(allMembers.filter(m => m.district === d)
+                          .map(m => m.taluka))]
+      .sort()
+      .forEach(t =>
+        talukaSelect.insertAdjacentHTML('beforeend',
+          `<option value="${t}">${t}</option>`));
   }
-  else if(level==='taluka'){
-    panchayatEl.innerHTML = ''; hdPanchayat.hidden = true;
-    memberWrap.hidden = true; tblBody.innerHTML = '';
-    currentPanchayat='';
+
+  /* reset Panchayat dropdown */
+  panchayatSelect.disabled = true;
+  panchayatSelect.innerHTML = '<option value="">Select Panchayat</option>';
+
+  filterTable({ district: d });
+});
+
+talukaSelect.addEventListener('change', () => {
+  const d = districtSelect.value;
+  const t = talukaSelect.value;
+
+  /* rebuild Panchayat list */
+  panchayatSelect.disabled = !t;
+  panchayatSelect.innerHTML = '<option value="">Select Panchayat</option>';
+  if (t) {
+    [...new Set(allMembers.filter(m =>
+        m.district === d && m.taluka === t).map(m => m.panchayat))]
+      .sort()
+      .forEach(p =>
+        panchayatSelect.insertAdjacentHTML('beforeend',
+          `<option value="${p}">${p}</option>`));
   }
-}
-/* search still works, overrides selection */
-searchInput.addEventListener('input',async e=>{
-  const kw = e.target.value.trim().toLowerCase();
-  if(!kw){memberWrap.hidden=true;tblBody.innerHTML='';return;}
-  const res = await fetch(`${API_BASE_URL}/api/members/search?keyword=${kw}`);
-  const members = await res.json();
-  membersTitle.textContent = `Search results (${members.length})`;
-  tblBody.innerHTML = members.map(m=>`
-    <tr><td>${m.name}</td><td>${m.mobile}</td>
-        <td>${m.male}</td><td>${m.female}</td></tr>`).join('');
-  memberWrap.hidden=false;
+
+  filterTable({ district: d, taluka: t });
 });
-/* CSV download */
-downloadBtn.addEventListener('click',()=>{
-  const rows=[['Name','Mobile','Male','Female']].concat(
-    [...tblBody.querySelectorAll('tr')].map(tr=>[...tr.children].map(td=>td.textContent))
-  );
-  const csv = rows.map(r=>r.map(v=>`"${v.replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob=new Blob([csv],{type:'text/csv'});
-  const link=Object.assign(document.createElement('a'),{
-    href:URL.createObjectURL(blob),
-    download:`members_${Date.now()}.csv`
+
+panchayatSelect.addEventListener('change', () => {
+  filterTable({
+    district : districtSelect.value,
+    taluka   : talukaSelect.value,
+    panchayat: panchayatSelect.value
   });
-  link.click(); URL.revokeObjectURL(link.href);
 });
+
+/* ───── 3. Helper to apply filtering ───── */
+function filterTable (f) {
+  const filtered = allMembers.filter(m =>
+    (!f.district  || m.district  === f.district ) &&
+    (!f.taluka    || m.taluka    === f.taluka   ) &&
+    (!f.panchayat || m.panchayat === f.panchayat)
+  );
+  dataTable.clear().rows.add(filtered).draw();
+}

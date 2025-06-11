@@ -21,3 +21,69 @@
 @media(min-width:600px){.card{padding:1.2rem;}}
 table{width:100%;border-collapse:collapse;margin-block:1rem;}
 th,td{border:1px solid #ddd;padding:.5rem;text-align:left;}
+
+/* ─── Member Directory (dropdown + datatable) ───────────────────────── */
+
+/* 1. Dropdown row */
+#districtSelect, #talukaSelect, #panchayatSelect {
+  padding: 0.55rem 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23777' d='M6 8L0 0h12z'/%3E%3C/svg%3E") no-repeat right 0.7rem center;
+  background-size: 10px 6px;
+  appearance: none;             /* hide default arrow */
+  min-width: 160px;
+}
+#districtSelect:disabled,
+#talukaSelect:disabled,
+#panchayatSelect:disabled {
+  background-color: #f1f1f1;
+  color: #999;
+  cursor: not-allowed;
+}
+
+/* 2. DataTable tweaks */
+table.dataTable thead {
+  background: #003366;
+  color: #fff;
+  font-weight: 600;
+}
+table.dataTable tbody tr:nth-child(even) {
+  background: #f9fcff;          /* subtle zebra striping */
+}
+table.dataTable tbody tr:hover {
+  background: #e6f0ff;
+}
+
+/* 3. DataTables filter / length boxes */
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.95rem;
+}
+
+/* 4. CSV button (DataTables Buttons ext.) */
+button.dt-button {
+  background: linear-gradient(135deg, #0057b7 0%, #007bff 100%);
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.45rem 1rem;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+button.dt-button:hover {
+  background: #004cbf;
+}
+
+/* responsive tweak: put dropdowns full-width on very small screens */
+@media (max-width: 480px) {
+  #districtSelect, #talukaSelect, #panchayatSelect {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+}
+
