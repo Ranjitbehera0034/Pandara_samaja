@@ -1,9 +1,21 @@
-// assets/js/config.js
+/* assets/js/api-config.js  – load first on every page */
 
-const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+/* All hostnames considered “production”: */
+const PROD_HOSTS = [
+  'nikhilaodishapandarasamaja.in',
+  'www.nikhilaodishapandarasamaja.in'
+];
 
-const API_BASE_URL = isLocalhost
-  ? 'http://localhost:5000'
-  : 'https://pandara-samaja-backend.onrender.com';
+/* Detect environment */
+const isFile   = location.protocol === 'file:';
+const isLocal  = isFile || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+const isProd   = PROD_HOSTS.includes(location.hostname);
 
-export { API_BASE_URL };
+/* Decide once */
+if (isProd) {
+  window.API_BASE_URL = 'https://pandara-samaja-backend.onrender.com';
+} else {
+  // covers file:// and localhost
+  window.API_BASE_URL = 'http://localhost:5000';
+  
+}

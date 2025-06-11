@@ -1,5 +1,5 @@
 // File: assets/js/admin.js
-import { API_BASE_URL } from './config.js';
+
 
 const adminLogin = document.getElementById("admin-login");
 const adminPanel = document.getElementById("admin-panel");

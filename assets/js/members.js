@@ -1,5 +1,5 @@
 // assets/js/members.js
-import { API_BASE_URL } from './config.js';
+
 const districtEl   = document.getElementById('districtContainer');
 const talukaEl     = document.getElementById('talukaContainer');
 const panchayatEl  = document.getElementById('panchayatContainer');
@@ -15,6 +15,8 @@ const hdPanchayat= document.getElementById('panchayatHeading');
 
 let allMembers = [];
 let currentDistrict='', currentTaluka='', currentPanchayat='';
+const API_BASE_URL = window.API_BASE_URL;   
+console.log('API_BASE_URL:', window.API_BASE_URL);
 
 (async function init(){
   const res = await fetch(`${API_BASE_URL}/api/members`);
