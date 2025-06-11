@@ -1,4 +1,5 @@
 // assets/js/members.js
+import { API_BASE_URL } from './config.js';
 const districtEl   = document.getElementById('districtContainer');
 const talukaEl     = document.getElementById('talukaContainer');
 const panchayatEl  = document.getElementById('panchayatContainer');
