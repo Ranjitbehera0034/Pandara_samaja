@@ -3,12 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Oriya font -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Oriya:wght@400;700&display=swap" rel="stylesheet">
+
   <title>Members • ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</title>
+
+  <!-- Base styles -->
   <link rel="stylesheet" href="assets/css/main.css" />
+
+  <!-- DataTables -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+
+  <!-- NEW: dropdown styling + tweaks -->
+  <link rel="stylesheet" href="assets/css/members-cards.css" />
 </head>
 <body>
+  <!-- ─── nav bar ─────────────────────────────────────────────── -->
   <header>
     <nav class="navbar">
       <div class="brand">
@@ -26,13 +37,18 @@
     </nav>
   </header>
 
+  <!-- ─── main ────────────────────────────────────────────────── -->
   <main style="padding: 1rem;">
     <h1>Member Directory</h1>
-    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+
+    <!-- dropdown row -->
+    <div class="dropdown-row">
       <select id="districtSelect"><option value="">Select District</option></select>
-      <select id="talukaSelect" disabled><option value="">Select Taluka</option></select>
+      <select id="talukaSelect"   disabled><option value="">Select Taluka</option></select>
       <select id="panchayatSelect" disabled><option value="">Select Panchayat</option></select>
     </div>
+
+    <!-- members table -->
     <table id="memberTable" class="display" style="width:100%">
       <thead>
         <tr>
@@ -44,6 +60,7 @@
     </table>
   </main>
 
+  <!-- ─── scripts ─────────────────────────────────────────────── -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="assets/js/config.js"></script>

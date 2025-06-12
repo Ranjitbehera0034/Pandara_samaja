@@ -33,7 +33,7 @@ th,td{border:1px solid #ddd;padding:.5rem;text-align:left;}
   background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23777' d='M6 8L0 0h12z'/%3E%3C/svg%3E") no-repeat right 0.7rem center;
   background-size: 10px 6px;
   appearance: none;             /* hide default arrow */
-  min-width: 160px;
+  min-width: 298px;
 }
 #districtSelect:disabled,
 #talukaSelect:disabled,
@@ -86,4 +86,64 @@ button.dt-button:hover {
     min-width: 0;
   }
 }
+/* ─── Fancy dropdowns for Member Directory ─────────────────────────── */
+
+.dropdown-row {               /* parent flex wrapper (optional) */
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.dropdown-row select {
+  /* base */
+  padding: 0.6rem 2.4rem 0.6rem 0.9rem;   /* extra right-pad for arrow */
+  min-width: 300px;
+  font-size: 1rem;
+  color: #222;
+  border: 2px solid #0066ff40;            /* subtle blue tint */
+  border-radius: 8px;
+  background: #fff;
+  line-height: 1.2;
+
+  /* custom arrow ▼ */
+  background-image:
+     linear-gradient(45deg, transparent 50%, #0066ff 50%),
+     linear-gradient(135deg, #0066ff 50%, transparent 50%);
+  background-position:
+     calc(100% - 1.1rem) calc(50% - 2px),
+     calc(100% - 1.05rem) calc(50% + 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  appearance: none;                        /* remove default arrow */
+
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.dropdown-row select:hover {
+  border-color: #0066ff80;
+}
+.dropdown-row select:focus {
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px #0066ff30;
+  outline: none;
+}
+
+/* disabled state */
+.dropdown-row select:disabled {
+  background-color: #f3f6fa;
+  color: #999;
+  border-color: #ccd3e0;
+  background-image: none;      /* hide arrow */
+  cursor: not-allowed;
+}
+
+/* mobile: stack full-width when screen is narrow */
+@media (max-width: 480px) {
+  .dropdown-row select {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+}
+
 
