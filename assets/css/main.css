@@ -51,8 +51,11 @@ body {
   transition: color 0.2s;
 }
 
-.nav-links a:hover,
-.nav-links a.active { color: var(--blue-200); }
+
+.nav-links a:hover, 
+.nav-links a.active {
+    color: #e3e7ec;
+}
 
 /* ---------- HAMBURGER ---------- */
 .nav-toggle {
@@ -90,15 +93,18 @@ body {
   }
 
   .nav-links {
-    position: absolute;
-    top: 60px; right: 0; left: 0;
-    flex-direction: column;
-    background: var(--blue-900);
     display: none;
-    padding: 0.8rem 0;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: #3f55d5ab;
+    padding: 1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1000; 
   }
 
-  .nav-links.open { display: flex; }
+  .nav-links.open { display: block; }
   .nav-links li { text-align: center; }
 }
 
@@ -176,4 +182,10 @@ a:hover   { color: var(--blue-200); }
 }
 .welcome-inner{ animation: fadeSlide .8s ease-out both; }
 
-
+@media (max-width: 680px) {
+  .nav-links li a {
+    display: block;          /* take full row width */
+    padding: 0.6rem 0;       /* nicer tap target */
+    white-space: nowrap;     /* ⬅ NO wrapping between letters */
+  }
+}
