@@ -23,6 +23,7 @@ body {
   padding: 0.6rem 1.2rem;
   background: var(--blue-900);
   color: var(--white);
+  position: relative; 
 }
 
 .brand {
@@ -79,7 +80,14 @@ body {
 
 /* ---------- BREAKPOINT ---------- */
 @media (max-width: 680px) {
-  .nav-toggle { display: block; }
+ .nav-toggle {
+    display: block;
+    position: absolute;          /* pin so Flex doesn’t push it away */
+    right: 1rem;                 /* same padding as navbar */
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9999;               /* above drop-down panel */
+  }
 
   .nav-links {
     position: absolute;
@@ -167,3 +175,5 @@ a:hover   { color: var(--blue-200); }
   to  {opacity:1; transform:none;}
 }
 .welcome-inner{ animation: fadeSlide .8s ease-out both; }
+
+
