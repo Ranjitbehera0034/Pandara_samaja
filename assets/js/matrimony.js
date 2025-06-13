@@ -8,10 +8,15 @@ const maleBtn = document.getElementById("selectMale");
 const femaleBtn = document.getElementById("selectFemale");
 const backToGender = document.getElementById("backToGender");
 
+function imageURL(raw) {
+  const m = raw.match(/id=([^&]+)/);
+  return m ? `https://lh3.googleusercontent.com/d/${m[1]}` : raw;
+}
+
 async function renderProfiles(gender) {
   container.innerHTML = "<p>Loading profiles...</p>";
   try {
-    const res = await fetch(`http://localhost:5000/api/candidates?gender=${gender}`);
+    const res = await fetch(`${API_BASE_URL}/api/candidates?gender=${gender}`);
     const filtered = await res.json();
 
     filtered.sort((a, b) => b.age - a.age); // Oldest to youngest
@@ -21,15 +26,21 @@ async function renderProfiles(gender) {
     cardList.className = "card-list";
 
     filtered.forEach(person => {
-      const card = document.createElement("div");
-      card.className = "profile-card";
-      card.innerHTML = `
-        <img src="${person.photo}" alt="${person.name}" />
-        <p>${person.name}</p>
-      `;
-      card.querySelector("img").addEventListener("click", () => showModal(person));
-      cardList.appendChild(card);
-    });
+       const imgUrl = imageURL(person.photo);  // ← convert here
+       console.log(imgUrl);
+       const card = document.createElement("div");
+       card.className = "profile-card";       
+    card.innerHTML = `
+  <img src="${imageURL(person.photo)}" alt="${person.name}">
+  <p>${person.name}</p>
+`;
+
+document.getElementById('modal-photo').src =
+  imageURL(person.photo);
+       card.querySelector("img")
+           .addEventListener("click", () => showModal(person));
+       cardList.appendChild(card);
+     });
 
     container.appendChild(cardList);
     backToGender.style.display = "block";
@@ -39,20 +50,21 @@ async function renderProfiles(gender) {
   }
 }
 
-function showModal(person) {
-  document.getElementById("modal-photo").src = person.photo;
-  document.getElementById("modal-name").textContent = person.name;
-  document.getElementById("modal-age").textContent = person.age;
-  document.getElementById("modal-height").textContent = person.height;
-  document.getElementById("modal-blood").textContent = person.bloodGroup;
-  document.getElementById("modal-gotra").textContent = person.gotra;
-  document.getElementById("modal-edu").textContent = person.education;
-  document.getElementById("modal-occ").textContent = person.occupation;
-  document.getElementById("modal-father").textContent = person.father;
-  document.getElementById("modal-mother").textContent = person.mother;
-  document.getElementById("modal-phone").textContent = person.phone;
-  document.getElementById("modal-email").textContent = person.email;
-  document.getElementById("modal-address").textContent = person.address;
+function showModal(p) {
+  document.getElementById("modal-photo").src      = imageURL(p.photo);
+  document.getElementById("modal-name").textContent   = p.name;
+  document.getElementById("modal-age").textContent    = p.age;
+  document.getElementById("modal-height").textContent = p.height;
+  document.getElementById("modal-blood").textContent  = p.blood_group || p.bloodGroup;
+  document.getElementById("modal-gotra").textContent  = p.gotra;
+  document.getElementById("modal-edu").textContent    = p.education;
+  document.getElementById("modal-occ").textContent    = p.occupation;
+  document.getElementById("modal-father").textContent = p.father;
+  document.getElementById("modal-mother").textContent = p.mother;
+  document.getElementById("modal-phone").textContent  = p.phone;
+  document.getElementById("modal-email").textContent  = p.email || "—";
+  document.getElementById("modal-address").textContent= p.address;
+
   modal.classList.remove("hidden");
 }
 
