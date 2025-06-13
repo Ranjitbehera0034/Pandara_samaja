@@ -9,6 +9,8 @@ const adminCandidates = document.getElementById("adminCandidates");
 const excelInput  = document.getElementById("excelFileInput");
 const uploadBtn   = document.getElementById("uploadExcelBtn");
 const excelStatus = document.getElementById("excelStatus");
+const postForm = document.getElementById("addPostForm");
+const postList = document.getElementById("adminPosts");
 
 let candidates = [];
 
@@ -207,6 +209,51 @@ if (document.getElementById("uploadExcelBtn")) {
     if (status.textContent.includes("complete")) status.classList.add("success");
     else status.classList.add("error");
   };
+}
+
+postForm.onsubmit = async e => {
+  e.preventDefault();
+  const title = document.getElementById("postTitle").value.trim();
+  const content = document.getElementById("postContent").value.trim();
+
+  if (!title || !content) return alert("Fill out all fields!");
+
+  try {
+    await fetch(`${API_BASE_URL}/api/posts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, content })
+    });
+    alert("Post added!");
+    postForm.reset();
+    renderPosts();
+  } catch (err) {
+    console.error("Post Error:", err);
+    alert("Error adding post.");
+  }
+};
+
+async function renderPosts() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/posts`);
+    const posts = await res.json();
+
+    postList.innerHTML = posts.map(p => `
+      <div class="post-card">
+        <h4>${p.title}</h4>
+        <p>${p.content}</p>
+        <button onclick="deletePost(${p.id})">Delete</button>
+      </div>
+    `).join('');
+  } catch (err) {
+    postList.innerHTML = "<p>Failed to load posts</p>";
+  }
+}
+
+async function deletePost(id) {
+  if (!confirm("Delete this post?")) return;
+  await fetch(`${API_BASE_URL}/api/posts/${id}`, { method: "DELETE" });
+  renderPosts();
 }
 
 

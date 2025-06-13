@@ -4,8 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Oriya:wght@400;700&display=swap" rel="stylesheet">
-  <title>About • ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</title>
+  <title>Blogs • ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</title>
   <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/blogs.css" />
 </head>
 <body>
   <header>
@@ -17,22 +18,24 @@
       <button class="nav-toggle" aria-label="Toggle navigation"><span class="hamburger"></span></button>
       <ul class="nav-links" id="navLinks">
         <li><a href="index.html">Home</a></li>
-        <li><a href="blogs.html">Recent Blogs</a></li>
-        <li><a href="about.html" class="active">About</a></li>
+        <li><a href="blogs.html" class="active">Recent Blogs</a></li>
+        <li><a href="about.html">About</a></li>
         <li><a href="members.html">Members</a></li>
         <li><a href="matrimony.html">Matrimony</a></li>
-       <li><a href="admin.html">Admin</a></li>
+        <li><a href="admin.html">Admin</a></li>
       </ul>
     </nav>
   </header>
 
   <main>
-    <section>
-      <h1>About Pandara Samaja</h1>
-      <p>Describe the community’s history, mission, and cultural significance here.</p>
+    <section class="blog-section">
+      <h1>Recent Blogs & Announcements</h1>
+      <div id="blog-list" class="blog-list"></div>
     </section>
   </main>
 
+  <script src="assets/js/config.js"></script>
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/blogs.js"></script>
 </body>
 </html>
