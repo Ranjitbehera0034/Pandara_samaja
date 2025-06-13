@@ -41,38 +41,46 @@
         <button onclick="showSection('postSection')">Post Management</button>
       </div>
 
-      <section id="matrimonySection" class="admin-section">
-        <h3>Add / Update Matrimony Candidate</h3>
-        <input type="file" id="ocrImageInput" accept="image/*" style="margin-top:1rem;">
-<button type="button" id="ocrUploadBtn">Upload & Extract Data</button>
-<div id="ocrStatus" style="margin:0.5rem 0;color:#007bff;"></div>
-        <form id="addCandidateForm" enctype="multipart/form-data">
-          <input type="text" id="adminName" placeholder="Name" required>
-          <select id="adminGender" required>
-            <option value="">Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select>
-          <input type="date" id="adminDob" placeholder="Date of Birth">
-          <input type="number" id="adminAge" placeholder="Age" required>
-          <input type="text" id="adminHeight" placeholder="Height">
-          <input type="text" id="adminBloodGroup" placeholder="Blood Group">
-          <input type="text" id="adminGotra" placeholder="Gotra">
-          <input type="text" id="adminBansha" placeholder="Bansha">
-          <input type="text" id="adminEducation" placeholder="Education">
-          <input type="text" id="adminTechnicalEducation" placeholder="Technical Education">
-          <input type="text" id="adminProfessionalEducation" placeholder="Professional Education">
-          <input type="text" id="adminOccupation" placeholder="Occupation">
-          <input type="text" id="adminFather" placeholder="Father">
-          <input type="text" id="adminMother" placeholder="Mother">
-          <input type="text" id="adminAddress" placeholder="Address">
-          <input type="text" id="adminPhone" placeholder="Phone">
-          <input type="email" id="adminEmail" placeholder="Email">
-          <input type="file" id="adminPhotoFile" accept="image/*" required>
-          <button type="submit">Add/Update Candidate</button>
-        </form>
-        <div id="adminCandidates"></div>
-      </section>
+      <!-- ========= MATRIMONY SECTION ========= -->
+<section id="matrimonySection" class="admin-section">
+  <h3>Add / Update Matrimony Candidate</h3>
+
+  <!-- always-visible form (no OCR) -->
+  <form id="addCandidateForm" enctype="multipart/form-data">
+    <input type="text"    id="adminName"  placeholder="Name" required>
+
+    <select id="adminGender" required>
+      <option value="">Gender</option>
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+
+    <input type="date"   id="adminDob"   placeholder="Date of Birth">
+    <input type="number" id="adminAge"   placeholder="Age" required>
+    <input type="text"   id="adminHeight"        placeholder="Height">
+    <input type="text"   id="adminBloodGroup"    placeholder="Blood Group">
+    <input type="text"   id="adminGotra"         placeholder="Gotra">
+    <input type="text"   id="adminBansha"        placeholder="Bansha">
+    <input type="text"   id="adminEducation"     placeholder="Education">
+    <input type="text"   id="adminTechnicalEducation"    placeholder="Technical Education">
+    <input type="text"   id="adminProfessionalEducation" placeholder="Professional Education">
+    <input type="text"   id="adminOccupation"    placeholder="Occupation">
+    <input type="text"   id="adminFather"        placeholder="Father">
+    <input type="text"   id="adminMother"        placeholder="Mother">
+    <input type="text"   id="adminAddress"       placeholder="Address">
+    <input type="text"   id="adminPhone"         placeholder="Phone">
+    <input type="email"  id="adminEmail"         placeholder="Email">
+
+    <!-- candidate portrait (required) -->
+    <input type="file" id="adminPhotoFile" accept="image/*" required>
+
+    <button type="submit">Save Candidate</button>
+  </form>
+
+  <!-- grid of saved profiles -->
+  <div id="adminCandidates"></div>
+</section>
+
 
       <!----- member management (replace entire old memberSection) --->
 <section id="memberSection" class="admin-section" style="display:none;">

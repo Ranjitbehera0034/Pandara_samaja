@@ -37,249 +37,78 @@ adminLoginForm.onsubmit = async function(e) {
 };
 
 // Add or update candidate
-addCandidateForm.onsubmit = async function (e) {
+addCandidateForm.onsubmit = async e => {
   e.preventDefault();
 
-  const formData = new FormData();
-  const fields = [
-    "name", "gender", "dob", "age", "height", "bloodGroup", "gotra", "bansha",
-    "education", "technicalEducation", "professionalEducation", "occupation",
-    "father", "mother", "address", "phone", "email"
-  ];
-  for (const field of fields) {
-    const el = document.getElementById("admin" + capitalize(field));
-    formData.append(field, el.value.trim());
-  }
+  const fd = new FormData();
+  [
+    "name","gender","dob","age","height","bloodGroup","gotra","bansha",
+    "education","technicalEducation","professionalEducation","occupation",
+    "father","mother","address","phone","email"
+  ].forEach(f => {
+    const el = document.getElementById("admin"+capitalize(f));
+    fd.append(f, el.value.trim());
+  });
 
-  const photoFile = document.getElementById("adminPhotoFile").files[0];
-  if (!photoFile) return alert("Please upload a photo");
-  formData.append("photo", photoFile);
+  const photo = document.getElementById("adminPhotoFile").files[0];
+  if (!photo) return alert("Please choose a candidate photo");
+  fd.append("photo", photo);
 
   try {
-    await fetch(`${API_BASE_URL}/api/candidates`, {
-      method: "POST",
-      body: formData,
-    });
-    alert("Candidate added");
+    await fetch(`${API_BASE_URL}/api/candidates`, { method:"POST", body:fd });
+    alert("Candidate saved!");
     addCandidateForm.reset();
     await renderCandidates();
   } catch (err) {
-    console.error("Upload failed", err);
-    alert("Failed to add candidate");
+    console.error(err);
+    alert("Failed to save candidate – see console");
   }
 };
 
-
-// Render all candidates
-async function renderCandidates() {
-  adminCandidates.innerHTML = "<p>Loading...</p>";
+/* ---------- Candidate grid ---------- */
+async function renderCandidates () {
+  adminCandidates.textContent = "Loading…";
   try {
     const res = await fetch(`${API_BASE_URL}/api/candidates`);
     candidates = await res.json();
 
-    if (candidates.length === 0) {
-      adminCandidates.innerHTML = "<p>No candidates added yet.</p>";
-      return;
+    if (!candidates.length) {
+      return (adminCandidates.textContent = "No candidates yet");
     }
 
     adminCandidates.innerHTML = "";
-    candidates.forEach((c, idx) => {
-      const div = document.createElement("div");
-      div.className = "profile-card";
-      div.innerHTML = `
-        <img src="${c.photo}" alt="${c.name}" />
+    candidates.forEach(c => {
+      const card = document.createElement("div");
+      card.className = "profile-card";
+      card.innerHTML = `
+        <img src="${c.photo}" alt="${c.name}">
         <p>${c.name} (${c.gender}, ${c.age})</p>
-        <button class="deleteBtn" data-id="${c._id}">Delete</button>
+        <button class="deleteBtn" data-id="${c.id}">Delete</button>
       `;
-      adminCandidates.appendChild(div);
+      adminCandidates.appendChild(card);
     });
 
-    // Handle delete
-    document.querySelectorAll(".deleteBtn").forEach(btn => {
-      btn.onclick = async function () {
-        const id = this.getAttribute("data-id");
-        if (confirm("Delete this candidate?")) {
-          try {
-            await fetch(`${API_BASE_URL}/api/candidates/${id}`, {
-              method: "DELETE"
-            });
-            await renderCandidates();
-          } catch (err) {
-            alert("Failed to delete candidate.");
-            console.error(err);
-          }
-        }
+    adminCandidates.querySelectorAll(".deleteBtn").forEach(btn => {
+      btn.onclick = async () => {
+        if (!confirm("Delete this candidate?")) return;
+        await fetch(`${API_BASE_URL}/api/candidates/${btn.dataset.id}`, { method:"DELETE" });
+        renderCandidates();
       };
     });
-
- 
-
   } catch (err) {
-    console.error("Error fetching candidates:", err);
-    adminCandidates.innerHTML = "<p>Failed to load candidates</p>";
+    console.error(err);
+    adminCandidates.textContent = "Failed to load candidates";
   }
 }
 
- function initOCR() {
-  const ocrBtn    = document.getElementById("ocrUploadBtn");
-  const fileInput = document.getElementById("ocrImageInput");
-  const statusDiv = document.getElementById("ocrStatus");
-
-  if (!ocrBtn || !fileInput) return;   // section might still be hidden
-
-  /* attach only once */
-  if (ocrBtn.dataset.bound) return;
-  ocrBtn.dataset.bound = "true";
-
-  ocrBtn.onclick = async () => {
-    if (!fileInput.files[0]) {
-      statusDiv.textContent = "Please select an image file.";
-      return;
-    }
-
-    statusDiv.textContent = "Extracting data, please wait…";
-
-    const reader = new FileReader();
-    reader.onload = async ({ target }) => {
-  console.log("OCR button clicked");         //  <-- NEW
-
-  const { data: { text } } = await Tesseract.recognize(
-    target.result, "ori",
-    { logger: m => (statusDiv.textContent = m.status) }
-  );
-  console.log("RAW OCR →\n", text);          //  <-- NEW
-
-  const formData = parseOcrToFields(text);
-  console.log("PARSED DATA →", formData);    //  <-- NEW
-
-  for (const [field, value] of Object.entries(formData)) {
-    if (value == null || value === "") continue;
-    const el = document.getElementById("admin" + capitalize(field));
-    if (el && !el.value) {
-      console.log(`FILL ${el.id} → "${value}"`);  //  <-- NEW
-      el.value = value;
-    }
-  }
-  statusDiv.textContent = "Extraction complete. Please verify.";
-};
-
-
-    reader.readAsDataURL(fileInput.files[0]);
-  };}
-
-  document.addEventListener("click", e => {
-  if (e.target.matches('button[onclick*="matrimonySection"]')) {
-    setTimeout(initOCR, 0);
-  }
-});
-
-/* ----------  OCR → form-field mapper  ---------- */
-/* ------------------------------------------------------------------
-   Robust OCR → form-field mapper for Pandara matrimony sheets
-   Put this in admin.js **instead of** the old parseOcrToFields().
-   ------------------------------------------------------------------ */
-function parseOcrToFields(raw) {
-  /* 1 ───────────── NORMALISE THE BLOCK ───────────── */
-  const text = raw
-    .replace(/\r\n?/g, "\n")            // CRLF → LF
-    .replace(/[|‖¦]+/g, " ")            // vertical bar artefacts
-    .replace(/[_\-]{2,}/g, " ")         // long underlines
-    .replace(/\s{2,}/g, " ")            // collapse double spaces
-    .toUpperCase();
-
-  /* split into lines once, keep index for “next line” logic */
-  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-
-  /* helper: get the portion after a keyword on the *same* line,
-             or the very next non-empty line if nothing after keyword */
-  const after = (needle) => {
-    const i = lines.findIndex(l => l.includes(needle));
-    if (i === -1) return "";
-    const cut = lines[i].split(needle)[1].trim();
-    return cut || (lines[i + 1] || "").trim();
-  };
-
-  /* 2 ───────────── DIRECT PATTERN GRABS ───────────── */
-  const out = {};
-
-  // Name  (look after “SON/DAUGHTER” or just “NAME” + take next line)
-  out.name = after("NAME OF THE SON")  ||
-             after("NAME OF THE DAUGHTER") ||
-             after("NAME ");
-
-  // Height (digits + optional ' , . or ″ )
-  const heightMatch = text.match(/HEIGHT[^A-Z0-9]{0,5}([\d.'″ ]{2,7})/);
-  out.height = heightMatch ? heightMatch[1].replace(/\s+/g,"").replace(/[′″]/g,"'") : "";
-
-  // Blood group  (A, B, AB, O + optional + / - )
-  const bloodMatch = text.match(/BLOOD GROUP[^A-Z0-9]{0,5}([ABO]{1,2}[+-]?)/);
-  out.bloodGroup = bloodMatch ? bloodMatch[1] : "";
-
-  // DOB  → ISO yyyy-mm-dd
-  const dobLine = after("DATE ") || after("DATE OF BIRTH");
-  const dmy = dobLine.match(/(\d{1,2})[^A-Z0-9]+([A-Z]{3,9})[^A-Z0-9]+(\d{4})/);
-  if (dmy) {
-    const [, d, monText, y] = dmy;
-    const month = ["JAN","FEB","MAR","APR","MAY","JUN",
-                   "JUL","AUG","SEP","OCT","NOV","DEC"]
-                   .indexOf(monText.slice(0,3)) + 1;
-    if (month) out.dob = `${y}-${String(month).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-  }
-
-  // Age  → first 1-3 digit run *after “AGE” OR computed from DOB*
-  const ageMatch = text.match(/AGE[^0-9]{0,4}(\d{1,3})/);
-  if (ageMatch) out.age = ageMatch[1];
-  else if (out.dob) {
-    const thisYear = new Date().getFullYear();
-    out.age = thisYear - Number(out.dob.slice(0,4));
-  }
-
-  // Gotra + Bansha
-  out.gotra  = after("GOTRA")  || after("GOTR");
-  out.bansha = after("BANSHA") || after("BANS");
-
-  // Education blocks
-  out.education              = after("ACADEMIC EDUCATION");
-  out.technicalEducation     = after("TECHNICAL EDUCATION");
-  out.professionalEducation  = after("PROFESSIONAL EDUCATION");
-
-  // Occupation   (NON-GOVT / GOVT etc. → use first word on that row)
-  const occLine = after("OCCUPATIONAL GROUND") || after("OCCUPATION") ||
-                  after("OCCUPATIONAL");
-  out.occupation = occLine.split(" ")[0];
-
-  // Father / Mother
-  out.father = after("NAME OF THE FATHER") || after("FATHER");
-  out.mother = after("NAME OF THE MOTHER") || after("MOTHER");
-
-  // Phone  – pick the first 10-digit number
-  const phone = (text.match(/\d{10}/g) || [])[0];
-  if (phone) out.phone = phone;
-
-  // Address  – join district + panchayat + village
-  const addrLine = after("DISTRICT NAME");
-  if (addrLine) {
-    const district = addrLine.split(" ")[0];
-    const village  = after("VILLAGE NAME");
-    out.address = [district, village].filter(Boolean).join(", ");
-  } else {
-    // fallback: first occurrence of GANJAM/ CUTTACK/ etc.
-    const addrMatch = text.match(/\b(KENDRAPARA|GANJAM|CUTTACK|KHORDHA|PURI)\b[^\n]{0,40}/);
-    out.address = addrMatch ? addrMatch[0] : "";
-  }
-
-  // Gender
-  if (/SON/.test(text))       out.gender = "male";
-  else if (/DAUGHTER/.test(text)) out.gender = "female";
-
-  /* 3 ───────────── CLEAN-UPS ───────────── */
-  Object.keys(out).forEach(k => {
-    out[k] = out[k]?.replace(/[^0-9A-Z.'+\- ]/gi, " ").trim(); // strip junk
-    if (!out[k]) delete out[k];                               // drop empties
-  });
-
-  return out;
+/* ---------- section switch helper (unchanged) ---------- */
+function showSection (id) {
+  document.querySelectorAll('.admin-section').forEach(s => s.style.display='none');
+  document.getElementById(id).style.display = 'block';
 }
+
+
+
 if (uploadBtn) {
   uploadBtn.onclick = async () => {
     if (!excelInput.files[0]) {
