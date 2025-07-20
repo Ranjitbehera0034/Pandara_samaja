@@ -130,6 +130,7 @@ if (uploadBtn) {
     /* 2 → map headings → API fields
           (trim spaces because your sample sheet has them) */
     rows = rows.map(r => ({
+      membership_no : (r['MEMBERSHIP NO.'] || '').trim(), 
       name:               r["NAME OF THE FAMILY (HEAD)"]?.trim(),
       mobile:             String(r["MOB.NO."]).replace(/\D/g,""),
       male:               Number(r["MALE "]||0),
@@ -138,7 +139,7 @@ if (uploadBtn) {
       taluka:             r["TALUKA /"]?.trim(),      // note column name
       panchayat:          r["PANCHAYATA"]?.trim(),
       village:            r["VILLAGE"]?.trim()
-    })).filter(r => r.name && r.mobile);  // drop blank rows
+    })).filter(r => r.name && r.membership_no);  // drop blank rows
 
     if (rows.length === 0) {
       excelStatus.textContent = "No usable rows found.";
