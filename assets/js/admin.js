@@ -129,17 +129,17 @@ if (uploadBtn) {
 
     /* 2 → map headings → API fields
           (trim spaces because your sample sheet has them) */
-    rows = rows.map(r => ({
-      membership_no : (r['MEMBERSHIP NO.'] || '').trim(), 
-      name:               r["NAME OF THE FAMILY (HEAD)"]?.trim(),
-      mobile:             String(r["MOB.NO."]).replace(/\D/g,""),
-      male:               Number(r["MALE "]||0),
-      female:             Number(r["FEMALE"]||0),
-      district:           r["DISTRICT"]?.trim(),
-      taluka:             r["TALUKA /"]?.trim(),      // note column name
-      panchayat:          r["PANCHAYATA"]?.trim(),
-      village:            r["VILLAGE"]?.trim()
-    })).filter(r => r.name && r.membership_no);  // drop blank rows
+          rows = rows.map(r => ({
+            membership_no : String(r['MEMBERSHIP NO.'] ?? '').trim(), 
+            name: String(r["NAME OF THE FAMILY (HEAD)"] ?? '').trim(),
+            mobile: String(r["MOB.NO."] ?? '').replace(/\D/g,""),
+            male: Number(r["MALE "]||0),
+            female: Number(r["FEMALE"]||0),
+            district: String(r["DISTRICT"] ?? '').trim(),
+            taluka: String(r["TALUKA /"] ?? '').trim(),
+            panchayat: String(r["PANCHAYATA"] ?? '').trim(),
+            village: String(r["VILLAGE"] ?? '').trim()
+          })).filter(r => r.name && r.membership_no); // drop blank rows
 
     if (rows.length === 0) {
       excelStatus.textContent = "No usable rows found.";
