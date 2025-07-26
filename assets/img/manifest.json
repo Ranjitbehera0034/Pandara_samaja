@@ -1,0 +1,38 @@
+{
+    "GANJAM": [
+      { "name": "Ashok Kumar Badatya",      "src": "assets/img/leaders/Ganjam/Ashok Kumar Badatya.jpg" },
+      { "name": "BanchhaNidhi Behera",      "src": "assets/img/leaders/Ganjam/BanchhaNidhi Behera.jpg" },
+      { "name": "Hrisikesh Badatya",        "src": "assets/img/leaders/Ganjam/Hrisikesh Badatya.jpg" },
+      { "name": "Jagannath Badatya",        "src": "assets/img/leaders/Ganjam/Jagannath Badatya.jpg" },
+      { "name": "Pramod Badatya",           "src": "assets/img/leaders/Ganjam/Pramod Badatya.jpg" },
+      { "name": "Santosh Badatya",          "src": "assets/img/leaders/Ganjam/Santosh Badatya.jpg" },
+      { "name": "Santosh",                   "src": "assets/img/leaders/Ganjam/Santosh.jpg" },
+      { "name": "Sudama Behera",            "src": "assets/img/leaders/Ganjam/Sudama Behera.jpg" },
+      { "name": "Susanta Kumar Badatya",    "src": "assets/img/leaders/Ganjam/Susanta Kumar Badatya.jpg" },
+      { "name": "Trilochan Badatya",        "src": "assets/img/leaders/Ganjam/Trilochan Badatya.jpg" },
+      { "name": "Upendra Badatya",          "src": "assets/img/leaders/Ganjam/Upendra Badatya.jpg" }
+    ],
+    "JHARSUGUDA": [
+      { "name": "Dhoba Badatya",            "src": "assets/img/leaders/JHARSUGUDA/Dhoba Badatya.jpg" },
+      { "name": "Dillip Kumar Badatya",     "src": "assets/img/leaders/JHARSUGUDA/Dillip Kumar Badatya.jpg" },
+      { "name": "Manoj Kumar Badatya",      "src": "assets/img/leaders/JHARSUGUDA/Manoj Kumar Badatya.jpg" },
+      { "name": "Manoranjan Badatya",       "src": "assets/img/leaders/JHARSUGUDA/Manoranjan Badatya.jpg" },
+      { "name": "RankaMani Badatya",        "src": "assets/img/leaders/JHARSUGUDA/RankaMani Badatya.jpg" },
+      { "name": "Tuna Badatya",             "src": "assets/img/leaders/JHARSUGUDA/Tuna Badatya.jpg" }
+    ],
+    "SAMBALAPUR": [
+      { "name": "IMG-20250630-WA0001",      "src": "assets/img/leaders/SAMBALAPUR/IMG-20250630-WA0001.jpg" },
+      { "name": "IMG-20250630-WA0002",      "src": "assets/img/leaders/SAMBALAPUR/IMG-20250630-WA0002.jpg" },
+      { "name": "IMG-20250630-WA0003",      "src": "assets/img/leaders/SAMBALAPUR/IMG-20250630-WA0003.jpg" },
+      { "name": "IMG-20250630-WA0004",      "src": "assets/img/leaders/SAMBALAPUR/IMG-20250630-WA0004.jpg" },
+      { "name": "IMG-20250630-WA0005",      "src": "assets/img/leaders/SAMBALAPUR/IMG-20250630-WA0005.jpg" },
+      { "name": "IMG-20250630-WA0006",      "src": "assets/img/leaders/SAMBALAPUR/IMG-20250630-WA0006.jpg" },
+      { "name": "IMG-20250630-WA0007",      "src": "assets/img/leaders/SAMBALAPUR/IMG-20250630-WA0007.jpg" },
+      { "name": "IMG-20250630-WA0008",      "src": "assets/img/leaders/SAMBALAPUR/IMG-20250630-WA0008.jpg" },
+      { "name": "IMG-20250711-WA0011",      "src": "assets/img/leaders/SAMBALAPUR/IMG-20250711-WA0011.jpg" },
+      { "name": "IMG-20250711-WA0013",      "src": "assets/img/leaders/SAMBALAPUR/IMG-20250711-WA0013.jpg" },
+      { "name": "IMG-20250711-WA0014",      "src": "assets/img/leaders/SAMBALAPUR/IMG-20250711-WA0014.jpg" },
+      { "name": "IMG-20250711-WA0018",      "src": "assets/img/leaders/SAMBALAPUR/IMG-20250711-WA0018.jpg" }
+    ]
+  }
+  

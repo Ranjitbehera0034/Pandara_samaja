@@ -48,12 +48,15 @@
       <select id="talukaSelect"   disabled><option value="">Select Taluka</option></select>
       <select id="panchayatSelect" disabled><option value="">Select Panchayat</option></select>
     </div>
+    <div id="leaderContainer" style="text-align:center; margin:1rem 0; display:none;">
 
+      <img id="leaderImage" src="" alt="District leader" style="max-height:200px;" />
+    </div>
     <!-- members table -->
     <table id="memberTable" class="display" style="width:100%">
       <thead>
         <tr>
-          <th>Name</th><th>Mobile</th><th>Male</th><th>Female</th>
+          <th>Membership No.</th><th>Name</th><th>Mobile</th><th>Male</th><th>Female</th>
           <th>District</th><th>Taluka</th><th>Panchayat</th><th>Village</th>
         </tr>
       </thead>
@@ -65,7 +68,7 @@
   <script src="assets/js/main.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-  <script src="assets/js/config.js"></script>
+  <script src="assets/js/config.js"></script>  
   <script src="assets/js/members.js"></script>
 </body>
 </html>

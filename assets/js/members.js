@@ -1,28 +1,118 @@
-/* assets/js/members.js — cascading dropdowns + DataTable (fixed) */
+/* assets/js/members.js — cascading dropdowns + DataTable + leader gallery */
 
 const districtSelect  = document.getElementById('districtSelect');
 const talukaSelect    = document.getElementById('talukaSelect');
 const panchayatSelect = document.getElementById('panchayatSelect');
+const leaderContainer = document.getElementById('leaderContainer');
 
-let allMembers = [];
-let dataTable;
+const districtLeaderImages ={
+  "GANJAM": [
+    { "name": "Ashok Kumar Badatya",      "src": "assets/img/Ganjam/Ashok Kumar Badatya.png" },
+    { "name": "BanchhaNidhi Behera",      "src": "assets/img/Ganjam/BanchhaNidhi Behera.png" },
+    { "name": "Hrisikesh Badatya",        "src": "assets/img/Ganjam/Hrisikesh Badatya.png" },
+    { "name": "Jagannath Badatya",        "src": "assets/img/Ganjam/Jagannath Badatya.png" },
+    { "name": "Pramod Badatya",           "src": "assets/img/Ganjam/Pramod Badatya.png" },
+    { "name": "Santosh Badatya",          "src": "assets/img/Ganjam/Santosh Badatya.png" },
+    { "name": "Santosh",                  "src": "assets/img/Ganjam/Santosh.png" },
+    { "name": "Sudama Behera",            "src": "assets/img/Ganjam/Sudama Behera.png" },
+    { "name": "Susanta Kumar Badatya",    "src": "assets/img/Ganjam/Susanta Kumar Badatya.png" },
+    { "name": "Trilochan Badatya",        "src": "assets/img/Ganjam/Trilochan Badatya.png" },
+    { "name": "Upendra Badatya",          "src": "assets/img/Ganjam/Upendra Badatya.png" }
+  ],
+  "JHARSAGUDA": [
+    { "name": "Dhoba Badatya",            "src": "assets/img/JHARSAGUDA/Dhoba Badatya.jpg" },
+    { "name": "Dillip Kumar Badatya",     "src": "assets/img/JHARSAGUDA/Dillip Kumar Badatya.jpg" },
+    { "name": "Manoj Kumar Badatya",      "src": "assets/img/JHARSAGUDA/Manoj Kumar Badatya.jpg" },
+    { "name": "Manoranjan Badatya",       "src": "assets/img/JHARSAGUDA/Manoranjan Badatya.jpg" },
+    { "name": "RankaMani Badatya",        "src": "assets/img/JHARSAGUDA/RankaMani Badatya.jpg" },
+    { "name": "Tuna Badatya",             "src": "assets/img/JHARSAGUDA/Tuna Badatya.jpg" }
+  ],
+  "SAMBALAPUR": [
+    { "name": "IMG-20250630-WA0001",      "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0001.jpg" },
+    { "name": "IMG-20250630-WA0002",      "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0002.jpg" },
+    { "name": "IMG-20250630-WA0003",      "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0003.jpg" },
+    { "name": "IMG-20250630-WA0004",      "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0004.jpg" },
+    { "name": "IMG-20250630-WA0005",      "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0005.jpg" },
+    { "name": "IMG-20250630-WA0006",      "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0006.jpg" },
+    { "name": "IMG-20250630-WA0007",      "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0007.jpg" },
+    { "name": "IMG-20250630-WA0008",      "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0008.jpg" },
+    { "name": "IMG-20250711-WA0011",      "src": "assets/img/SAMBALAPUR/IMG-20250711-WA0011.jpg" },
+    { "name": "IMG-20250711-WA0013",      "src": "assets/img/SAMBALAPUR/IMG-20250711-WA0013.jpg" },
+    { "name": "IMG-20250711-WA0014",      "src": "assets/img/SAMBALAPUR/IMG-20250711-WA0014.jpg" },
+    { "name": "IMG-20250711-WA0018",      "src": "assets/img/SAMBALAPUR/IMG-20250711-WA0018.jpg" }
+  ]
+}
 
-/* ───── 1. Fetch data and initialise table ───── */
+
+function showLeader(district) {
+  const key = district.toUpperCase().replace(/\s+/g, '');
+  const leaders = districtLeaderImages[key] || [];
+
+  leaderContainer.innerHTML = '';
+
+  if (leaders.length === 0) {
+    leaderContainer.style.display = 'none';
+    return;
+  }
+
+  leaders.forEach(({ name, src }) => {
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'inline-block';
+    wrapper.style.textAlign = 'center';
+    wrapper.style.margin = '10px';
+
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = name;
+
+    const PLACEHOLDER = 'assets/img/placeholder.png';
+    
+    img.onerror = () => {
+      img.onerror = null;                  // prevent infinite loop
+      console.warn('Image not found:', src);
+      img.src = PLACEHOLDER;               // make sure this file exists!
+      img.alt = name + ' (photo unavailable)';
+    };
+    
+
+    img.style.maxHeight = '200px';
+    img.style.borderRadius = '8px';
+    img.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)';
+    img.style.display = 'block';
+    img.style.marginBottom = '5px';   
+
+    wrapper.appendChild(img);
+    
+    leaderContainer.appendChild(wrapper);
+  });
+
+  leaderContainer.style.display = 'block';
+}
+
+
+
+/* ──────────────────────────────────────────────────────────────
+   1) Fetch data and initialise table
+   ────────────────────────────────────────────────────────────── */
 (async function init () {
   const res = await fetch(`${API_BASE_URL}/api/members`);
   allMembers = await res.json();
 
-  /* populate District dropdown */
-  [...new Set(allMembers.map(m => m.district))]        // unique districts
+  // populate District dropdown
+  [...new Set(allMembers.map(m => m.district))]
     .sort()
-    .forEach(d =>
-      districtSelect.insertAdjacentHTML('beforeend',
-        `<option value="${d}">${d}</option>`));
+    .forEach(d => {
+      districtSelect.insertAdjacentHTML(
+        'beforeend',
+        `<option value="${d}">${d}</option>`
+      );
+    });
 
-  /* boot DataTable */
+  // boot DataTable
   dataTable = $('#memberTable').DataTable({
     data   : allMembers,
     columns: [
+      { data: 'membership_no', title: 'Membership No.' },
       { data: 'name'      },
       { data: 'mobile'    },
       { data: 'male'      },
@@ -30,30 +120,37 @@ let dataTable;
       { data: 'district'  },
       { data: 'taluka'    },
       { data: 'panchayat' },
-      { data: 'village',  defaultContent: '' }  // ← fix: safe fallback
+      { data: 'village',  defaultContent: '' }
     ],
-    dom     : 'Bfrtip',            // Buttons, filter, table, pagination
-    buttons : ['csv']              // needs DataTables Buttons extension
+    dom     : 'Bfrtip',
+    buttons : ['csv']
   });
 })();
 
-/* ───── 2. Cascading dropdown logic ───── */
+/* ──────────────────────────────────────────────────────────────
+   2) Cascading dropdown logic
+   ────────────────────────────────────────────────────────────── */
+
+// NOTE: You had two separate 'change' listeners for district.
+// Merge into one to avoid duplicate work.
 districtSelect.addEventListener('change', () => {
   const d = districtSelect.value;
 
-  /* rebuild Taluka list */
+  // show leader gallery
+  showLeader(d);
+
+  // rebuild Taluka list
   talukaSelect.disabled = !d;
   talukaSelect.innerHTML = '<option value="">Select Taluka</option>';
   if (d) {
-    [...new Set(allMembers.filter(m => m.district === d)
-                          .map(m => m.taluka))]
+    [...new Set(allMembers.filter(m => m.district === d).map(m => m.taluka))]
       .sort()
-      .forEach(t =>
-        talukaSelect.insertAdjacentHTML('beforeend',
-          `<option value="${t}">${t}</option>`));
+      .forEach(t => {
+        talukaSelect.insertAdjacentHTML('beforeend', `<option value="${t}">${t}</option>`);
+      });
   }
 
-  /* reset Panchayat dropdown */
+  // reset Panchayat
   panchayatSelect.disabled = true;
   panchayatSelect.innerHTML = '<option value="">Select Panchayat</option>';
 
@@ -64,16 +161,19 @@ talukaSelect.addEventListener('change', () => {
   const d = districtSelect.value;
   const t = talukaSelect.value;
 
-  /* rebuild Panchayat list */
+  // rebuild Panchayat list
   panchayatSelect.disabled = !t;
   panchayatSelect.innerHTML = '<option value="">Select Panchayat</option>';
   if (t) {
-    [...new Set(allMembers.filter(m =>
-        m.district === d && m.taluka === t).map(m => m.panchayat))]
+    [...new Set(
+      allMembers
+        .filter(m => m.district === d && m.taluka === t)
+        .map(m => m.panchayat)
+    )]
       .sort()
-      .forEach(p =>
-        panchayatSelect.insertAdjacentHTML('beforeend',
-          `<option value="${p}">${p}</option>`));
+      .forEach(p => {
+        panchayatSelect.insertAdjacentHTML('beforeend', `<option value="${p}">${p}</option>`);
+      });
   }
 
   filterTable({ district: d, taluka: t });
@@ -87,7 +187,9 @@ panchayatSelect.addEventListener('change', () => {
   });
 });
 
-/* ───── 3. Helper to apply filtering ───── */
+/* ──────────────────────────────────────────────────────────────
+   3) Helper to apply filtering
+   ────────────────────────────────────────────────────────────── */
 function filterTable (f) {
   const filtered = allMembers.filter(m =>
     (!f.district  || m.district  === f.district ) &&

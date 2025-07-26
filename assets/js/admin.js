@@ -127,19 +127,19 @@ if (uploadBtn) {
     const ws = wb.Sheets[wb.SheetNames[0]];      // first sheet only
     let rows = XLSX.utils.sheet_to_json(ws, {defval:""});
 
-    /* 2 → map headings → API fields
-          (trim spaces because your sample sheet has them) */
-          rows = rows.map(r => ({
-            membership_no : String(r['MEMBERSHIP NO.'] ?? '').trim(), 
-            name: String(r["NAME OF THE FAMILY (HEAD)"] ?? '').trim(),
-            mobile: String(r["MOB.NO."] ?? '').replace(/\D/g,""),
-            male: Number(r["MALE "]||0),
-            female: Number(r["FEMALE"]||0),
-            district: String(r["DISTRICT"] ?? '').trim(),
-            taluka: String(r["TALUKA /"] ?? '').trim(),
-            panchayat: String(r["PANCHAYATA"] ?? '').trim(),
-            village: String(r["VILLAGE"] ?? '').trim()
-          })).filter(r => r.name && r.membership_no); // drop blank rows
+    rows = rows.map(r => ({
+      membership_no: String(r['MEMBERSHIP NO.'] ?? '').trim(),
+      name:          String(r['NAME OF THE FAMILY (HEAD)'] ?? '').trim(),
+      mobile:        String(r['MOB.NO.'] ?? '').replace(/\D/g, ''),
+      male:          Number.isFinite(Number(r['MALE '])) ? Number(r['MALE ']) : '',
+      female:        Number.isFinite(Number(r['FEMALE'])) ? Number(r['FEMALE']) : '',
+      district:      String(r['DISTRICT'] ?? '').trim(),
+      taluka:        String(r["TALUKA "] ?? '').trim(),
+      panchayat:     String(r['PANCHAYATA'] ?? '').trim(),
+      village:       String(r['VILLAGE'] ?? '').trim(),
+    }))
+    .filter(r => r.name && r.membership_no); // <- require membership number
+    
 
     if (rows.length === 0) {
       excelStatus.textContent = "No usable rows found.";
