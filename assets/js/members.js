@@ -7,17 +7,17 @@ const leaderContainer = document.getElementById('leaderContainer');
 
 const districtLeaderImages ={
   "GANJAM": [
-    { "name": "Ashok Kumar Badatya",      "src": "assets/img/Ganjam/Ashok Kumar Badatya.png" },
-    { "name": "BanchhaNidhi Behera",      "src": "assets/img/Ganjam/BanchhaNidhi Behera.png" },
-    { "name": "Hrisikesh Badatya",        "src": "assets/img/Ganjam/Hrisikesh Badatya.png" },
-    { "name": "Jagannath Badatya",        "src": "assets/img/Ganjam/Jagannath Badatya.png" },
-    { "name": "Pramod Badatya",           "src": "assets/img/Ganjam/Pramod Badatya.png" },
-    { "name": "Santosh Badatya",          "src": "assets/img/Ganjam/Santosh Badatya.png" },
-    { "name": "Santosh",                  "src": "assets/img/Ganjam/Santosh.png" },
-    { "name": "Sudama Behera",            "src": "assets/img/Ganjam/Sudama Behera.png" },
-    { "name": "Susanta Kumar Badatya",    "src": "assets/img/Ganjam/Susanta Kumar Badatya.png" },
-    { "name": "Trilochan Badatya",        "src": "assets/img/Ganjam/Trilochan Badatya.png" },
-    { "name": "Upendra Badatya",          "src": "assets/img/Ganjam/Upendra Badatya.png" }
+    { "name": "Ashok Kumar Badatya",      "src": "assets/img/GANJAM/Ashok Kumar Badatya.png" },
+    { "name": "BanchhaNidhi Behera",      "src": "assets/img/GANJAM/BanchhaNidhi Behera.png" },
+    { "name": "Hrisikesh Badatya",        "src": "assets/img/GANJAM/Hrisikesh Badatya.png" },
+    { "name": "Jagannath Badatya",        "src": "assets/img/GANJAM/Jagannath Badatya.png" },
+    { "name": "Pramod Badatya",           "src": "assets/img/GANJAM/Pramod Badatya.png" },
+    { "name": "Santosh Badatya",          "src": "assets/img/GANJAM/Santosh Badatya.png" },
+    { "name": "Santosh",                  "src": "assets/img/GANJAM/Santosh.png" },
+    { "name": "Sudama Behera",            "src": "assets/img/GANJAM/Sudama Behera.png" },
+    { "name": "Susanta Kumar Badatya",    "src": "assets/img/GANJAM/Susanta Kumar Badatya.png" },
+    { "name": "Trilochan Badatya",        "src": "assets/img/GANJAM/Trilochan Badatya.png" },
+    { "name": "Upendra Badatya",          "src": "assets/img/GANJAM/Upendra Badatya.png" }
   ],
   "JHARSAGUDA": [
     { "name": "Dhoba Badatya",            "src": "assets/img/JHARSAGUDA/Dhoba Badatya.jpg" },
