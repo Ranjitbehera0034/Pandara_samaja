@@ -15,6 +15,11 @@
   user-select:none;
   transition:.2s transform;
 }
+main {
+  max-width: 1230px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
 .card:hover{transform:translateY(-3px);}
 .card.selected{background:#0066ff;color:#fff;font-weight:700;}
 /* simple mobile-first tweaks */
@@ -145,5 +150,116 @@ button.dt-button:hover {
     min-width: 0;
   }
 }
+/* ---- Page framing ---- */
+.members-page {
+  padding: 2rem 0 3rem;
+  background: #f6f9fe;
+}
+.members-page .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+.page-title {
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  color: #0a4a96;
+}
+
+/* Center the dropdowns */
+.dropdown-row.centered {
+  justify-content: center;
+}
+
+/* Leader image strip */
+.leader-strip {
+  text-align: center;
+  margin: 1rem 0 1.25rem;
+}
+.leader-strip img {
+  max-height: 200px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(10,70,150,.12);
+}
+
+/* Card around the DataTable */
+.table-card {
+  background: #fff;
+  border: 1px solid #e7eef6;
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(10,70,150,.08);
+  padding: 1rem;
+  overflow: hidden;           /* rounds DataTable header corners */
+}
+
+/* Make the DataTables wrapper centered and full width inside card */
+.dataTables_wrapper {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Header styling */
+table.dataTable thead {
+  background: #0a4a96;
+  color: #fff;
+}
+table.dataTable thead th {
+  border-bottom: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Body rows */
+table.dataTable tbody tr:nth-child(even) { background: #f9fcff; }
+table.dataTable tbody tr:hover { background: #eaf3ff; }
+table.dataTable td, table.dataTable th {
+  padding: .75rem .9rem;
+}
+
+/* DataTables controls */
+.dataTables_wrapper .dataTables_filter {
+  text-align: right;
+  margin-bottom: .5rem;
+}
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select {
+  border: 1px solid #c9d7e8;
+  border-radius: 8px;
+  padding: 0.45rem 0.65rem;
+  font-size: .95rem;
+  background: #fff;
+}
+.dataTables_wrapper .dataTables_info {
+  padding-top: .75rem;
+  color: #475569;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  border-radius: 8px !important;
+  border: 1px solid transparent !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: #0a4a96 !important;
+  color: #fff !important;
+  border-color: #0a4a96 !important;
+}
+
+/* CSV button */
+button.dt-button {
+  background: linear-gradient(135deg, #0057b7 0%, #007bff 100%);
+  border: none;
+  color: #fff;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+}
+button.dt-button:hover { background: #0050a8; }
+
+/* Responsive: dropdowns stack nicely */
+@media (max-width: 640px) {
+  .dropdown-row select { flex: 1 1 100%; min-width: 0; }
+}
+
+/* (keep your existing dropdown styles below this; they work fine) */
 
 

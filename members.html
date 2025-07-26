@@ -39,30 +39,34 @@
   </header>
 
   <!-- ─── main ────────────────────────────────────────────────── -->
-  <main style="padding: 1rem;">
-    <h1>Member Directory</h1>
-
-    <!-- dropdown row -->
-    <div class="dropdown-row">
-      <select id="districtSelect"><option value="">Select District</option></select>
-      <select id="talukaSelect"   disabled><option value="">Select Taluka</option></select>
-      <select id="panchayatSelect" disabled><option value="">Select Panchayat</option></select>
+  <main class="members-page">
+    <div class="container">
+      <h1 class="page-title">Member Directory</h1>
+  
+      <div class="dropdown-row centered">
+        <select id="districtSelect"><option value="">Select District</option></select>
+        <select id="talukaSelect" disabled><option value="">Select Taluka</option></select>
+        <select id="panchayatSelect" disabled><option value="">Select Panchayat</option></select>
+      </div>
+  
+      <div id="leaderContainer" class="leader-strip" style="display:none;">
+        <img id="leaderImage" src="" alt="District leader" />
+      </div>
+  
+      <div class="table-card">
+        <table id="memberTable" class="display" style="width:100%">
+          <thead>
+            <tr>
+              <th>Membership No.</th><th>Name</th><th>Mobile</th><th>Male</th><th>Female</th>
+              <th>District</th><th>Taluka</th><th>Panchayat</th><th>Village</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
-    <div id="leaderContainer" style="text-align:center; margin:1rem 0; display:none;">
-
-      <img id="leaderImage" src="" alt="District leader" style="max-height:200px;" />
-    </div>
-    <!-- members table -->
-    <table id="memberTable" class="display" style="width:100%">
-      <thead>
-        <tr>
-          <th>Membership No.</th><th>Name</th><th>Mobile</th><th>Male</th><th>Female</th>
-          <th>District</th><th>Taluka</th><th>Panchayat</th><th>Village</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
   </main>
+  
 
   <!-- ─── scripts ─────────────────────────────────────────────── -->
   <script src="assets/js/main.js"></script>
