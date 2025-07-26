@@ -150,7 +150,7 @@ if (uploadBtn) {
     excelStatus.textContent = `Uploading ${rows.length} members…`;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/members/import-rows`, {
+      const res = await fetch(`${API_BASE_URL}/api/members/import-rows`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({rows})
