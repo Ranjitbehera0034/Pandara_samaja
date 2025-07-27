@@ -49,7 +49,9 @@
       <div class="hero-inner">
         <div class="hero-media">
           <div class="logo-wrap">
-            <img class="hero-logo" src="assets/img/pandara logo.png" alt="Pandara Samaja Logo"
+            <img class="hero-logo"
+                 src="assets/img/pandara logo.png"
+                 alt="Pandara Samaja Logo"
                  onerror="this.onerror=null;this.src='assets/img/leaders/placeholder.png'">
           </div>
         </div>
@@ -60,12 +62,22 @@
     
           <div class="hero-actions">
             <a class="btn btn-outline" href="members.html">Members Directory</a>
-            <a class="btn btn-outline"  href="blogs.html">Recent Blogs</a>
-            <a class="btn btn-outline"  href="matrimony.html">Matrimony</a>
+            <a class="btn btn-outline" href="blogs.html">Recent Blogs</a>
+            <a class="btn btn-outline" href="matrimony.html">Matrimony</a>
           </div>
         </div>
+    
+        <!-- QR badge now participates in the grid -->
+        <a class="qr-badge"
+           href="https://nikhilaodishapandarasamaja.in/"
+           target="_blank" rel="noopener">
+          <div class="qr-canvas" id="siteQR"
+               aria-label="QR code for Pandara Samaja website"></div>
+          <span class="qr-caption">Scan to open in Mobile</span>
+        </a>
       </div>
     </section>
+    
     
     
     
@@ -163,5 +175,56 @@
     });
   </script>
   <script src="assets/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+(function () {
+  const SITE_URL = "https://nikhilaodishapandarasamaja.in/";
+  const holder   = document.getElementById("siteQR");
+
+  function fallbackImg() {
+    const img = new Image();
+    img.alt = "QR code";
+    img.src = "https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=1&data=" +
+              encodeURIComponent(SITE_URL);
+    holder.innerHTML = "";
+    holder.appendChild(img);
+  }
+
+  function qrSize() {
+    const w = window.innerWidth;
+    if (w <= 400) return 140;
+    if (w <= 640) return 160;
+    if (w <= 1024) return 180;
+    return 240;
+  }
+
+  function renderQR() {
+    const size = qrSize();
+    holder.innerHTML = "";
+    // prefer canvas
+    if (!window.QRCode || !QRCode.toCanvas) return fallbackImg();
+
+    const canvas = document.createElement("canvas");
+    holder.appendChild(canvas);
+    QRCode.toCanvas(
+      canvas,
+      SITE_URL,
+      { width: size, margin: 1, color: { dark: "#0a2540", light: "#ffffff" } },
+      err => { if (err) fallbackImg(); }
+    );
+  }
+
+  // Render and update on resize (debounced)
+  renderQR();
+  let t;
+  window.addEventListener("resize", () => {
+    clearTimeout(t);
+    t = setTimeout(renderQR, 150);
+  });
+})();
+</script>
+
+  
+
 </body>
 </html>
