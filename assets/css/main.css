@@ -190,15 +190,141 @@ a:hover   { color: var(--blue-200); }
   }
 }
 /* ==== Home / About helpers ==== */
-.page-hero {
-  background: linear-gradient(135deg, #0b5fc3 0%, #0a4a96 60%, #083b76 100%);
-  color: #fff;
-  padding: 4rem 1.25rem;
+/* ==== HERO (improved) ======================================= */
+
+.beautiful-hero{
+  position: relative;
+  /* deep blue gradient with subtle vignette */
+  background: radial-gradient(circle at 20% 20%, #0f5fbf 0%, #0b4ea1 35%, #083d80 100%);
+  overflow: hidden;
+}
+
+.beautiful-hero::after{
+  /* soft vignette edge */
+  content:"";
+  position:absolute; inset:0;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.06),
+              inset 0 0 160px rgba(0,0,0,.28);
+  pointer-events:none;
+}
+
+.beautiful-hero .hero-inner{
+  min-height: clamp(440px, 64vh, 640px);
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: clamp(28px, 6vw, 72px) clamp(20px, 6vw, 48px);
+
+  display: grid;
+  align-items: center;
+  gap: clamp(28px, 6vw, 56px);
+
+  /* mobile: single column */
+  grid-template-columns: 1fr;
+}
+
+/* desktop: two columns */
+@media (min-width: 960px){
+  .beautiful-hero .hero-inner{
+    grid-template-columns: minmax(220px, 320px) 1fr;
+  }
+}
+
+.hero-media{
+  display: grid;
+  place-items: center;
+}
+
+.hero-logo{
+  width: clamp(140px, 22vw, 260px);
+  height: auto;
+  background: #fff;
+  border-radius: 999px;
+  padding: clamp(10px, 1.8vw, 18px);
+  box-shadow:
+    0 22px 60px rgba(0,0,0,.35),
+    0 8px 18px rgba(0,0,0,.18),
+    0 0 0 10px rgba(255,255,255,.2);   /* white ring */
+}
+
+/* Right side copy */
+.hero-copy{
   text-align: center;
 }
-.page-hero.compact { padding: 2.5rem 1.25rem; }
-.page-hero h1 { font-size: xxx-large; margin: 0 0 0.75rem;color:white }
-.page-hero p { opacity: 0.95; max-width: 860px; margin: 0 auto; }
+@media (min-width: 960px){
+  .hero-copy{ text-align: left; }
+}
+
+.hero-title{
+  margin: 0 0 clamp(10px, 2vw, 16px);
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.05;
+  letter-spacing: 0.5px;
+  font-size: clamp(32px, 6vw, 56px);
+  text-shadow:
+    0 6px 18px rgba(0,0,0,.35),
+    0 2px 6px rgba(0,0,0,.25);
+}
+
+.hero-tagline{
+  margin: 0 0 clamp(22px, 5vw, 36px);
+  color: rgba(255,255,255,.92);
+  font-size: clamp(16px, 2.8vw, 22px);
+  line-height: 1.6;
+  max-width: 720px;
+}
+
+/* Buttons */
+.hero-actions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+@media (min-width: 960px){
+  .hero-actions{ justify-content: flex-start; }
+}
+
+.btn{
+  display: inline-block;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease, color .15s ease, border-color .15s ease;
+  white-space: nowrap;
+}
+
+.btn-primary{
+  background: #ffffff;
+  color: #0a4a96;
+  box-shadow: 0 12px 28px rgba(0,0,0,.22), 0 4px 10px rgba(0,0,0,.18);
+}
+.btn-primary:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(0,0,0,.26), 0 6px 14px rgba(0,0,0,.20);
+}
+
+.btn-outline{
+  border: 2px solid rgba(255,255,255,.6);
+  color: #fff;
+  background: transparent;
+}
+.btn-outline:hover{
+  border-color: #fff;
+  background: rgba(255,255,255,.08);
+  transform: translateY(-2px);
+}
+
+/* Accessibility: reduce animation if user prefers */
+@media (prefers-reduced-motion: reduce){
+  .btn,
+  .btn-primary,
+  .btn-outline{
+    transition: none;
+  }
+}
+
 .hero-actions { margin-top: 1.5rem; display: inline-flex; gap: .75rem; flex-wrap: wrap; }
 .btn { border: 1px solid #fff; color: #fff; padding: .65rem 1rem; border-radius: .5rem; text-decoration: none; display: inline-block; }
 .btn.primary { background: #fff; color: #0a4a96; font-weight: 600; }
@@ -280,3 +406,97 @@ a:hover   { color: var(--blue-200); }
 @media (prefers-reduced-motion: reduce){
   .ticker__track{ animation:none; transform:none; }
 }
+
+/* ── Make hero full‑bleed even when inside <main> ───────────── */
+/* Full‑bleed hero (you already added hero-full earlier) */
+.hero-full{
+  width:100vw; position:relative; left:50%; right:50%;
+  margin-left:-50vw; margin-right:-50vw;
+}
+
+/* Base hero gradient */
+.hero{
+  position:relative;
+  background: radial-gradient(circle at 10% 10%, #1769d1 0%, #0e55b3 45%, #093e83 100%);
+  overflow:hidden;
+}
+
+/* Two-column responsive grid */
+.hero .hero-inner{
+  min-height: clamp(460px, 60vh, 640px);
+  max-width: min(1400px, 90vw);
+  margin-inline:auto;
+  padding: clamp(32px, 6vw, 72px) clamp(24px, 6vw, 56px);
+  display:grid; gap: clamp(28px, 6vw, 56px);
+  align-items:center;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 960px){
+  .hero .hero-inner{ grid-template-columns: minmax(240px, 360px) 1fr; }
+}
+
+/* Title & text */
+.hero-title{
+  color:#fff; font-weight:800; line-height:1.05; letter-spacing:.4px;
+  font-size: clamp(34px, 6vw, 64px);
+  text-shadow: 0 10px 30px rgba(0,0,0,.35), 0 3px 10px rgba(0,0,0,.25);
+  margin:0 0 clamp(12px, 2vw, 18px);
+}
+.hero-tagline{
+  color:#eaf2ff; font-size: clamp(16px, 2.5vw, 22px); line-height:1.65;
+  margin:0 0 clamp(24px, 5vw, 36px);
+}
+
+/* Buttons */
+.hero-actions{ display:flex; flex-wrap:wrap; gap:12px; }
+.btn{
+  display:inline-block; border-radius:999px; padding:12px 22px; font-weight:700;
+  text-decoration:none; transition:transform .15s, box-shadow .15s, background .15s, border-color .15s, color .15s;
+}
+.btn-primary{
+  background:#fff; color:#0a4a96;
+  box-shadow:0 16px 40px rgba(0,0,0,.22), 0 6px 16px rgba(0,0,0,.18);
+}
+.btn-primary:hover{ transform:translateY(-2px); box-shadow:0 22px 48px rgba(0,0,0,.28); }
+.btn-outline{
+  border:2px solid rgba(255,255,255,.65); color:#fff; background:transparent;
+}
+.btn-outline:hover{ border-color:#fff; background:rgba(255,255,255,.08); transform:translateY(-2px); }
+
+/* Logo with animated glow rings */
+.logo-wrap{
+  position:relative; width: clamp(180px, 26vw, 320px); aspect-ratio:1/1;
+  border-radius:50%; display:grid; place-items:center;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.35),
+    0 10px 24px rgba(0,0,0,.22);
+}
+.logo-wrap::before,
+.logo-wrap::after{
+  content:""; position:absolute; inset:-18px; border-radius:50%;
+  background: conic-gradient(from 0deg, #ffffff30 0 25%, #ffffff08 25% 50%, #ffffff30 50% 75%, #ffffff08 75% 100%);
+  filter: blur(4px);
+  animation: spin 30s linear infinite;
+}
+.logo-wrap::after{
+  inset:-36px; opacity:.45; animation-duration: 50s;
+  background: conic-gradient(from 0deg, #7cc1ff30 0 25%, #ffffff05 25% 50%, #7cc1ff30 50% 75%, #ffffff05 75% 100%);
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
+.hero-logo{
+  width: 100%; height: 100%; border-radius:50%;
+  background:#fff; padding: clamp(12px, 2vw, 18px);
+  box-shadow: inset 0 0 0 12px rgba(255,255,255,.22),
+              0 0 0 10px rgba(255,255,255,.20);
+  object-fit:contain;
+}
+
+/* Vignette edge */
+.hero::after{
+  content:""; position:absolute; inset:0;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.06),
+              inset 0 0 200px rgba(0,0,0,.28);
+  pointer-events:none;
+}
+
