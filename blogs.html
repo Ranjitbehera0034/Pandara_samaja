@@ -1,66 +1,83 @@
 <!DOCTYPE html>
 <html lang="or">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE9R5DCCNT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE9R5DCCNT"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
 
-  gtag('config', 'G-LE9R5DCCNT');
-</script>
-<script src="assets/js/analytics.js" defer></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Oriya:wght@400;700&display=swap" rel="stylesheet">
-  <title>Blogs • ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</title>
-  <link rel="stylesheet" href="assets/css/main.css" />
-  <link rel="stylesheet" href="assets/css/blogs.css" />
-</head>
-<body>
-  <header>
-    <nav class="navbar">
-      <div class="brand">
-        <img src="assets/img/pandara logo.png" alt="Pandara Samaja Logo" />
-        <span>ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</span>
-      </div>
-      <button class="nav-toggle" aria-label="Toggle navigation"><span class="hamburger"></span></button>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="index.html">Home</a></li>       
-        <li><a href="about.html">About</a></li>
-        <li><a href="members.html">Members</a></li>
-        <li><a href="matrimony.html">Matrimony</a></li>
-        <li><a href="blogs.html" class="active">Recent Blogs</a></li>
-        <li><a href="admin.html">Admin</a></li>
-      </ul>
-    </nav>
-  </header>
-  <section class="ticker" aria-label="Pandara Samaja scrolling title">
-    <div class="ticker__track">
-      <div class="ticker__item">
-        ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-        ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-        ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-      </div>
-      <!-- duplicate for seamless loop -->
-      <div class="ticker__item" aria-hidden="true">
-        ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-        ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-        ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-      </div>
-    </div>
-  </section>
-  <main>
-    <section class="blog-section">
-      <h1>Recent Blogs & Announcements</h1>
-      <div id="blog-list" class="blog-list"></div>
-    </section>
-  </main>
+            gtag('config', 'G-LE9R5DCCNT');
+        </script>
+        <script src="assets/js/analytics.js" defer></script>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Oriya:wght@400;700&display=swap" rel="stylesheet">
+        <title>Blogs • ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</title>
+        <link rel="stylesheet" href="assets/css/main.css"/>
+        <link rel="stylesheet" href="assets/css/blogs.css"/>
+    </head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="brand">
+                    <img src="assets/img/pandara logo.png" alt="Pandara Samaja Logo"/>
+                    <span>ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</span>
+                </div>
+                <button class="nav-toggle" aria-label="Toggle navigation">
+                    <span class="hamburger"></span>
+                </button>
+                <ul class="nav-links" id="navLinks">
+                    <li>
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li>
+                        <a href="about.html">About</a>
+                    </li>
+                    <li>
+                        <a href="members.html">Members</a>
+                    </li>
+                    <li>
+                        <a href="matrimony.html">Matrimony</a>
+                    </li>
+                    <li>
+                        <a href="blogs.html" class="active">Recent Blogs</a>
+                    </li>
+                    <li>
+                        <a href="admin.html">Admin</a>
+                    </li>
+                </ul>
+            </nav>
+        </header>
+        <section class="ticker" aria-label="Pandara Samaja scrolling title">
+            <div class="ticker__track">
+                <div class="ticker__item">
+                    ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                </div>
+                <!-- duplicate for seamless loop -->
+                <div class="ticker__item" aria-hidden="true">
+                    ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                </div>
+            </div>
+        </section>
+        <main>
+            <section class="blog-section">
+                <h1>Recent Blogs & Announcements</h1>
+                <div id="blog-list" class="blog-list"></div>
+            </section>
+        </main>
 
-  <script src="assets/js/config.js"></script>
-  <script src="assets/js/main.js"></script>
-  <script src="assets/js/blogs.js"></script>
-  <!-- Google tag (gtag.js) -->
+        <script src="assets/js/config.js"></script>
+        <script src="assets/js/main.js"></script>
+        <script src="assets/js/blogs.js"></script>
+        <!-- Google tag (gtag.js) -->
 
-</body>
+    </body>
 </html>
+
