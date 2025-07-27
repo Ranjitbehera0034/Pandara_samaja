@@ -24,27 +24,31 @@
       </ul>
     </nav>
   </header>
-  <main>
-    <div id="admin-login" style="max-width:350px;margin:3rem auto;">
+  <main class="admin-container">
+    <div id="admin-login" class="auth-card">
       <h2>Admin Login</h2>
       <form id="adminLoginForm">
-        <input type="text" id="loginUser" placeholder="Username" required style="width:100%;margin-bottom:1rem;">
-        <input type="password" id="loginPass" placeholder="Password" required style="width:100%;margin-bottom:1rem;">
-        <button type="submit" style="width:100%;">Login</button>
+        <input type="text" id="loginUser" placeholder="Username" required>
+        <input type="password" id="loginPass" placeholder="Password" required>
+        <button class="btn primary" type="submit" style="width:100%;">Login</button>
       </form>
     </div>
 
-    <div id="admin-panel" style="display:none;max-width:1000px;margin:2rem auto;">
-      <h2>Admin Dashboard</h2>
-      <div class="admin-sections">
-        <button onclick="showSection('matrimonySection')">Matrimony Candidate Management</button>
-        <button onclick="showSection('memberSection')">Member Management</button>
-        <button onclick="showSection('postSection')">Post Management</button>
+    <div id="admin-panel" class="panel-card" style="display:none;">
+      <h1 class="page-title">Admin Dashboard</h1>
+
+      <div class="section-tabs" role="tablist" aria-label="Admin sections">
+        <button class="tab" id="tab-matrimony"  role="tab" aria-controls="matrimonySection" aria-selected="true"
+                onclick="setActiveSection('matrimonySection', this)">Matrimony Candidate Management</button>
+        <button class="tab" id="tab-members"    role="tab" aria-controls="memberSection" aria-selected="false"
+                onclick="setActiveSection('memberSection', this)">Member Management</button>
+        <button class="tab" id="tab-posts"      role="tab" aria-controls="postSection" aria-selected="false"
+                onclick="setActiveSection('postSection', this)">Post Management</button>
       </div>
 
       <!-- ========= MATRIMONY SECTION ========= -->
-<section id="matrimonySection" class="admin-section">
-  <h3>Add / Update Matrimony Candidate</h3>
+<section id="matrimonySection" class="admin-section panel-card">
+  <h3 class="section-title">Add / Update Matrimony Candidate</h3>
 
   <!-- always-visible form (no OCR) -->
   <form id="addCandidateForm" enctype="multipart/form-data">
@@ -71,12 +75,9 @@
     <input type="text"   id="adminAddress"       placeholder="Address">
     <input type="text"   id="adminPhone"         placeholder="Phone">
     <input type="email"  id="adminEmail"         placeholder="Email">
-
-    <!-- candidate portrait (required) -->
     <input type="file" id="adminPhotoFile" accept="image/*" required>
-
-    <button type="submit">Save Candidate</button>
-  </form>
+    <button type="submit" class="btn primary full">Save Candidate</button> 
+</form>
 
   <!-- grid of saved profiles -->
   <div id="adminCandidates"></div>
@@ -130,7 +131,7 @@
 </section>
 
 
-      <section id="postSection" class="admin-section" style="display:none;">
+<section id="postSection" class="admin-section panel-card" style="display:none;">
         <h3>Add / Manage Posts</h3>
         <form id="addPostForm">
   <input type="text" id="postTitle" placeholder="Post Title" required>

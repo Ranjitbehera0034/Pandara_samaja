@@ -257,7 +257,29 @@ async function deletePost(id) {
   renderPosts();
 }
 
+function setActiveSection(id, btn) {
+  // show section
+  document.querySelectorAll('.admin-section').forEach(sec => sec.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
 
+  // highlight tab
+  document.querySelectorAll('.section-tabs .tab').forEach(t => {
+    t.setAttribute('aria-selected', 'false');
+  });
+  if (btn) btn.setAttribute('aria-selected', 'true');
+}
+
+function toast(message, type='success') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = message;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 200);
+  }, 2500);
+}
 
 
 
