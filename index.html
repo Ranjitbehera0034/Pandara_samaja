@@ -57,14 +57,14 @@
             <div class="ticker__track">
                 <div class="ticker__item">
                     ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                                                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                                                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
                 </div>
                 <!-- duplicate for seamless loop -->
                 <div class="ticker__item" aria-hidden="true">
                     ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                                                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                                                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
                 </div>
             </div>
         </section>
@@ -111,7 +111,7 @@
                         </h2>
                         <p class="odia-text">
                             ଆମ ପନ୍ଦରା ସମାଜର ସମ୍ମିଳିତ ଉନ୍ନତି ପାଇଁ ସବୁଠାରୁ ଆବଶ୍ୟକ — ଶିକ୍ଷା, ସଂଯୋଗ ଓ ସହଯୋଗ।
-                                        ଏହି ମନ୍ଚ ମାଧ୍ୟମରେ ଆମେ ସମସ୍ତଙ୍କୁ ଏକ ସୂତ୍ରରେ ବାନ୍ଧି ନବୀନ ପିଢ଼ୀ ପାଇଁ ଉଦାହରଣ ସୃଷ୍ଟି କରିବାକୁ ଅଟଳ।
+                                                                    ଏହି ମନ୍ଚ ମାଧ୍ୟମରେ ଆମେ ସମସ୍ତଙ୍କୁ ଏକ ସୂତ୍ରରେ ବାନ୍ଧି ନବୀନ ପିଢ଼ୀ ପାଇଁ ଉଦାହରଣ ସୃଷ୍ଟି କରିବାକୁ ଅଟଳ।
                         </p>
                         <p class="president-name">—
                             <strong>ସଭାପତି, ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</strong>
@@ -158,10 +158,13 @@
         </main>
 
         <footer class="site-footer">
-            <p>©
-                <span id="year"></span>
-                Pramila Consultancy</p>
-        </footer>
+            <div class="footer-content">
+              <p>Total Visitors:</p>
+              <img class="visitor-counter" src="https://hitwebcounter.com/counter/counter.php?page=21260436&style=0001&nbdigits=5&type=page&initCount=144" alt="Visit Counter" />
+              <p>© <span id="year"></span> Pramila Consultancy</p>
+            </div>
+          </footer>
+          
 
         <script>
             document.getElementById('year').textContent = new Date().getFullYear();
@@ -180,8 +183,7 @@
                 },
                 {
                     src: 'assets/img/NOPS/Chiranjibi Badatya.png'
-                },
-                {
+                }, {
                     src: 'assets/img/NOPS/Kishore Hari Badatya.png'
                 }, {
                     src: 'assets/img/NOPS/Sarat Chandra Behera.png'
@@ -244,12 +246,15 @@
                     if (w <= 400) 
                         return 140;
                     
+
                     if (w <= 640) 
                         return 160;
                     
+
                     if (w <= 1024) 
                         return 180;
                     
+
                     return 240;
                 }
 
@@ -260,6 +265,7 @@
                     if (!window.QRCode || !QRCode.toCanvas) 
                         return fallbackImg();
                     
+
 
                     const canvas = document.createElement("canvas");
                     holder.appendChild(canvas);
@@ -274,6 +280,7 @@
                         if (err) 
                             fallbackImg();
                         
+
                     });
                 }
 
@@ -290,3 +297,4 @@
 
     </body>
 </html>
+
