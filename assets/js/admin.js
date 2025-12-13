@@ -10,10 +10,12 @@ const excelInput = document.getElementById("excelFileInput");
 const uploadBtn = document.getElementById("uploadExcelBtn");
 const excelStatus = document.getElementById("excelStatus");
 const postForm = document.getElementById("addPostForm");
-const postList = document.getElementById("adminPosts");
+const postsTableBody = document.getElementById("postsTableBody");
 
 let candidates = [];
 let filteredCandidates = [];
+let posts = [];
+let filteredPosts = [];
 
 
 
@@ -445,51 +447,115 @@ if (document.getElementById("uploadExcelBtn")) {
   };
 }
 
+/* ---------- Post Management ---------- */
+
 postForm.onsubmit = async e => {
   e.preventDefault();
   const title = document.getElementById("postTitle").value.trim();
   const content = document.getElementById("postContent").value.trim();
+  const id = document.getElementById("postId").value;
 
   if (!title || !content) return showToast("Fill out all fields!", "error");
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/posts`, {
-      method: "POST",
+    const url = id
+      ? `${API_BASE_URL}/api/posts/${id}`
+      : `${API_BASE_URL}/api/posts`;
+
+    const method = id ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method: method,
       headers: getAuthHeaders(),
       body: JSON.stringify({ title, content })
     });
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.message || "Failed to add post");
+      throw new Error(errorData.message || "Failed to save post");
     }
 
-    showToast("Post added!", "success");
-    postForm.reset();
-    renderPosts();
+    showToast(id ? "Post updated!" : "Post added!", "success");
+    resetPostForm();
+    await renderPosts();
   } catch (err) {
     console.error("Post Error:", err);
-    showToast("Error adding post: " + err.message, "error");
+    showToast("Error adding/updating post: " + err.message, "error");
   }
 };
 
 async function renderPosts() {
+  postsTableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px;">Loading...</td></tr>`;
   try {
     const res = await fetch(`${API_BASE_URL}/api/posts`, {
       headers: getAuthHeaders()
     });
-    const posts = await res.json();
+    posts = await res.json();
+    filteredPosts = [...posts];
 
-    postList.innerHTML = posts.map(p => `
-        < div class="post-card" >
-        <h4>${p.title}</h4>
-        <p>${p.content}</p>
-        <button onclick="deletePost(${p.id})">Delete</button>
-      </div >
-        `).join('');
+    renderPostsTable();
   } catch (err) {
-    postList.innerHTML = "<p>Failed to load posts</p>";
+    postsTableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:red;">Failed to load posts</td></tr>`;
   }
+}
+
+function renderPostsTable() {
+  if (!filteredPosts.length) {
+    postsTableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:#666;">No posts found</td></tr>`;
+    return;
+  }
+
+  postsTableBody.innerHTML = filteredPosts.map(p => {
+    // Create a short preview of the content for the table
+    const preview = p.content.length > 50 ? p.content.substring(0, 50) + "..." : p.content;
+    return `
+      <tr style="border-bottom: 1px solid #f0f0f0;">
+        <td style="padding: 12px; font-weight: 600;">${escapeHtml(p.title)}</td>
+        <td style="padding: 12px; color: #555;">${escapeHtml(preview)}</td>
+        <td style="padding: 12px; text-align: right;">
+            <button class="action-btn edit" onclick="editPost('${p.id}')">Edit</button>
+            <button class="action-btn delete" onclick="deletePost('${p.id}')">Delete</button>
+        </td>
+      </tr>
+      `;
+  }).join('');
+}
+
+function searchPosts() {
+  const term = document.getElementById("postSearchInput").value.trim().toLowerCase();
+  if (!term) {
+    filteredPosts = [...posts];
+  } else {
+    filteredPosts = posts.filter(p => p.title.toLowerCase().includes(term));
+  }
+  renderPostsTable();
+}
+
+function clearPostSearch() {
+  document.getElementById("postSearchInput").value = "";
+  filteredPosts = [...posts];
+  renderPostsTable();
+}
+
+function editPost(id) {
+  const p = posts.find(item => item.id == id);
+  if (!p) return;
+
+  document.getElementById("postId").value = id;
+  document.getElementById("postTitle").value = p.title;
+  document.getElementById("postContent").value = p.content;
+
+  document.getElementById("postFormTitle").textContent = "Edit Post";
+  document.getElementById("cancelPostEdit").style.display = "inline-block";
+  document.getElementById("savePostBtn").textContent = "Update Post";
+}
+
+function resetPostForm() {
+  postForm.reset();
+  document.getElementById("postId").value = "";
+  document.getElementById("postFormTitle").textContent = "Add New Post";
+  document.getElementById("cancelPostEdit").style.display = "none";
+  document.getElementById("savePostBtn").textContent = "Save Post";
 }
 
 async function deletePost(id) {
@@ -504,7 +570,7 @@ async function deletePost(id) {
       throw new Error(errorData.message || "Failed to delete");
     }
     showToast("Post deleted", "success");
-    renderPosts();
+    await renderPosts();
   } catch (err) {
     console.error(err);
     showToast("Failed to delete post: " + err.message, "error");
