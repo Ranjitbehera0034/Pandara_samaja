@@ -1,196 +1,452 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Admin | Nikhila Odisha Pandara Samaja</title>
-        <link rel="stylesheet" href="assets/css/admin.css">
-        <link rel="stylesheet" href="assets/css/matrimony.css">
-        <link rel="stylesheet" href="assets/css/main.css">
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE9R5DCCNT"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag() {
-                dataLayer.push(arguments);
-            }
-            gtag('js', new Date());
 
-            gtag('config', 'G-LE9R5DCCNT');
-        </script>
-        <script src="assets/js/analytics.js" defer></script>
-    </head>
-    <body>
-        <header>
-            <nav class="navbar">
-                <div class="brand">
-                    <img src="assets/img/pandara logo.png" alt="Pandara Samaja Logo"/>
-                    <span>ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</span>
-                </div>
-                <ul class="nav-links" id="navLinks">
-                    <li>
-                        <a href="index.html">Home</a>
-                    </li>
-                    <li>
-                        <a href="about.html">About</a>
-                    </li>
-                    <li>
-                        <a href="members.html">Members</a>
-                    </li>
-                    <li>
-                        <a href="matrimony.html">Matrimony</a>
-                    </li>
-                    <li>
-                        <a href="blogs.html">Recent Blogs</a>
-                    </li>
-                    <li>
-                        <a href="admin.html" class="active">Admin</a>
-                    </li>
-                </ul>
-            </nav>
-        </header>
-        <section class="ticker" aria-label="Pandara Samaja scrolling title">
-            <div class="ticker__track">
-                <div class="ticker__item">
-                    ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                </div>
-                <!-- duplicate for seamless loop -->
-                <div class="ticker__item" aria-hidden="true">
-                    ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                </div>
-            </div>
-        </section>
-        <main class="admin-container">
-            <div id="admin-login" class="auth-card">
-                <h2>Admin Login</h2>
-                <form id="adminLoginForm">
-                    <input type="text" id="loginUser" placeholder="Username" required>
-                    <input type="password" id="loginPass" placeholder="Password" required>
-                    <button class="btn primary" type="submit" style="width:100%;">Login</button>
-                </form>
-            </div>
+<head>
+    <meta charset="UTF-8">
+    <title>Admin | Nikhila Odisha Pandara Samaja</title>
+    <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="stylesheet" href="assets/css/matrimony.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE9R5DCCNT"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
 
-            <div id="admin-panel" class="panel-card" style="display:none;">
+        gtag('config', 'G-LE9R5DCCNT');
+    </script>
+    <script src="assets/js/analytics.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="brand">
+                <img src="assets/img/pandara logo.png" alt="Pandara Samaja Logo" />
+                <span>ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</span>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li>
+                    <a href="index.html">Home</a>
+                </li>
+                <li>
+                    <a href="about.html">About</a>
+                </li>
+                <li>
+                    <a href="members.html">Members</a>
+                </li>
+                <li>
+                    <a href="matrimony.html">Matrimony</a>
+                </li>
+                <li>
+                    <a href="blogs.html">Recent Blogs</a>
+                </li>
+                <li>
+                    <a href="admin.html" class="active">Admin</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <section class="ticker" aria-label="Pandara Samaja scrolling title">
+        <div class="ticker__track">
+            <div class="ticker__item">
+                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+            </div>
+            <!-- duplicate for seamless loop -->
+            <div class="ticker__item" aria-hidden="true">
+                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+            </div>
+        </div>
+    </section>
+    <main class="admin-container">
+        <div id="admin-login" class="auth-card">
+            <h2>Admin Login</h2>
+            <form id="adminLoginForm">
+                <input type="text" id="loginUser" placeholder="Username" required>
+                <input type="password" id="loginPass" placeholder="Password" required>
+                <button class="btn primary" type="submit" style="width:100%;">Login</button>
+            </form>
+        </div>
+
+        <div id="admin-panel" class="panel-card" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h1 class="page-title">Admin Dashboard</h1>
+                <button id="adminLogoutBtn" class="btn" style="background: #dc3545; color: white;">Logout</button>
+            </div>
 
-                <div class="section-tabs" role="tablist" aria-label="Admin sections">
-                    <button class="tab" id="tab-matrimony" role="tab" aria-controls="matrimonySection" aria-selected="true" onclick="setActiveSection('matrimonySection', this)">Matrimony Candidate Management</button>
-                    <button class="tab" id="tab-members" role="tab" aria-controls="memberSection" aria-selected="false" onclick="setActiveSection('memberSection', this)">Member Management</button>
-                    <button class="tab" id="tab-posts" role="tab" aria-controls="postSection" aria-selected="false" onclick="setActiveSection('postSection', this)">Post Management</button>
+            <div class="section-tabs" role="tablist" aria-label="Admin sections">
+                <button class="tab" id="tab-matrimony" role="tab" aria-controls="matrimonySection" aria-selected="true"
+                    onclick="setActiveSection('matrimonySection', this)">Matrimony Candidate Management</button>
+                <button class="tab" id="tab-members" role="tab" aria-controls="memberSection" aria-selected="false"
+                    onclick="setActiveSection('memberSection', this)">Member Management</button>
+                <button class="tab" id="tab-posts" role="tab" aria-controls="postSection" aria-selected="false"
+                    onclick="setActiveSection('postSection', this)">Post Management</button>
+            </div>
+
+            <!-- ========= MATRIMONY SECTION ========= -->
+            <section id="matrimonySection" class="admin-section panel-card">
+                <h3 class="section-title">Matrimony Candidate Management</h3>
+
+                <!-- Search & Actions Bar -->
+                <div class="search-container" style="margin-bottom: 2rem;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                        <input type="text" id="candidateSearchInput" placeholder="Search by Name"
+                            style="flex: 1; min-width: 250px; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                        <button onclick="searchCandidates()" class="btn primary"
+                            style="padding: 12px 24px; white-space: nowrap;">
+                            🔍 Search
+                        </button>
+                        <button onclick="clearCandidateSearch()" class="btn ghost"
+                            style="padding: 12px 24px; white-space: nowrap;">
+                            Clear
+                        </button>
+                    </div>
                 </div>
 
-                <!-- ========= MATRIMONY SECTION ========= -->
-                <section id="matrimonySection" class="admin-section panel-card">
-                    <h3 class="section-title">Add / Update Matrimony Candidate</h3>
+                <div class="form-grid"
+                    style="display: grid; grid-template-columns: 2fr 3fr; gap: 2rem; align-items: start;">
 
-                    <!-- always-visible form (no OCR) -->
-                    <form id="addCandidateForm" enctype="multipart/form-data">
-                        <input type="text" id="adminName" placeholder="Name" required>
+                    <!-- Candidate Form (Left Side) -->
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
+                        <h4 id="candidateFormTitle" style="margin-top: 0; color: #0a4a96;">Add New Candidate</h4>
+                        <form id="addCandidateForm" enctype="multipart/form-data">
+                            <input type="hidden" id="candidateId">
 
-                        <select id="adminGender" required>
-                            <option value="">Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
+                            <div class="form-group">
+                                <label style="font-weight: 600; font-size: 0.9rem;">Name</label>
+                                <input type="text" id="adminName" placeholder="Full Name" required class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label style="font-weight: 600; font-size: 0.9rem;">Gender</label>
+                                <select id="adminGender" required class="form-control">
+                                    <option value="">Select Gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="font-weight: 600; font-size: 0.9rem;">Marriage Form (Image)</label>
+                                <input type="file" id="adminPhotoFile" accept="image/*"
+                                    style="border: 2px dashed #ccc; padding: 10px; width: 100%; background: #fff; border-radius: 8px;">
+                                <small style="display:block; color: #666; margin-top: 5px;">Leave empty to keep existing
+                                    photo when updating.</small>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                                <button type="submit" class="btn primary" style="flex: 1;">Save Candidate</button>
+                                <button type="button" id="cancelCandidateEdit" class="btn ghost" style="display:none;"
+                                    onclick="resetCandidateForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Candidate List (Right Side) -->
+                    <div id="adminCandidatesList" style="overflow-x: auto;">
+                        <table id="candidatesTable"
+                            style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <thead style="background: #e7eef6; color: #333;">
+                                <tr>
+                                    <th style="padding: 12px; text-align: left;">Name</th>
+                                    <th style="padding: 12px; text-align: left;">Gender</th>
+                                    <th style="padding: 12px; text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="candidatesTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ========= MEMBER MANAGEMENT SECTION ========= -->
+            <section id="memberSection" class="admin-section" style="display:none;">
+                <h3 class="section-title">Member Management</h3>
+
+                <!-- Search Bar -->
+                <div class="search-container" style="margin-bottom: 2rem;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem;">
+                        <input type="text" id="memberSearchInput"
+                            placeholder="Search by Membership No., Name, or Mobile"
+                            style="flex: 1; min-width: 250px; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; transition: all 0.3s;">
+                        <button onclick="searchMembers()" class="btn primary"
+                            style="padding: 12px 24px; white-space: nowrap;">
+                            🔍 Search
+                        </button>
+                        <button onclick="clearSearch()" class="btn ghost"
+                            style="padding: 12px 24px; white-space: nowrap;">
+                            Clear
+                        </button>
+                        <button onclick="showAddMemberModal()" class="btn"
+                            style="padding: 12px 24px; background: #28a745; color: white; white-space: nowrap;">
+                            ➕ Add Member
+                        </button>
+                        <button onclick="showBulkUpload()" class="btn"
+                            style="padding: 12px 24px; background: #17a2b8; color: white; white-space: nowrap;">
+                            📊 Bulk Upload
+                        </button>
+                    </div>
+
+                    <!-- Filters & Export -->
+                    <div
+                        style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; background: #f8f9fa; padding: 1rem; border-radius: 8px; border: 1px solid #e9ecef;">
+                        <select id="filterDistrict"
+                            style="padding: 10px; border-radius: 6px; border: 1px solid #ced4da; min-width: 150px;">
+                            <option value="">All Districts</option>
+                        </select>
+                        <select id="filterTaluka"
+                            style="padding: 10px; border-radius: 6px; border: 1px solid #ced4da; min-width: 150px;"
+                            disabled>
+                            <option value="">All Talukas</option>
+                        </select>
+                        <select id="filterPanchayat"
+                            style="padding: 10px; border-radius: 6px; border: 1px solid #ced4da; min-width: 150px;"
+                            disabled>
+                            <option value="">All Panchayats</option>
                         </select>
 
-                        <input type="date" id="adminDob" placeholder="Date of Birth">
-                        <input type="number" id="adminAge" placeholder="Age" required>
-                        <input type="text" id="adminHeight" placeholder="Height">
-                        <input type="text" id="adminBloodGroup" placeholder="Blood Group">
-                        <input type="text" id="adminGotra" placeholder="Gotra">
-                        <input type="text" id="adminBansha" placeholder="Bansha">
-                        <input type="text" id="adminEducation" placeholder="Education">
-                        <input type="text" id="adminTechnicalEducation" placeholder="Technical Education">
-                        <input type="text" id="adminProfessionalEducation" placeholder="Professional Education">
-                        <input type="text" id="adminOccupation" placeholder="Occupation">
-                        <input type="text" id="adminFather" placeholder="Father">
-                        <input type="text" id="adminMother" placeholder="Mother">
-                        <input type="text" id="adminAddress" placeholder="Address">
-                        <input type="text" id="adminPhone" placeholder="Phone">
-                        <input type="email" id="adminEmail" placeholder="Email">
-                        <input type="file" id="adminPhotoFile" accept="image/*" required>
-                        <button type="submit" class="btn primary full">Save Candidate</button>
-                    </form>
-
-                    <!-- grid of saved profiles -->
-                    <div id="adminCandidates"></div>
-                </section>
-
-
-                <!----- member management (replace entire old memberSection) --->
-                <section id="memberSection" class="admin-section" style="display:none;">
-                    <h3>Member Management</h3>
-
-                    <!-- level-0: two action cards -->
-                    <div class="member-action-grid" id="memberActionGrid">
-                        <div class="action-card" id="bulkUploadCard">
-                            <img src="assets/img/excel-icon.svg" alt=""/>
-                            <h4>Bulk Upload</h4>
-                            <p>Import members from Excel sheet</p>
-                        </div>
-                        <div class="action-card" id="singleUpdateCard">
-                            <img src="assets/img/user-add.svg" alt=""/>
-                            <h4>Single Update</h4>
-                            <p>Add or edit one member</p>
+                        <div style="margin-left: auto; display: flex; gap: 10px;">
+                            <button onclick="exportMembers()" class="btn"
+                                style="background: #218838; color: white; padding: 10px 20px;">
+                                📥 Export
+                            </button>
+                            <button onclick="printMembers()" class="btn"
+                                style="background: #6c757d; color: white; padding: 10px 20px;">
+                                🖨️ Print
+                            </button>
                         </div>
                     </div>
+                </div>
 
-                    <!-- level-1A: bulk uploader (hidden until Bulk Upload card is clicked) -->
-                    <div id="bulkUploadPane" class="member-pane" style="display:none;">
-                        <button class="backBtn" data-target="memberActionGrid">&larr; Back</button>
-                        <h4>Bulk Excel Import
-                            <small>(.xlsx)</small>
-                        </h4>
+                <!-- Members Table -->
+                <div id="membersTableContainer"
+                    style="overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <table id="membersTable" style="width: 100%; border-collapse: collapse;">
+                        <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <tr>
+                                <th style="padding: 16px; text-align: left; font-weight: 600;">Membership No.</th>
+                                <th style="padding: 16px; text-align: left; font-weight: 600;">Name</th>
+                                <th style="padding: 16px; text-align: left; font-weight: 600;">Mobile</th>
+                                <th style="padding: 16px; text-align: left; font-weight: 600;">District</th>
+                                <th style="padding: 16px; text-align: left; font-weight: 600;">Taluka</th>
+                                <th style="padding: 16px; text-align: left; font-weight: 600;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="membersTableBody">
+                            <tr>
+                                <td colspan="7" style="padding: 40px; text-align: center; color: #999;">
+                                    Loading members...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-                        <input type="file" id="excelFileInput" accept=".xlsx,.xls"/>
-                        <button id="uploadExcelBtn">Start Upload</button>
+                <!-- Pagination -->
+                <div id="membersPagination"
+                    style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
+                </div>
 
-                        <!-- loader + status -->
-                        <div id="excelStatus" class="status"></div>
+                <!-- Bulk Upload Modal/Section -->
+                <div id="bulkUploadModal" class="modal" style="display: none;">
+                    <div class="modal-content"
+                        style="max-width: 600px; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h3 style="margin: 0;">Bulk Upload Members</h3>
+                            <button onclick="closeBulkUpload()"
+                                style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
+                        </div>
+                        <p style="color: #666; margin-bottom: 1.5rem;">Upload an Excel file (.xlsx) with member data</p>
+                        <input type="file" id="excelFileInput" accept=".xlsx,.xls"
+                            style="margin-bottom: 1rem; width: 100%; padding: 10px; border: 2px dashed #ddd; border-radius: 8px;" />
+                        <button id="uploadExcelBtn" class="btn primary" style="width: 100%; padding: 12px;">Start
+                            Upload</button>
+                        <div id="excelStatus" class="status" style="margin-top: 1rem;"></div>
                         <div id="excelLoader" class="loader" hidden></div>
                     </div>
+                </div>
 
-                    <!-- level-1B: single-member form (hidden until Single Update card is clicked) -->
-                    <div id="singleUpdatePane" class="member-pane" style="display:none;">
-                        <button class="backBtn" data-target="memberActionGrid">&larr; Back</button>
-                        <h4>Add / Update Member</h4>
+                <!-- Add/Edit Member Modal -->
+                <div id="memberModal" class="modal" style="display: none;">
+                    <div class="modal-content"
+                        style="max-width: 700px; background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h3 id="memberModalTitle" style="margin: 0;">Add New Member</h3>
+                            <button onclick="closeMemberModal()"
+                                style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
+                        </div>
+                        <form id="memberForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <input type="hidden" id="memberId">
 
-                        <form id="addMemberForm">
-                            <input type="text" id="memberName" placeholder="Member Name" required>
-                            <input type="text" id="memberRole" placeholder="Role">
-                            <input type="email" id="memberEmail" placeholder="Email">
-                            <button type="submit">Save</button>
+                            <div style="grid-column: 1 / -1;">
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Membership
+                                    No. *</label>
+                                <input type="text" id="membershipNo" required
+                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            </div>
+
+                            <div>
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Name
+                                    *</label>
+                                <input type="text" id="memberName" required
+                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            </div>
+
+                            <div>
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Mobile
+                                    *</label>
+                                <input type="tel" id="memberMobile" required pattern="[0-9]{10}"
+                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            </div>
+
+                            <div>
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Male
+                                    Count</label>
+                                <input type="number" id="memberMale" min="0"
+                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            </div>
+
+                            <div>
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Female
+                                    Count</label>
+                                <input type="number" id="memberFemale" min="0"
+                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            </div>
+
+                            <div>
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">District
+                                    *</label>
+                                <input type="text" id="memberDistrict" required
+                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            </div>
+
+                            <div>
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Taluka
+                                    *</label>
+                                <input type="text" id="memberTaluka" required
+                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            </div>
+
+                            <div>
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Panchayat</label>
+                                <input type="text" id="memberPanchayat"
+                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            </div>
+
+                            <div>
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Village</label>
+                                <input type="text" id="memberVillage"
+                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            </div>
+
+                            <div style="grid-column: 1 / -1; display: flex; gap: 1rem; margin-top: 1rem;">
+                                <button type="submit" class="btn primary"
+                                    style="flex: 1; padding: 14px; font-size: 16px;">
+                                    💾 Save Member
+                                </button>
+                                <button type="button" onclick="closeMemberModal()" class="btn ghost"
+                                    style="padding: 14px 24px;">
+                                    Cancel
+                                </button>
+                            </div>
                         </form>
-                        <div id="adminMembers"></div>
                     </div>
-                </section>
+                </div>
+
+                <!-- Match Candidate Modal -->
+                <!-- <div id="matchModal" class="modal" style="display: none;">
+                    <div class="modal-content"
+                        style="max-width: 500px; background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h3 style="margin: 0;">Mark as Matched</h3>
+                            <button onclick="closeMatchModal()"
+                                style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
+                        </div>
+                        <form id="matchForm">
+                            <input type="hidden" id="matchCandidateId">
+                            <div style="margin-bottom: 1rem;">
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Partner
+                                    Name *</label>
+                                <input type="text" id="partnerName" required
+                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Partner
+                                    Gender *</label>
+                                <select id="partnerGender" required
+                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                <button type="submit" class="btn primary" style="flex: 1; padding: 12px;">Confirm
+                                    Match</button>
+                                <button type="button" onclick="closeMatchModal()" class="btn ghost"
+                                    style="padding: 12px;">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>-->
+            </section>
 
 
-                <section id="postSection" class="admin-section panel-card" style="display:none;">
-                    <h3>Add / Manage Posts</h3>
-                    <form id="addPostForm">
-                        <input type="text" id="postTitle" placeholder="Post Title" required>
-                        <textarea id="postContent" placeholder="Post Content" rows="4" required></textarea>
-                        <button type="submit">Add Post</button>
-                    </form>
-                    <div id="adminPosts"></div>
-                </section>
-            </div>
-        </main>
+            <section id="postSection" class="admin-section panel-card" style="display:none;">
+                <h3>Add / Manage Posts</h3>
+                <form id="addPostForm">
+                    <input type="hidden" id="postId">
+                    <div class="form-group">
+                        <input type="text" id="postTitle" placeholder="Post Title" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <textarea id="postContent" placeholder="Post Content" rows="4" required
+                            class="form-control"></textarea>
+                    </div>
+                    <div class="form-actions" style="display:flex; gap:10px;">
+                        <button type="submit" id="savePostBtn" class="btn primary">Add Post</button>
+                        <button type="button" id="cancelEditBtn" class="btn ghost" style="display:none;">Cancel</button>
+                    </div>
+                </form>
+                <div id="adminPosts" style="margin-top: 2rem;"></div>
+            </section>
+        </div>
+    </main>
 
-        <script>
-            function showSection(id) {
-                document.querySelectorAll('.admin-section').forEach(sec => sec.style.display = 'none');
-                document.getElementById(id).style.display = 'block';
-            }
-        </script>
-        <script src="assets/js/config.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-        <script src="assets/js/admin.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script>
+        function showSection(id) {
+            document.querySelectorAll('.admin-section').forEach(sec => sec.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        }
+    </script>
+    <script src="assets/js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="assets/js/admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-    </body>
+</body>
+
 </html>
-
