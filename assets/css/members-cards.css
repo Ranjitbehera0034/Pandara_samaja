@@ -1,45 +1,75 @@
 /* assets/css/members-cards.css — import after main.css */
-.card-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
-  gap:1rem;
-  margin-block:1rem;
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 1rem;
+  margin-block: 1rem;
 }
-.card{
-  padding:1rem;
-  text-align:center;
-  border-radius:8px;
-  box-shadow:0 1px 4px rgba(0,0,0,.12);
-  background:#fff;
-  cursor:pointer;
-  user-select:none;
-  transition:.2s transform;
+
+.card {
+  padding: 1rem;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
+  background: #fff;
+  cursor: pointer;
+  user-select: none;
+  transition: .2s transform;
 }
+
 main {
   max-width: 1230px;
   margin: 2rem auto;
   padding: 0 1rem;
 }
-.card:hover{transform:translateY(-3px);}
-.card.selected{background:#0066ff;color:#fff;font-weight:700;}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+.card.selected {
+  background: #0066ff;
+  color: #fff;
+  font-weight: 700;
+}
+
 /* simple mobile-first tweaks */
-@media(min-width:600px){.card{padding:1.2rem;}}
-table{width:100%;border-collapse:collapse;margin-block:1rem;}
-th,td{border:1px solid #ddd;padding:.5rem;text-align:left;}
+@media(min-width:600px) {
+  .card {
+    padding: 1.2rem;
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-block: 1rem;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: .5rem;
+  text-align: left;
+}
 
 /* ─── Member Directory (dropdown + datatable) ───────────────────────── */
 
 /* 1. Dropdown row */
-#districtSelect, #talukaSelect, #panchayatSelect {
+#districtSelect,
+#talukaSelect,
+#panchayatSelect {
   padding: 0.55rem 0.9rem;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
   background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23777' d='M6 8L0 0h12z'/%3E%3C/svg%3E") no-repeat right 0.7rem center;
   background-size: 10px 6px;
-  appearance: none;             /* hide default arrow */
+  appearance: none;
+  /* hide default arrow */
   min-width: 298px;
 }
+
 #districtSelect:disabled,
 #talukaSelect:disabled,
 #panchayatSelect:disabled {
@@ -54,9 +84,12 @@ table.dataTable thead {
   color: #fff;
   font-weight: 600;
 }
+
 table.dataTable tbody tr:nth-child(even) {
-  background: #f9fcff;          /* subtle zebra striping */
+  background: #f9fcff;
+  /* subtle zebra striping */
 }
+
 table.dataTable tbody tr:hover {
   background: #e6f0ff;
 }
@@ -80,20 +113,26 @@ button.dt-button {
   font-size: 0.95rem;
   transition: background 0.2s;
 }
+
 button.dt-button:hover {
   background: #004cbf;
 }
 
 /* responsive tweak: put dropdowns full-width on very small screens */
 @media (max-width: 480px) {
-  #districtSelect, #talukaSelect, #panchayatSelect {
+
+  #districtSelect,
+  #talukaSelect,
+  #panchayatSelect {
     flex: 1 1 100%;
     min-width: 0;
   }
 }
+
 /* ─── Fancy dropdowns for Member Directory ─────────────────────────── */
 
-.dropdown-row {               /* parent flex wrapper (optional) */
+.dropdown-row {
+  /* parent flex wrapper (optional) */
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
@@ -102,25 +141,28 @@ button.dt-button:hover {
 
 .dropdown-row select {
   /* base */
-  padding: 0.6rem 2.4rem 0.6rem 0.9rem;   /* extra right-pad for arrow */
+  padding: 0.6rem 2.4rem 0.6rem 0.9rem;
+  /* extra right-pad for arrow */
   min-width: 300px;
   font-size: 1rem;
   color: #222;
-  border: 2px solid #0066ff40;            /* subtle blue tint */
+  border: 2px solid #0066ff40;
+  /* subtle blue tint */
   border-radius: 8px;
   background: #fff;
   line-height: 1.2;
 
   /* custom arrow ▼ */
   background-image:
-     linear-gradient(45deg, transparent 50%, #0066ff 50%),
-     linear-gradient(135deg, #0066ff 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, #0066ff 50%),
+    linear-gradient(135deg, #0066ff 50%, transparent 50%);
   background-position:
-     calc(100% - 1.1rem) calc(50% - 2px),
-     calc(100% - 1.05rem) calc(50% + 2px);
+    calc(100% - 1.1rem) calc(50% - 2px),
+    calc(100% - 1.05rem) calc(50% + 2px);
   background-size: 6px 6px, 6px 6px;
   background-repeat: no-repeat;
-  appearance: none;                        /* remove default arrow */
+  appearance: none;
+  /* remove default arrow */
 
   transition: border-color .2s, box-shadow .2s;
 }
@@ -128,6 +170,7 @@ button.dt-button:hover {
 .dropdown-row select:hover {
   border-color: #0066ff80;
 }
+
 .dropdown-row select:focus {
   border-color: #0066ff;
   box-shadow: 0 0 0 3px #0066ff30;
@@ -139,7 +182,8 @@ button.dt-button:hover {
   background-color: #f3f6fa;
   color: #999;
   border-color: #ccd3e0;
-  background-image: none;      /* hide arrow */
+  background-image: none;
+  /* hide arrow */
   cursor: not-allowed;
 }
 
@@ -150,16 +194,19 @@ button.dt-button:hover {
     min-width: 0;
   }
 }
+
 /* ---- Page framing ---- */
 .members-page {
   padding: 2rem 0 3rem;
   background: #f6f9fe;
 }
+
 .members-page .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
 }
+
 .page-title {
   margin: 0 0 1.25rem;
   font-size: clamp(1.8rem, 3vw, 2.6rem);
@@ -176,10 +223,11 @@ button.dt-button:hover {
   text-align: center;
   margin: 1rem 0 1.25rem;
 }
+
 .leader-strip img {
   max-height: 200px;
   border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(10,70,150,.12);
+  box-shadow: 0 6px 18px rgba(10, 70, 150, .12);
 }
 
 /* Card around the DataTable */
@@ -187,9 +235,10 @@ button.dt-button:hover {
   background: #fff;
   border: 1px solid #e7eef6;
   border-radius: 18px;
-  box-shadow: 0 12px 32px rgba(10,70,150,.08);
+  box-shadow: 0 12px 32px rgba(10, 70, 150, .08);
   padding: 1rem;
-  overflow: hidden;           /* rounds DataTable header corners */
+  overflow-x: auto;
+  /* allows table scroll */
 }
 
 /* Make the DataTables wrapper centered and full width inside card */
@@ -203,6 +252,7 @@ table.dataTable thead {
   background: #0a4a96;
   color: #fff;
 }
+
 table.dataTable thead th {
   border-bottom: none;
   font-weight: 600;
@@ -210,9 +260,16 @@ table.dataTable thead th {
 }
 
 /* Body rows */
-table.dataTable tbody tr:nth-child(even) { background: #f9fcff; }
-table.dataTable tbody tr:hover { background: #eaf3ff; }
-table.dataTable td, table.dataTable th {
+table.dataTable tbody tr:nth-child(even) {
+  background: #f9fcff;
+}
+
+table.dataTable tbody tr:hover {
+  background: #eaf3ff;
+}
+
+table.dataTable td,
+table.dataTable th {
   padding: .75rem .9rem;
 }
 
@@ -221,6 +278,7 @@ table.dataTable td, table.dataTable th {
   text-align: right;
   margin-bottom: .5rem;
 }
+
 .dataTables_wrapper .dataTables_filter input,
 .dataTables_wrapper .dataTables_length select {
   border: 1px solid #c9d7e8;
@@ -229,14 +287,17 @@ table.dataTable td, table.dataTable th {
   font-size: .95rem;
   background: #fff;
 }
+
 .dataTables_wrapper .dataTables_info {
   padding-top: .75rem;
   color: #475569;
 }
+
 .dataTables_wrapper .dataTables_paginate .paginate_button {
   border-radius: 8px !important;
   border: 1px solid transparent !important;
 }
+
 .dataTables_wrapper .dataTables_paginate .paginate_button.current,
 .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
   background: #0a4a96 !important;
@@ -253,48 +314,71 @@ button.dt-button {
   padding: 0.5rem 1rem;
   font-size: 0.95rem;
 }
-button.dt-button:hover { background: #0050a8; }
+
+button.dt-button:hover {
+  background: #0050a8;
+}
 
 /* Responsive: dropdowns stack nicely */
 @media (max-width: 640px) {
-  .dropdown-row select { flex: 1 1 100%; min-width: 0; }
+  .dropdown-row select {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
 }
 
-.ticker{
-  --dur: 22s;                  /* speed: lower = faster */
-  background:#0A4A96;
-  color:#fff;
-  overflow:hidden;
-  line-height:1;
+.ticker {
+  --dur: 22s;
+  /* speed: lower = faster */
+  background: #0A4A96;
+  color: #fff;
+  overflow: hidden;
+  line-height: 1;
   -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-          mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
 }
-.ticker__track{
-  display:flex;
-  width:max-content;           /* shrink-wrap content */
-  gap:0;
+
+.ticker__track {
+  display: flex;
+  width: max-content;
+  /* shrink-wrap content */
+  gap: 0;
   animation: ticker-slide var(--dur) linear infinite;
 }
-.ticker__item{
-  flex:0 0 auto;               /* prevent shrinking */
-  white-space:nowrap;
-  padding-block:10px;
-  font-size:1rem;
-  font-weight:700;
-  letter-spacing:.3px;
-  padding-right:2rem;          /* space between repeats */
+
+.ticker__item {
+  flex: 0 0 auto;
+  /* prevent shrinking */
+  white-space: nowrap;
+  padding-block: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: .3px;
+  padding-right: 2rem;
+  /* space between repeats */
 }
-@keyframes ticker-slide{
-  from{ transform: translateX(0); }
-  to  { transform: translateX(-50%); } /* move by half (because we duplicated content) */
+
+@keyframes ticker-slide {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+
+  /* move by half (because we duplicated content) */
 }
 
 /* pause on hover */
-.ticker:hover .ticker__track{ animation-play-state: paused; }
-
-/* reduced motion */
-@media (prefers-reduced-motion: reduce){
-  .ticker__track{ animation:none; transform:none; }
+.ticker:hover .ticker__track {
+  animation-play-state: paused;
 }
 
-
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ticker__track {
+    animation: none;
+    transform: none;
+  }
+}
