@@ -1,36 +1,132 @@
-.ticker{
-    --dur: 22s;                  /* speed: lower = faster */
-    background:#0A4A96;
-    color:#fff;
-    overflow:hidden;
-    line-height:1;
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-            mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+.ticker {
+  --dur: 22s;
+  /* speed: lower = faster */
+  background: #0A4A96;
+  color: #fff;
+  overflow: hidden;
+  line-height: 1;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+.ticker__track {
+  display: flex;
+  width: max-content;
+  /* shrink-wrap content */
+  gap: 0;
+  animation: ticker-slide var(--dur) linear infinite;
+}
+
+.ticker__item {
+  flex: 0 0 auto;
+  /* prevent shrinking */
+  white-space: nowrap;
+  padding-block: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: .3px;
+  padding-right: 2rem;
+  /* space between repeats */
+}
+
+@keyframes ticker-slide {
+  from {
+    transform: translateX(0);
   }
-  .ticker__track{
-    display:flex;
-    width:max-content;           /* shrink-wrap content */
-    gap:0;
-    animation: ticker-slide var(--dur) linear infinite;
+
+  to {
+    transform: translateX(-50%);
   }
-  .ticker__item{
-    flex:0 0 auto;               /* prevent shrinking */
-    white-space:nowrap;
-    padding-block:10px;
-    font-size:1rem;
-    font-weight:700;
-    letter-spacing:.3px;
-    padding-right:2rem;          /* space between repeats */
+
+  /* move by half (because we duplicated content) */
+}
+
+/* pause on hover */
+.ticker:hover .ticker__track {
+  animation-play-state: paused;
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ticker__track {
+    animation: none;
+    transform: none;
   }
-  @keyframes ticker-slide{
-    from{ transform: translateX(0); }
-    to  { transform: translateX(-50%); } /* move by half (because we duplicated content) */
+}
+
+/* =========================================
+     Blog List & Cards
+     ========================================= */
+.blog-section {
+  padding: 2rem 0;
+  background: #f6f9fe;
+  min-height: 80vh;
+}
+
+.blog-section h1 {
+  text-align: center;
+  color: #0a4a96;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
+
+.blog-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 0 1.5rem 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.blog-card {
+  background: white;
+  border: 1px solid #e7eef6;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.blog-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.blog-card h3 {
+  margin-top: 0;
+  color: #0a4a96;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+}
+
+.blog-card p {
+  color: #334155;
+  line-height: 1.6;
+  flex-grow: 1;
+  /* Pushes footer (date/actions) down */
+}
+
+.blog-card small {
+  display: block;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f0f0f0;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+/* Mobile Tweaks */
+@media (max-width: 600px) {
+  .blog-list {
+    grid-template-columns: 1fr;
+    padding: 0 1rem 2rem;
   }
-  
-  /* pause on hover */
-  .ticker:hover .ticker__track{ animation-play-state: paused; }
-  
-  /* reduced motion */
-  @media (prefers-reduced-motion: reduce){
-    .ticker__track{ animation:none; transform:none; }
+
+  .blog-card {
+    padding: 1.25rem;
   }
+}
