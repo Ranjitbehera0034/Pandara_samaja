@@ -87,23 +87,22 @@
 
         <section id="profile-list"></section>
 
-        <!-- modal -->
-        <!-- modal -->
+        <!-- Modal - Navigation buttons are now OUTSIDE modal-content -->
         <div id="profile-modal" class="hidden">
+
+
             <div class="modal-content">
                 <span class="close-btn">&times;</span>
-                <button id="prevBtn" class="nav-btn prev">&#10094;</button>
-                <button id="nextBtn" class="nav-btn next">&#10095;</button>
 
                 <div class="modal-body">
-                    <div class="modal-left" style="width: 100%; max-width: none;">
-                        <img id="modal-photo" src="" alt="photo"
-                            style="width: 100%; height: auto; max-height: 80vh; object-fit: contain;">
+                    <div class="modal-left">
+                        <button id="prevBtn" class="nav-btn prev">&#10094;</button>
+                        <img id="modal-photo" src="" alt="photo">
+                        <button id="nextBtn" class="nav-btn next">&#10095;</button>
                     </div>
 
                     <div class="modal-right" style="width: 100%; text-align: center;">
                         <h2 id="modal-name"></h2>
-                        <!-- Details are now inside the image in the left column -->
                     </div>
                 </div>
             </div>

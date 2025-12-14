@@ -26,7 +26,8 @@ function capitalize(str) {
 function imageURL(raw) {
   if (!raw) return '';
   const m = raw.match(/id=([^&]+)/);
-  return m ? `https://lh3.googleusercontent.com/d/${m[1]}` : raw;
+  // Use thumbnail API to avoid excessive 429 errors from Google
+  return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w200` : raw;
 }
 
 function showSection(id) {

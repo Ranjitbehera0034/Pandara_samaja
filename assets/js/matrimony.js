@@ -15,7 +15,8 @@ let currentIndex = -1;
 
 function imageURL(raw) {
   const m = raw.match(/id=([^&]+)/);
-  return m ? `https://lh3.googleusercontent.com/d/${m[1]}` : raw;
+  // Use thumbnail API with large size (w1000) to avoid strict download quotas (429 errors)
+  return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000` : raw;
 }
 
 async function renderProfiles(gender) {
@@ -46,8 +47,9 @@ async function renderProfiles(gender) {
           >✅ Mark Matched</button>`;
       }
 
+      // Add loading="lazy" and referrerpolicy="no-referrer" to reduce load impact
       card.innerHTML = `
-  <img src="${imgUrl}" alt="${person.name}">
+  <img src="${imgUrl}" alt="${person.name}" loading="lazy" referrerpolicy="no-referrer">
   <p>${person.name}</p>
   ${adminHtml}
 `;

@@ -138,18 +138,34 @@ body {
   font-size: 1.5rem;
   cursor: pointer;
   color: #444;
+  z-index: 1020;
 }
 
 .modal-body {
   display: flex;
   gap: 2rem;
   flex-wrap: wrap;
+  justify-content: center;
+}
+
+.modal-left {
+  display: block;
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  /* Center the container */
 }
 
 .modal-left img {
-  width: 250px;
-  height: 300px;
-  object-fit: cover;
+  display: block;
+  /* Removes bottom space */
+  width: auto;
+  /* Let height dictate width usually, or max-width constraint */
+  max-width: 100%;
+  height: auto;
+  max-height: 80vh;
+  object-fit: contain;
   border-radius: 8px;
 }
 
@@ -160,18 +176,6 @@ body {
 .modal-right p {
   margin: 0.3rem 0;
   font-size: 0.95rem;
-}
-
-@media (max-width: 768px) {
-  .modal-body {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .modal-left img {
-    width: 100%;
-    height: auto;
-  }
 }
 
 .gender-panel {
@@ -221,7 +225,6 @@ body {
 
 .ticker {
   --dur: 22s;
-  /* speed: lower = faster */
   background: #0A4A96;
   color: #fff;
   overflow: hidden;
@@ -233,21 +236,18 @@ body {
 .ticker__track {
   display: flex;
   width: max-content;
-  /* shrink-wrap content */
   gap: 0;
   animation: ticker-slide var(--dur) linear infinite;
 }
 
 .ticker__item {
   flex: 0 0 auto;
-  /* prevent shrinking */
   white-space: nowrap;
   padding-block: 10px;
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: .3px;
   padding-right: 2rem;
-  /* space between repeats */
 }
 
 @keyframes ticker-slide {
@@ -258,16 +258,12 @@ body {
   to {
     transform: translateX(-50%);
   }
-
-  /* move by half (because we duplicated content) */
 }
 
-/* pause on hover */
 .ticker:hover .ticker__track {
   animation-play-state: paused;
 }
 
-/* reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .ticker__track {
     animation: none;
@@ -275,24 +271,34 @@ body {
   }
 }
 
-/* Navigation Buttons for Modal */
+/* ========================================
+   NAVIGATION BUTTONS - ON IMAGE
+   Absolute positioning inside .modal-left
+   ======================================== */
 .nav-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.3);
-  color: white;
+  background-color: rgba(255, 255, 255, 0.3);
+  /* Transparent white */
+  color: #333;
   border: none;
   font-size: 2rem;
-  padding: 0.5rem 1rem;
+  width: 50px;
+  height: 50px;
   cursor: pointer;
-  z-index: 1001;
-  border-radius: 4px;
-  transition: background 0.3s;
+  z-index: 10;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-btn:hover {
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .nav-btn.prev {
@@ -304,9 +310,21 @@ body {
 }
 
 @media (max-width: 768px) {
+  .modal-body {
+    flex-direction: column;
+    align-items: center;
+  }
 
-  /* On mobile, rely on swipe instead of buttons to save space */
+  .modal-left img {
+    width: 100%;
+    height: auto;
+    max-height: 70vh;
+  }
+
   .nav-btn {
-    display: none;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.5);
   }
 }
