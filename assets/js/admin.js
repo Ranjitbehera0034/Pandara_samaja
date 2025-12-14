@@ -4,6 +4,17 @@
 const adminLogin = document.getElementById("admin-login");
 const adminPanel = document.getElementById("admin-panel");
 const adminLoginForm = document.getElementById("adminLoginForm");
+
+// Loader Helpers
+function showLoader() {
+  const loader = document.getElementById("globalLoader");
+  if (loader) loader.style.display = "flex";
+}
+
+function hideLoader() {
+  const loader = document.getElementById("globalLoader");
+  if (loader) loader.style.display = "none";
+}
 const addCandidateForm = document.getElementById("addCandidateForm");
 const candidatesTableBody = document.getElementById("candidatesTableBody");
 const excelInput = document.getElementById("excelFileInput");
@@ -91,6 +102,7 @@ adminLoginForm.onsubmit = async function (e) {
   const pass = document.getElementById("loginPass").value.trim();
 
   try {
+    showLoader();
     const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -131,6 +143,8 @@ adminLoginForm.onsubmit = async function (e) {
     console.error("Login error:", err);
     console.log("Error details:", err.message);
     showToast(err.message || "Login failed. Please check your credentials.", "error");
+  } finally {
+    hideLoader();
   }
 };
 
@@ -266,7 +280,12 @@ addCandidateForm.onsubmit = async e => {
     return showToast("Marriage Form (Photo) is mandatory!", "error");
   }
 
+  if (!photo && !hasExistingPhoto) {
+    return showToast("Marriage Form (Photo) is mandatory!", "error");
+  }
+
   try {
+    showLoader();
     const url = id
       ? `${API_BASE_URL}/api/candidates/${id}`
       : `${API_BASE_URL}/api/candidates`;
@@ -315,6 +334,8 @@ addCandidateForm.onsubmit = async e => {
   } catch (err) {
     console.error(err);
     showToast("Failed to save candidate: " + err.message, "error");
+  } finally {
+    hideLoader();
   }
 };
 
@@ -323,6 +344,7 @@ async function renderCandidates() {
   if (!candidatesTableBody) return;
   candidatesTableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px;">Loading...</td></tr>`;
   try {
+    showLoader();
     const res = await fetch(`${API_BASE_URL}/api/candidates`, {
       headers: getAuthHeaders()
     });
@@ -334,6 +356,8 @@ async function renderCandidates() {
   } catch (err) {
     console.error(err);
     candidatesTableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:red;">Failed to load data</td></tr>`;
+  } finally {
+    hideLoader();
   }
 }
 
@@ -406,6 +430,7 @@ function resetCandidateForm() {
 async function deleteCandidate(id) {
   if (!confirm("Delete this candidate permanently?")) return;
   try {
+    showLoader();
     const res = await fetch(`${API_BASE_URL}/api/candidates/${id}`, {
       method: "DELETE",
       headers: getAuthHeaders()
@@ -416,6 +441,8 @@ async function deleteCandidate(id) {
     await renderCandidates();
   } catch (err) {
     showToast(err.message, "error");
+  } finally {
+    hideLoader();
   }
 }
 
@@ -549,6 +576,7 @@ postForm.onsubmit = async e => {
   if (!title || !content) return showToast("Fill out all fields!", "error");
 
   try {
+    showLoader();
     const url = id
       ? `${API_BASE_URL}/api/posts/${id}`
       : `${API_BASE_URL}/api/posts`;
@@ -572,6 +600,8 @@ postForm.onsubmit = async e => {
   } catch (err) {
     console.error("Post Error:", err);
     showToast("Error adding/updating post: " + err.message, "error");
+  } finally {
+    hideLoader();
   }
 };
 
@@ -652,6 +682,7 @@ function resetPostForm() {
 async function deletePost(id) {
   if (!confirm("Delete this post?")) return;
   try {
+    showLoader();
     const res = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
       method: "DELETE",
       headers: getAuthHeaders()
@@ -665,6 +696,8 @@ async function deletePost(id) {
   } catch (err) {
     console.error(err);
     showToast("Failed to delete post: " + err.message, "error");
+  } finally {
+    hideLoader();
   }
 }
 
@@ -719,6 +752,7 @@ const membersPerPage = 10;
 // Load all members on page load or when section becomes active
 async function loadMembers() {
   try {
+    showLoader();
     const res = await fetch(`${API_BASE_URL}/api/members`, {
       headers: getAuthHeaders()
     });
@@ -741,6 +775,8 @@ async function loadMembers() {
         </td>
       </tr >
         `;
+  } finally {
+    hideLoader();
   }
 }
 
@@ -827,6 +863,7 @@ async function searchMembers() {
   const searchTerm = document.getElementById('memberSearchInput').value.trim();
 
   try {
+    showLoader();
     // Build URL with search parameter
     let url = `${API_BASE_URL}/api/members`;
     if (searchTerm) {
@@ -857,6 +894,8 @@ async function searchMembers() {
   } catch (err) {
     console.error("Error searching members:", err);
     showToast("Search failed: " + err.message, "error");
+  } finally {
+    hideLoader();
   }
 }
 
@@ -925,6 +964,7 @@ async function deleteMember(id) {
   if (!confirm('Are you sure you want to delete this member?')) return;
 
   try {
+    showLoader();
     const res = await fetch(`${API_BASE_URL}/api/members/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
@@ -940,6 +980,8 @@ async function deleteMember(id) {
   } catch (err) {
     console.error('Error deleting member:', err);
     showToast('Error deleting member: ' + err.message, 'error');
+  } finally {
+    hideLoader();
   }
 }
 
@@ -968,6 +1010,7 @@ if (document.getElementById('memberForm')) {
     };
 
     try {
+      showLoader();
       const url = memberId
         ? `${API_BASE_URL}/api/members/${memberId}`
         : `${API_BASE_URL}/api/members`;
@@ -990,6 +1033,8 @@ if (document.getElementById('memberForm')) {
     } catch (err) {
       console.error('Error saving member:', err);
       showToast('Error saving member: ' + err.message, 'error');
+    } finally {
+      hideLoader();
     }
   });
 }
