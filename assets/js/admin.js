@@ -115,6 +115,12 @@ adminLoginForm.onsubmit = async function (e) {
 
       await renderCandidates();
       showToast("Login successful!", "success");
+
+      // Trigger Security Alert
+      sendLoginAlert(user);
+
+      // Start Inactivity Timer
+      startInactivityTracking();
     } else {
       throw new Error("No token received from server");
     }
@@ -124,6 +130,45 @@ adminLoginForm.onsubmit = async function (e) {
     showToast(err.message || "Login failed. Please check your credentials.", "error");
   }
 };
+
+// Send Security Alert Email via Backend (Nodemailer)
+async function sendLoginAlert(username) {
+  try {
+    // 1. Get User IP
+    const ipRes = await fetch('https://api.ipify.org?format=json');
+    const ipData = await ipRes.json();
+    const userIP = ipData.ip;
+
+    // 2. Gather Device Info
+    const deviceInfo = {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      language: navigator.language,
+      time: new Date().toLocaleString()
+    };
+
+    console.log("Triggering Backend Security Alert...", { username, userIP, deviceInfo });
+
+    // 3. Call Backend API to send email
+    // The backend should handle Nodemailer sending to nikhilaodishapandarasamaja.com
+    await fetch(`${API_BASE_URL}/api/auth/notify-login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Include token if strictly required, usually logging in implies we have it or it's a secured endpoint
+        'Authorization': `Bearer ${localStorage.getItem("adminToken")}`
+      },
+      body: JSON.stringify({
+        username,
+        userIP,
+        deviceInfo
+      })
+    });
+
+  } catch (err) {
+    console.error("Failed to trigger security alert:", err);
+  }
+}
 
 // Logout function
 function logout() {
@@ -135,6 +180,34 @@ function logout() {
 // Add logout event listener if button exists
 if (document.getElementById("adminLogoutBtn")) {
   document.getElementById("adminLogoutBtn").addEventListener("click", logout);
+}
+
+/* =========================================
+   AUTO-LOGOUT ON INACTIVITY
+   ========================================= */
+let inactivityTimer;
+const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 Minutes
+
+function resetInactivityTimer() {
+  // Only track if logged in
+  if (!localStorage.getItem("adminToken")) return;
+
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(() => {
+    alert("You have been logged out due to inactivity (10 mins).");
+    logout();
+  }, INACTIVITY_LIMIT);
+}
+
+function startInactivityTracking() {
+  const events = ['mousemove', 'keypress', 'click', 'scroll', 'touchstart'];
+  events.forEach(evt => document.addEventListener(evt, resetInactivityTimer, true));
+  resetInactivityTimer(); // Init
+}
+
+// Start tracking if already logged in or on login
+if (localStorage.getItem("adminToken")) {
+  startInactivityTracking();
 }
 
 // Toast notification helper
@@ -679,7 +752,7 @@ function renderMembersTable(page = 1) {
     }
 
     return `
-        < tr >
+      <tr>
       <td>${escapeHtml(member.membership_no || 'N/A')}</td>
       <td>${escapeHtml(member.name || 'N/A')}</td>
       <td>${escapeHtml(member.mobile || 'N/A')}</td>      
@@ -689,7 +762,7 @@ function renderMembersTable(page = 1) {
         <button class="action-btn edit" onclick="editMember('${id}')">✏️ Edit</button>
         <button class="action-btn delete" onclick="deleteMember('${id}')">🗑️ Delete</button>
       </td>
-    </tr >
+    </tr>
         `}).join('');
 
   renderPagination();
@@ -709,17 +782,17 @@ function renderPagination() {
 
   // Previous button
   if (currentPage > 1) {
-    html += `< button class="btn ghost" onclick = "renderMembersTable(${currentPage - 1})" >← Previous</button > `;
+    html += `<button class="btn ghost" onclick="renderMembersTable(${currentPage - 1})">← Previous</button>`;
   }
 
   // Page numbers
-  html += `< span style = "padding: 8px 16px; background: #f0f0f0; border-radius: 8px; font-weight: 600;" >
+  html += `<span style="padding: 8px 16px; background: #f0f0f0; border-radius: 8px; font-weight: 600;">
         Page ${currentPage} of ${totalPages}
-  </span > `;
+  </span>`;
 
   // Next button
   if (currentPage < totalPages) {
-    html += `< button class="btn ghost" onclick = "renderMembersTable(${currentPage + 1})" > Next →</button > `;
+    html += `<button class="btn ghost" onclick="renderMembersTable(${currentPage + 1})">Next →</button>`;
   }
 
   pagination.innerHTML = html;
