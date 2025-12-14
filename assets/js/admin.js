@@ -252,18 +252,18 @@ addCandidateForm.onsubmit = async e => {
   e.preventDefault();
 
   const id = document.getElementById("candidateId").value;
-  const fd = new FormData();
-
-  ["name", "gender"].forEach(f => {
-    const el = document.getElementById("admin" + capitalize(f));
-    if (el) fd.append(f, el.value.trim());
-  });
-
   const photo = document.getElementById("adminPhotoFile").files[0];
-  if (photo) {
-    fd.append("photo", photo);
-  } else if (!id) {
-    return showToast("Please choose a candidate photo", "error");
+
+  // Validation: Photo is mandatory for new candidates, OR existing candidates with no photo
+  let existingCandidate = null;
+  if (id) {
+    existingCandidate = candidates.find(c => (c.id || c._id) == id);
+  }
+
+  const hasExistingPhoto = existingCandidate && existingCandidate.photo;
+
+  if (!photo && !hasExistingPhoto) {
+    return showToast("Marriage Form (Photo) is mandatory!", "error");
   }
 
   try {
@@ -271,24 +271,38 @@ addCandidateForm.onsubmit = async e => {
       ? `${API_BASE_URL}/api/candidates/${id}`
       : `${API_BASE_URL}/api/candidates`;
 
-    // For update, we might need a different logic or endpoint if the backend strictly separates
-    // PUT (JSON) vs POST (FormData). Assuming the backend handles multipart/form-data for updates too 
-    // or we might need to change strategy.
-    // If backend only supports JSON for PUT, we'd need to handle photo upload separately or check backend capability.
-    // Standard approach: Use the same endpoint logic or PUT with FormData if backend supports it.
+    let options = {};
 
-    // NOTE: Based on previous context, update might be tricky with images. 
-    // If the backend doesn't support FormData on PUT, this might fail. 
-    // Let's assume standard REST behavior or we might need to fix the backend later.
+    if (id && !photo) {
+      // Update without file -> Use JSON to prevent overwriting photo with null
+      const data = {};
+      ["name", "gender"].forEach(f => {
+        const el = document.getElementById("admin" + capitalize(f));
+        if (el) data[f] = el.value.trim();
+      });
 
-    // Fix: If updating and no new photo, backend should handle it. 
-    // If ID exists, use PUT, otherwise POST.
+      options = {
+        method: "PUT",
+        headers: getAuthHeaders(false), // JSON
+        body: JSON.stringify(data)
+      };
+    } else {
+      // Create OR Update with file -> Use FormData
+      const fd = new FormData();
+      ["name", "gender"].forEach(f => {
+        const el = document.getElementById("admin" + capitalize(f));
+        if (el) fd.append(f, el.value.trim());
+      });
+      if (photo) fd.append("photo", photo);
 
-    const res = await fetch(url, {
-      method: id ? "PUT" : "POST",
-      body: fd,
-      headers: getAuthHeaders(true)
-    });
+      options = {
+        method: id ? "PUT" : "POST",
+        headers: getAuthHeaders(true), // FormData (no Content-Type)
+        body: fd
+      };
+    }
+
+    const res = await fetch(url, options);
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));

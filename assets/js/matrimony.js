@@ -14,6 +14,7 @@ let currentProfiles = [];
 let currentIndex = -1;
 
 function imageURL(raw) {
+  if (!raw) return '';
   const m = raw.match(/id=([^&]+)/);
   // Use thumbnail API with large size (w1000) to avoid strict download quotas (429 errors)
   return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000` : raw;
