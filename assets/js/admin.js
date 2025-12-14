@@ -111,7 +111,10 @@ adminLoginForm.onsubmit = async function (e) {
 
       adminLogin.style.display = "none";
       adminPanel.style.display = "block";
+
+      // Show matrimony section by default
       document.querySelectorAll('.admin-section').forEach(sec => sec.style.display = 'none');
+      document.getElementById('matrimonySection').style.display = 'block';
 
       await renderCandidates();
       showToast("Login successful!", "success");
@@ -661,6 +664,13 @@ function setActiveSection(id, btn) {
     t.setAttribute('aria-selected', 'false');
   });
   if (btn) btn.setAttribute('aria-selected', 'true');
+
+  // Load data based on section
+  if (id === 'postSection') {
+    renderPosts();
+  } else if (id === 'memberSection') {
+    loadMembers();
+  }
 }
 
 function toast(message, type = 'success') {

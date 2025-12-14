@@ -92,6 +92,8 @@ body {
   padding: .75rem 1.25rem;
   transition: .2s transform, .2s box-shadow, .2s background;
   text-decoration: none;
+  color: inherit;
+  /* Ensure text color is inherited */
 }
 
 .btn:active {
@@ -99,29 +101,41 @@ body {
 }
 
 .btn.primary {
-  background: var(--brand-500);
-  color: #fff;
+  background: var(--brand-500) !important;
+  color: #fff !important;
+  /* Force white text */
   box-shadow: var(--shadow-sm);
 }
 
 .btn.primary:hover {
   background: var(--brand-600);
+  color: #fff !important;
+  /* Keep white text on hover */
 }
 
 .btn.ghost {
   background: #fff;
-  color: var(--brand-600);
+  color: var(--brand-600) !important;
+  /* Force brand color text */
   border: 1px solid var(--line);
+}
+
+.btn.ghost:hover {
+  background: #f8f9fa;
+  color: var(--brand-600) !important;
+  /* Keep brand color on hover */
 }
 
 .btn.danger {
   background: var(--danger);
-  color: #fff;
+  color: #fff !important;
+  /* Force white text */
 }
 
 .btn.warning {
   background: var(--warning);
-  color: #000;
+  color: #000 !important;
+  /* Force black text */
 }
 
 /* =========================================
