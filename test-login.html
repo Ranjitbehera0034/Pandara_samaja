@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Login</title>
+</head>
+
+<body>
+    <h1>Test Admin Login</h1>
+    <button onclick="testLogin()">Test Login</button>
+    <div id="result"></div>
+
+    <script src="assets/js/config.js"></script>
+    <script>
+        async function testLogin() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing...';
+
+            try {
+                console.log('API URL:', API_BASE_URL);
+
+                const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username: "admin",
+                        password: "pandara123"
+                    })
+                });
+
+                const data = await res.json();
+                console.log('Response:', data);
+
+                if (data.token) {
+                    localStorage.setItem("adminToken", data.token);
+                    result.innerHTML = `<pre>SUCCESS!\nToken: ${data.token.substring(0, 50)}...\nStored in localStorage</pre>`;
+                } else {
+                    result.innerHTML = `<pre>FAILED!\n${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (err) {
+                console.error(err);
+                result.innerHTML = `<pre>ERROR!\n${err.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+
+</html>
