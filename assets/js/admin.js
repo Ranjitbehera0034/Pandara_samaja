@@ -717,6 +717,8 @@ function setActiveSection(id, btn) {
     renderPosts();
   } else if (id === 'memberSection') {
     loadMembers();
+  } else if (id === 'reviewSection') {
+    loadSheetConfig();
   }
 }
 
@@ -910,6 +912,9 @@ function showAddMemberModal() {
   document.getElementById('memberModalTitle').textContent = 'Add New Member';
   document.getElementById('memberForm').reset();
   document.getElementById('memberId').value = '';
+  // Enable membership number input for new members
+  document.getElementById('membershipNo').disabled = false;
+  document.getElementById('membershipNo').readOnly = false;
   document.getElementById('memberModal').style.display = 'flex';
 }
 
@@ -947,6 +952,9 @@ async function editMember(id) {
   document.getElementById('memberModalTitle').textContent = 'Edit Member';
   document.getElementById('memberId').value = id;
   document.getElementById('membershipNo').value = member.membership_no || '';
+  // Make membership number read-only when editing (it's the identifier)
+  document.getElementById('membershipNo').disabled = false;
+  document.getElementById('membershipNo').readOnly = true;
   document.getElementById('memberName').value = member.name || '';
   document.getElementById('memberMobile').value = member.mobile || '';
   document.getElementById('memberMale').value = member.male || '';
@@ -990,12 +998,9 @@ if (document.getElementById('memberForm')) {
   document.getElementById('memberForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const memberId = document.getElementById('membershipNo').value;
-    console.log(memberId);
-    if (memberId === 'undefined') {
-      showToast("Error: Invalid Member ID. Please refresh and try again.", "error");
-      return;
-    }
+    // Use the hidden memberId field to determine add vs edit
+    const editId = document.getElementById('memberId').value;
+    const isEditing = !!editId;
 
     const memberData = {
       membership_no: document.getElementById('membershipNo').value.trim(),
@@ -1009,12 +1014,17 @@ if (document.getElementById('memberForm')) {
       village: document.getElementById('memberVillage').value.trim()
     };
 
+    if (!memberData.membership_no) {
+      showToast('Please enter a Membership No.', 'error');
+      return;
+    }
+
     try {
       showLoader();
-      const url = memberId
-        ? `${API_BASE_URL}/api/members/${memberId}`
+      const url = isEditing
+        ? `${API_BASE_URL}/api/members/${editId}`
         : `${API_BASE_URL}/api/members`;
-      const method = memberId ? 'PUT' : 'POST';
+      const method = isEditing ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
         method: method,
@@ -1027,7 +1037,7 @@ if (document.getElementById('memberForm')) {
         throw new Error(errorData.message || 'Failed to save member');
       }
 
-      showToast(memberId ? 'Member updated successfully!' : 'Member added successfully!', 'success');
+      showToast(isEditing ? 'Member updated successfully!' : 'Member added successfully!', 'success');
       closeMemberModal();
       await loadMembers();
     } catch (err) {
@@ -1300,7 +1310,7 @@ if (document.getElementById('matchForm')) {
         partnerGender: partnerGender
       };
 
-      const res = await fetch(`${API_BASE_URL} /api/candidates / ${id}/match`, {
+      const res = await fetch(`${API_BASE_URL}/api/candidates/${id}/match`, {
         method: 'PUT',
         headers: getAuthHeaders(false),
         body: JSON.stringify(payload)
@@ -1320,4 +1330,387 @@ if (document.getElementById('matchForm')) {
       showToast("Error: " + err.message, "error");
     }
   });
+}
+
+/* =========================================
+   GOOGLE FORM SUBMISSIONS REVIEW
+   ========================================= */
+
+let allSubmissions = [];
+let currentFilter = 'all';
+
+// Expected Google Form column headers (in order)
+// Adjust these if your Google Form questions differ
+const FORM_COLUMNS = {
+  TIMESTAMP: 0,
+  MEMBERSHIP_NO: 1,
+  HEAD_NAME: 2,
+  MOBILE: 3,
+  DISTRICT: 4,
+  TALUKA: 5,
+  PANCHAYAT: 6,
+  VILLAGE: 7,
+  MALE_COUNT: 8,
+  FEMALE_COUNT: 9,
+  FAMILY_MEMBERS: 10,
+  HEAD_PHOTO: 11
+};
+
+// Load saved Google Sheet config from localStorage
+function loadSheetConfig() {
+  const savedId = localStorage.getItem('googleSheetId');
+  const savedTab = localStorage.getItem('googleSheetTab');
+  if (savedId) document.getElementById('googleSheetId').value = savedId;
+  if (savedTab) document.getElementById('googleSheetTab').value = savedTab;
+}
+
+// Save Google Sheet config to localStorage
+window.saveSheetConfig = function () {
+  const sheetId = document.getElementById('googleSheetId').value.trim();
+  const sheetTab = document.getElementById('googleSheetTab').value.trim();
+
+  if (!sheetId) {
+    showToast('Please enter a Google Sheet ID', 'error');
+    return;
+  }
+
+  localStorage.setItem('googleSheetId', sheetId);
+  localStorage.setItem('googleSheetTab', sheetTab || 'Form Responses 1');
+  showToast('Sheet configuration saved!', 'success');
+}
+
+// Fetch submissions from Google Sheet using the Visualization API
+window.fetchGoogleSheetSubmissions = async function () {
+  const sheetId = document.getElementById('googleSheetId').value.trim();
+  const sheetTab = document.getElementById('googleSheetTab').value.trim() || 'Form Responses 1';
+
+  if (!sheetId) {
+    showToast('Please enter a Google Sheet ID first', 'error');
+    return;
+  }
+
+  // Save config automatically
+  localStorage.setItem('googleSheetId', sheetId);
+  localStorage.setItem('googleSheetTab', sheetTab);
+
+  try {
+    showLoader();
+
+    // Use Google Visualization API (works for published sheets, no API key needed)
+    const encodedTab = encodeURIComponent(sheetTab);
+    const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodedTab}`;
+
+    const response = await fetch(gvizUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch sheet (HTTP ${response.status}). Make sure the sheet is published to web.`);
+    }
+
+    const text = await response.text();
+
+    // Parse the gviz JSONP-like response
+    // Format: google.visualization.Query.setResponse({...});
+    const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/);
+    if (!match) {
+      throw new Error('Could not parse Google Sheet response. Make sure the sheet is published to web.');
+    }
+
+    const data = JSON.parse(match[1]);
+
+    if (data.status === 'error') {
+      throw new Error(data.errors?.[0]?.detailed_message || 'Google Sheet returned an error');
+    }
+
+    const cols = data.table.cols;
+    const rows = data.table.rows;
+
+    console.log('Sheet columns:', cols.map(c => c.label));
+    console.log('Total rows:', rows.length);
+
+    // Parse rows into submission objects
+    const submissions = rows.map((row, idx) => {
+      const getCellValue = (colIdx) => {
+        if (!row.c || !row.c[colIdx]) return '';
+        const cell = row.c[colIdx];
+        // For dates, prefer formatted value
+        if (cell.f) return cell.f;
+        return cell.v != null ? String(cell.v) : '';
+      };
+
+      return {
+        _rowIndex: idx + 2, // 1-indexed + header row
+        timestamp: getCellValue(FORM_COLUMNS.TIMESTAMP),
+        membership_no: getCellValue(FORM_COLUMNS.MEMBERSHIP_NO).trim(),
+        name: getCellValue(FORM_COLUMNS.HEAD_NAME).trim(),
+        mobile: getCellValue(FORM_COLUMNS.MOBILE).trim(),
+        district: getCellValue(FORM_COLUMNS.DISTRICT).trim(),
+        taluka: getCellValue(FORM_COLUMNS.TALUKA).trim(),
+        panchayat: getCellValue(FORM_COLUMNS.PANCHAYAT).trim(),
+        village: getCellValue(FORM_COLUMNS.VILLAGE).trim(),
+        male: parseInt(getCellValue(FORM_COLUMNS.MALE_COUNT)) || 0,
+        female: parseInt(getCellValue(FORM_COLUMNS.FEMALE_COUNT)) || 0,
+        family_members: getCellValue(FORM_COLUMNS.FAMILY_MEMBERS).trim(),
+        head_photo_url: getCellValue(FORM_COLUMNS.HEAD_PHOTO).trim(),
+        _status: 'pending'
+      };
+    }).filter(s => s.membership_no); // Skip empty rows
+
+    // Cross-reference with existing members to find already-approved ones
+    try {
+      const membersRes = await fetch(`${API_BASE_URL}/api/members`, {
+        headers: getAuthHeaders()
+      });
+      if (membersRes.ok) {
+        const existingMembers = await membersRes.json();
+        const existingNos = new Set(existingMembers.map(m => String(m.membership_no)));
+
+        submissions.forEach(s => {
+          if (existingNos.has(String(s.membership_no))) {
+            s._status = 'approved';
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Could not cross-reference existing members:', e);
+    }
+
+    allSubmissions = submissions;
+    updateReviewStats();
+    renderSubmissions();
+
+    const pending = submissions.filter(s => s._status === 'pending').length;
+    showToast(`Fetched ${submissions.length} submissions (${pending} pending review)`, 'success');
+
+  } catch (err) {
+    console.error('Error fetching Google Sheet:', err);
+    showToast('Error: ' + err.message, 'error');
+    document.getElementById('submissionsContainer').innerHTML = `
+      <div style="text-align: center; padding: 3rem 2rem; color: #dc3545;">
+        <div style="font-size: 2.5rem; margin-bottom: 1rem;">⚠️</div>
+        <p style="font-weight: 600; font-size: 1.1rem;">Failed to fetch submissions</p>
+        <p style="font-size: 0.9rem; color: #666; max-width: 500px; margin: 0.5rem auto;">${escapeHtml(err.message)}</p>
+        <p style="font-size: 0.85rem; color: #888; margin-top: 1rem;">Checklist:<br>
+          ✅ Sheet ID is correct<br>
+          ✅ Sheet is <strong>published to web</strong> (File → Share → Publish to web)<br>
+          ✅ Sheet tab name matches (default: "Form Responses 1")
+        </p>
+      </div>
+    `;
+  } finally {
+    hideLoader();
+  }
+}
+
+// Update the stats counters
+function updateReviewStats() {
+  const total = allSubmissions.length;
+  const pending = allSubmissions.filter(s => s._status === 'pending').length;
+  const approved = allSubmissions.filter(s => s._status === 'approved').length;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statApproved').textContent = approved;
+
+  document.getElementById('reviewStats').style.display = total > 0 ? 'block' : 'none';
+  document.getElementById('reviewFilterBar').style.display = total > 0 ? 'flex' : 'none';
+}
+
+// Filter submissions by status
+window.filterSubmissions = function (filter) {
+  currentFilter = filter;
+
+  // Update filter button styles
+  ['filterAll', 'filterPending', 'filterApproved'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (id === 'filter' + filter.charAt(0).toUpperCase() + filter.slice(1) || (filter === 'all' && id === 'filterAll')) {
+      btn.style.background = '#0a4a96';
+      btn.style.color = 'white';
+      btn.className = 'btn';
+    } else {
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.className = 'btn ghost';
+    }
+  });
+
+  renderSubmissions();
+}
+
+// Render submission cards
+function renderSubmissions() {
+  const container = document.getElementById('submissionsContainer');
+
+  let filtered = allSubmissions;
+  if (currentFilter === 'pending') {
+    filtered = allSubmissions.filter(s => s._status === 'pending');
+  } else if (currentFilter === 'approved') {
+    filtered = allSubmissions.filter(s => s._status === 'approved');
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 3rem 2rem; color: #999;">
+        <div style="font-size: 2.5rem; margin-bottom: 1rem;">${currentFilter === 'pending' ? '🎉' : '📋'}</div>
+        <p style="font-weight: 600;">${currentFilter === 'pending' ? 'No pending submissions!' : 'No submissions found'}</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map((sub, idx) => {
+    const isPending = sub._status === 'pending';
+    const statusBadge = isPending
+      ? '<span style="background: #fff3cd; color: #856404; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">⏳ Pending</span>'
+      : '<span style="background: #d4edda; color: #155724; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">✅ Approved</span>';
+
+    const photoHtml = sub.head_photo_url
+      ? `<div style="margin-top: 0.8rem;"><a href="${escapeHtml(sub.head_photo_url)}" target="_blank" style="color: #0a4a96; text-decoration: none; font-size: 0.85rem;">📷 View Uploaded Photo</a></div>`
+      : '';
+
+    const familyHtml = sub.family_members
+      ? `<div style="margin-top: 0.8rem; padding: 0.8rem; background: #f8f9fa; border-radius: 8px; border-left: 3px solid #667eea;">
+           <div style="font-weight: 600; font-size: 0.8rem; color: #555; margin-bottom: 0.3rem;">👨‍👩‍👧‍👦 Family Members:</div>
+           <div style="font-size: 0.9rem; color: #333; white-space: pre-line;">${escapeHtml(sub.family_members)}</div>
+         </div>`
+      : '';
+
+    return `
+      <div style="background: white; border: 1px solid ${isPending ? '#ffc107' : '#28a745'}; border-left: 4px solid ${isPending ? '#ffc107' : '#28a745'}; border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.2s;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+          <div>
+            <span style="font-size: 1.15rem; font-weight: 700; color: #0a2540;">${escapeHtml(sub.name || 'No Name')}</span>
+            <span style="margin-left: 0.5rem; font-size: 0.85rem; color: #666;">Membership: <strong>${escapeHtml(sub.membership_no)}</strong></span>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            ${statusBadge}
+            <span style="font-size: 0.75rem; color: #999;">${escapeHtml(sub.timestamp)}</span>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.6rem; font-size: 0.9rem;">
+          <div><span style="color: #888;">📞 Mobile:</span> <strong>${escapeHtml(sub.mobile || 'N/A')}</strong></div>
+          <div><span style="color: #888;">📍 District:</span> <strong>${escapeHtml(sub.district || 'N/A')}</strong></div>
+          <div><span style="color: #888;">🏘️ Taluka:</span> <strong>${escapeHtml(sub.taluka || 'N/A')}</strong></div>
+          <div><span style="color: #888;">🏠 Village:</span> <strong>${escapeHtml(sub.village || 'N/A')}</strong></div>
+          <div><span style="color: #888;">👨 Male:</span> <strong>${sub.male}</strong></div>
+          <div><span style="color: #888;">👩 Female:</span> <strong>${sub.female}</strong></div>
+        </div>
+
+        ${familyHtml}
+        ${photoHtml}
+
+        ${isPending ? `
+        <div style="display: flex; gap: 0.5rem; margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid #eee;">
+          <button onclick="approveSubmission(${allSubmissions.indexOf(sub)})" class="btn"
+            style="background: #28a745; color: white; padding: 8px 20px; font-size: 0.85rem; flex: 1;">✅ Approve & Add to DB</button>
+          <button onclick="editBeforeApprove(${allSubmissions.indexOf(sub)})" class="btn"
+            style="background: #17a2b8; color: white; padding: 8px 20px; font-size: 0.85rem;">✏️ Edit & Approve</button>
+          <button onclick="rejectSubmission(${allSubmissions.indexOf(sub)})" class="btn"
+            style="background: #dc3545; color: white; padding: 8px 20px; font-size: 0.85rem;">❌ Reject</button>
+        </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+// Approve a submission — push to backend DB
+window.approveSubmission = async function (index) {
+  const sub = allSubmissions[index];
+  if (!sub) return;
+
+  if (!confirm(`Approve and add member "${sub.name}" (${sub.membership_no}) to the database?`)) return;
+
+  try {
+    showLoader();
+
+    const memberData = {
+      membership_no: sub.membership_no,
+      name: sub.name,
+      mobile: sub.mobile,
+      male: sub.male,
+      female: sub.female,
+      district: sub.district,
+      taluka: sub.taluka,
+      panchayat: sub.panchayat,
+      village: sub.village
+    };
+
+    // Add family_members and head_photo_url if backend supports them
+    if (sub.family_members) memberData.family_members = sub.family_members;
+    if (sub.head_photo_url) memberData.head_photo_url = sub.head_photo_url;
+
+    const res = await fetch(`${API_BASE_URL}/api/members`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(memberData)
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to add member');
+    }
+
+    sub._status = 'approved';
+    updateReviewStats();
+    renderSubmissions();
+    showToast(`Member "${sub.name}" approved and added to database!`, 'success');
+
+  } catch (err) {
+    console.error('Approve error:', err);
+    showToast('Error approving: ' + err.message, 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Edit before approving — opens the member modal with pre-filled data
+window.editBeforeApprove = function (index) {
+  const sub = allSubmissions[index];
+  if (!sub) return;
+
+  // Switch to member management tab
+  const memberTab = document.getElementById('tab-members');
+  setActiveSection('memberSection', memberTab);
+
+  // Open the add member modal with pre-filled data
+  setTimeout(() => {
+    document.getElementById('memberModalTitle').textContent = 'Add Member (from Form Submission)';
+    document.getElementById('memberId').value = ''; // empty = new member (POST)
+    document.getElementById('membershipNo').value = sub.membership_no;
+    document.getElementById('membershipNo').disabled = false;
+    document.getElementById('membershipNo').readOnly = false;
+    document.getElementById('memberName').value = sub.name;
+    document.getElementById('memberMobile').value = sub.mobile;
+    document.getElementById('memberMale').value = sub.male;
+    document.getElementById('memberFemale').value = sub.female;
+    document.getElementById('memberDistrict').value = sub.district;
+    document.getElementById('memberTaluka').value = sub.taluka;
+    document.getElementById('memberPanchayat').value = sub.panchayat || '';
+    document.getElementById('memberVillage').value = sub.village || '';
+
+    document.getElementById('memberModal').style.display = 'flex';
+  }, 300);
+}
+
+// Reject a submission — just mark locally (doesn't affect Google Sheet)
+window.rejectSubmission = function (index) {
+  const sub = allSubmissions[index];
+  if (!sub) return;
+
+  if (!confirm(`Reject submission from "${sub.name}" (${sub.membership_no})?\n\nThis will remove it from the review list (it will reappear on next fetch).`)) return;
+
+  // Add to rejected list in localStorage so it doesn't show again
+  const rejectedList = JSON.parse(localStorage.getItem('rejectedSubmissions') || '[]');
+  rejectedList.push({
+    membership_no: sub.membership_no,
+    timestamp: sub.timestamp,
+    rejectedAt: new Date().toISOString()
+  });
+  localStorage.setItem('rejectedSubmissions', JSON.stringify(rejectedList));
+
+  // Remove from current list
+  allSubmissions.splice(index, 1);
+  updateReviewStats();
+  renderSubmissions();
+  showToast(`Submission from "${sub.name}" rejected`, 'success');
 }
