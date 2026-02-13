@@ -7,9 +7,9 @@ const PROD_HOSTS = [
 ];
 
 /* Detect environment */
-const isFile   = location.protocol === 'file:';
-const isLocal  = isFile || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-const isProd   = PROD_HOSTS.includes(location.hostname);
+const isFile = location.protocol === 'file:';
+const isLocal = isFile || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+const isProd = PROD_HOSTS.includes(location.hostname);
 
 /* Decide once */
 if (isProd) {
@@ -17,5 +17,5 @@ if (isProd) {
 } else {
   // covers file:// and localhost
   window.API_BASE_URL = 'http://localhost:5000';
-  
+
 }

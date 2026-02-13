@@ -88,6 +88,8 @@
                     onclick="setActiveSection('matrimonySection', this)">Matrimony Candidate Management</button>
                 <button class="tab" id="tab-members" role="tab" aria-controls="memberSection" aria-selected="false"
                     onclick="setActiveSection('memberSection', this)">Member Management</button>
+                <button class="tab" id="tab-reviews" role="tab" aria-controls="reviewSection" aria-selected="false"
+                    onclick="setActiveSection('reviewSection', this)">📋 Review Submissions</button>
                 <button class="tab" id="tab-posts" role="tab" aria-controls="postSection" aria-selected="false"
                     onclick="setActiveSection('postSection', this)">Post Management</button>
             </div>
@@ -295,7 +297,7 @@
                                 <label
                                     style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Membership
                                     No. *</label>
-                                <input type="text" id="membershipNo" required disabled
+                                <input type="text" id="membershipNo" required
                                     style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
                             </div>
 
@@ -416,6 +418,92 @@
                 </div>-->
             </section>
 
+
+            <!-- ========= REVIEW SUBMISSIONS SECTION ========= -->
+            <section id="reviewSection" class="admin-section" style="display:none;">
+                <h3 class="section-title">📋 Review Google Form Submissions</h3>
+
+                <!-- Google Sheet Configuration -->
+                <div
+                    style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 1.5rem; border-radius: 12px; border: 1px solid #dee2e6; margin-bottom: 2rem;">
+                    <h4 style="margin: 0 0 1rem 0; color: #495057; font-size: 1rem;">⚙️ Google Sheet Configuration</h4>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+                        <div style="flex: 1; min-width: 300px;">
+                            <label
+                                style="display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.85rem; color: #555;">Google
+                                Sheet ID</label>
+                            <input type="text" id="googleSheetId"
+                                placeholder="e.g. 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"
+                                style="width: 100%; padding: 10px 14px; border: 2px solid #ced4da; border-radius: 8px; font-size: 14px; font-family: monospace;">
+                        </div>
+                        <div style="min-width: 200px;">
+                            <label
+                                style="display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.85rem; color: #555;">Sheet
+                                Name (tab)</label>
+                            <input type="text" id="googleSheetTab" placeholder="Form Responses 1"
+                                value="Form Responses 1"
+                                style="width: 100%; padding: 10px 14px; border: 2px solid #ced4da; border-radius: 8px; font-size: 14px;">
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="saveSheetConfig()" class="btn"
+                                style="padding: 10px 20px; background: #6c757d; color: white; white-space: nowrap;">💾
+                                Save Config</button>
+                            <button onclick="fetchGoogleSheetSubmissions()" class="btn primary"
+                                style="padding: 10px 20px; white-space: nowrap;">🔄 Fetch Submissions</button>
+                        </div>
+                    </div>
+                    <p style="margin: 0.8rem 0 0 0; font-size: 0.8rem; color: #888;">
+                        📌 <strong>How to find Sheet ID:</strong> Open your Google Sheet → copy the long ID from the
+                        URL:<br>
+                        <code
+                            style="background: #fff; padding: 2px 6px; border-radius: 4px;">https://docs.google.com/spreadsheets/d/<strong style="color: #0a4a96;">{THIS_IS_THE_ID}</strong>/edit</code><br>
+                        📌 Make sure the sheet is <strong>published to web</strong>: File → Share → Publish to web →
+                        Publish
+                    </p>
+                </div>
+
+                <!-- Stats Bar -->
+                <div id="reviewStats" style="display: none; margin-bottom: 1.5rem;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <div
+                            style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1.2rem; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700;" id="statTotal">0</div>
+                            <div style="font-size: 0.85rem; opacity: 0.9;">Total Submissions</div>
+                        </div>
+                        <div
+                            style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #f7971e, #ffd200); color: white; padding: 1.2rem; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700;" id="statPending">0</div>
+                            <div style="font-size: 0.85rem; opacity: 0.9;">Pending Review</div>
+                        </div>
+                        <div
+                            style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 1.2rem; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700;" id="statApproved">0</div>
+                            <div style="font-size: 0.85rem; opacity: 0.9;">Already Approved</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div id="reviewFilterBar"
+                    style="display: none; margin-bottom: 1.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn" onclick="filterSubmissions('all')" id="filterAll"
+                        style="padding: 8px 18px; background: #0a4a96; color: white; font-size: 0.85rem;">All</button>
+                    <button class="btn ghost" onclick="filterSubmissions('pending')" id="filterPending"
+                        style="padding: 8px 18px; font-size: 0.85rem;">⏳ Pending</button>
+                    <button class="btn ghost" onclick="filterSubmissions('approved')" id="filterApproved"
+                        style="padding: 8px 18px; font-size: 0.85rem;">✅ Approved</button>
+                </div>
+
+                <!-- Submissions List -->
+                <div id="submissionsContainer">
+                    <div style="text-align: center; padding: 4rem 2rem; color: #999;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                        <p style="font-size: 1.1rem; font-weight: 600;">No submissions loaded</p>
+                        <p style="font-size: 0.9rem;">Configure your Google Sheet ID above and click "Fetch Submissions"
+                        </p>
+                    </div>
+                </div>
+            </section>
 
             <section id="postSection" class="admin-section panel-card" style="display:none;">
                 <h3 class="section-title">Post Management</h3>
