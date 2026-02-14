@@ -283,87 +283,142 @@
                 <!-- Add/Edit Member Modal -->
                 <div id="memberModal" class="modal" style="display: none;">
                     <div class="modal-content"
-                        style="max-width: 700px; background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+                        style="max-width: 900px; max-height: 90vh; overflow-y: auto; background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
                         <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; position: sticky; top: 0; background: white; padding-bottom: 0.5rem; border-bottom: 2px solid #e9ecef; z-index: 1;">
                             <h3 id="memberModalTitle" style="margin: 0;">Add New Member</h3>
                             <button onclick="closeMemberModal()"
                                 style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
                         </div>
-                        <form id="memberForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <form id="memberForm">
                             <input type="hidden" id="memberId">
 
-                            <div style="grid-column: 1 / -1;">
-                                <label
-                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Membership
-                                    No. *</label>
-                                <input type="text" id="membershipNo" required
-                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            <!-- Section: Basic Info -->
+                            <div
+                                style="background: #f0f4ff; padding: 1rem 1.2rem; border-radius: 8px; margin-bottom: 1.2rem; border-left: 4px solid #667eea;">
+                                <h4 style="margin: 0 0 1rem 0; color: #0a4a96; font-size: 0.95rem;">👤 Head of Family
+                                    Details</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div style="grid-column: 1 / -1;">
+                                        <label
+                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Membership
+                                            No. *</label>
+                                        <input type="text" id="membershipNo" required
+                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                    </div>
+                                    <div>
+                                        <label
+                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Head
+                                            of Family Name *</label>
+                                        <input type="text" id="memberName" required
+                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                    </div>
+                                    <div>
+                                        <label
+                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Mobile
+                                            *</label>
+                                        <input type="tel" id="memberMobile" required pattern="[0-9]{10}"
+                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                    </div>
+                                    <div>
+                                        <label
+                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Aadhaar
+                                            No.</label>
+                                        <input type="text" id="memberAadhaar" maxlength="12" pattern="[0-9]{12}"
+                                            placeholder="12-digit Aadhaar number"
+                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                    </div>
+                                </div>
                             </div>
 
-                            <div>
-                                <label
-                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Name
-                                    *</label>
-                                <input type="text" id="memberName" required
-                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            <!-- Section: Address -->
+                            <div
+                                style="background: #f0faf0; padding: 1rem 1.2rem; border-radius: 8px; margin-bottom: 1.2rem; border-left: 4px solid #38ef7d;">
+                                <h4 style="margin: 0 0 1rem 0; color: #1a7a3a; font-size: 0.95rem;">📍 Address Details
+                                </h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div>
+                                        <label
+                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">District
+                                            *</label>
+                                        <input type="text" id="memberDistrict" required
+                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                    </div>
+                                    <div>
+                                        <label
+                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Taluka
+                                            *</label>
+                                        <input type="text" id="memberTaluka" required
+                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                    </div>
+                                    <div>
+                                        <label
+                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Panchayat</label>
+                                        <input type="text" id="memberPanchayat"
+                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                    </div>
+                                    <div>
+                                        <label
+                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Village</label>
+                                        <input type="text" id="memberVillage"
+                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                    </div>
+                                    <div style="grid-column: 1 / -1;">
+                                        <label
+                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Full
+                                            Address</label>
+                                        <textarea id="memberAddress" rows="2"
+                                            placeholder="House/Street details (optional)"
+                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div>
-                                <label
-                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Mobile
-                                    *</label>
-                                <input type="tel" id="memberMobile" required pattern="[0-9]{10}"
-                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            <!-- Section: Family Members -->
+                            <div
+                                style="background: #fff8f0; padding: 1rem 1.2rem; border-radius: 8px; margin-bottom: 1.2rem; border-left: 4px solid #f7971e;">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <h4 style="margin: 0; color: #b85c00; font-size: 0.95rem;">👨‍👩‍👧‍👦 Family
+                                        Members</h4>
+                                    <div style="display: flex; gap: 1rem; align-items: center;">
+                                        <span style="font-size: 0.8rem; color: #666;">
+                                            👨 Male: <strong id="autoMaleCount">0</strong> &nbsp;|&nbsp;
+                                            👩 Female: <strong id="autoFemaleCount">0</strong> &nbsp;|&nbsp;
+                                            Total: <strong id="autoTotalCount">0</strong>
+                                        </span>
+                                        <button type="button" onclick="addFamilyMemberRow()"
+                                            style="background: #f7971e; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                                            ➕ Add Member
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Family member table header -->
+                                <div
+                                    style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 0.8fr 40px; gap: 0.5rem; padding: 6px 0; border-bottom: 2px solid #f0d9b5; margin-bottom: 0.5rem;">
+                                    <span
+                                        style="font-weight: 700; font-size: 0.78rem; color: #666; text-transform: uppercase;">Name</span>
+                                    <span
+                                        style="font-weight: 700; font-size: 0.78rem; color: #666; text-transform: uppercase;">Relation</span>
+                                    <span
+                                        style="font-weight: 700; font-size: 0.78rem; color: #666; text-transform: uppercase;">Gender</span>
+                                    <span
+                                        style="font-weight: 700; font-size: 0.78rem; color: #666; text-transform: uppercase;">Age</span>
+                                    <span></span>
+                                </div>
+
+                                <!-- Dynamic rows container -->
+                                <div id="familyMembersContainer">
+                                    <!-- Rows added by JS -->
+                                </div>
+
+                                <input type="hidden" id="memberMale">
+                                <input type="hidden" id="memberFemale">
                             </div>
 
-                            <div>
-                                <label
-                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Male
-                                    Count</label>
-                                <input type="number" id="memberMale" min="0"
-                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
-                            </div>
-
-                            <div>
-                                <label
-                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Female
-                                    Count</label>
-                                <input type="number" id="memberFemale" min="0"
-                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
-                            </div>
-
-                            <div>
-                                <label
-                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">District
-                                    *</label>
-                                <input type="text" id="memberDistrict" required
-                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
-                            </div>
-
-                            <div>
-                                <label
-                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Taluka
-                                    *</label>
-                                <input type="text" id="memberTaluka" required
-                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
-                            </div>
-
-                            <div>
-                                <label
-                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Panchayat</label>
-                                <input type="text" id="memberPanchayat"
-                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
-                            </div>
-
-                            <div>
-                                <label
-                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Village</label>
-                                <input type="text" id="memberVillage"
-                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
-                            </div>
-
-                            <div style="grid-column: 1 / -1; display: flex; gap: 1rem; margin-top: 1rem;">
+                            <!-- Save / Cancel -->
+                            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
                                 <button type="submit" class="btn primary"
                                     style="flex: 1; padding: 14px; font-size: 16px;">
                                     💾 Save Member
