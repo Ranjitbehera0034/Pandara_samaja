@@ -1,138 +1,152 @@
 <!DOCTYPE html>
 <html lang="or">
-    <head>
-        <meta charset="UTF-8"/>
-        <meta
-        name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-        <!-- Oriya font -->
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Oriya:wght@400;700&display=swap" rel="stylesheet">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <title>Members • ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</title>
+    <!-- Oriya font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Oriya:wght@400;700&display=swap" rel="stylesheet">
 
-        <!-- Base styles -->
-        <link
-        rel="stylesheet" href="assets/css/main.css"/>
+    <title>Members • ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</title>
 
-        <!-- DataTables -->
-        <link
-        rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
+    <!-- Base styles -->
+    <link rel="stylesheet" href="assets/css/main.css" />
 
-        <!-- NEW: dropdown styling + tweaks -->
-        <link
-        rel="stylesheet" href="assets/css/members-cards.css"/>
-        <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE9R5DCCNT"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag() {
-                dataLayer.push(arguments);
-            }
-            gtag('js', new Date());
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
 
-            gtag('config', 'G-LE9R5DCCNT');
-        </script>
-        <script src="assets/js/analytics.js" defer></script>
-    </head>
-    <body>
-        <!-- ─── nav bar ─────────────────────────────────────────────── -->
-        <header>
-            <nav class="navbar">
-                <div class="brand">
-                    <img src="assets/img/pandara logo.png" alt="Pandara Samaja Logo"/>
-                    <span>ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</span>
-                </div>
-                <button class="nav-toggle" aria-label="Toggle navigation">
-                    <span class="hamburger"></span>
-                </button>
-                <ul class="nav-links" id="navLinks">
-                    <li>
-                        <a href="index.html">Home</a>
-                    </li>
-                    <li>
-                        <a href="about.html">About</a>
-                    </li>
-                    <li>
-                        <a href="members.html" class="active">Members</a>
-                    </li>
-                    <li>
-                        <a href="matrimony.html">Matrimony</a>
-                    </li>
-                    <li>
-                        <a href="blogs.html">Recent Blogs</a>
-                    </li>
-                    <li>
-                        <a href="admin.html">Admin</a>
-                    </li>
-                </ul>
-            </nav>
-        </header>
+    <!-- NEW: dropdown styling + tweaks -->
+    <link rel="stylesheet" href="assets/css/members-cards.css" />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE9R5DCCNT"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
 
-        <section class="ticker" aria-label="Pandara Samaja scrolling title">
-            <div class="ticker__track">
-                <div class="ticker__item">
-                    ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                </div>
-                <!-- duplicate for seamless loop -->
-                <div class="ticker__item" aria-hidden="true">
-                    ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                            ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                </div>
+        gtag('config', 'G-LE9R5DCCNT');
+    </script>
+    <script src="assets/js/analytics.js" defer></script>
+</head>
+
+<body>
+    <!-- ─── nav bar ─────────────────────────────────────────────── -->
+    <header>
+        <nav class="navbar">
+            <div class="brand">
+                <img src="assets/img/pandara logo.png" alt="Pandara Samaja Logo" />
+                <span>ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</span>
             </div>
-        </section>
-        <!-- ─── main ────────────────────────────────────────────────── -->
-        <main class="members-page">
-            <div class="container">
-                <h1 class="page-title">Member Directory</h1>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                <span class="hamburger"></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li>
+                    <a href="index.html">Home</a>
+                </li>
+                <li>
+                    <a href="about.html">About</a>
+                </li>
+                <li>
+                    <a href="members.html" class="active">Members</a>
+                </li>
+                <li>
+                    <a href="matrimony.html">Matrimony</a>
+                </li>
+                <li>
+                    <a href="blogs.html">Recent Blogs</a>
+                </li>
+                <li>
+                    <a href="admin.html">Admin</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
 
-                <div class="dropdown-row centered">
-                    <select id="districtSelect">
-                        <option value="">Select District</option>
-                    </select>
-                    <select id="talukaSelect" disabled>
-                        <option value="">Select Taluka</option>
-                    </select>
-                    <select id="panchayatSelect" disabled>
-                        <option value="">Select Panchayat</option>
-                    </select>
-                </div>
-
-                <div id="leaderContainer" class="leader-strip" style="display:none;">
-                    <img id="leaderImage" src="" alt="District leader"/>
-                </div>
-
-                <div class="table-card">
-                    <table id="memberTable" class="display" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>Membership No.</th>
-                                <th>Name</th>
-                                <th>Mobile</th>
-                                <th>Male</th>
-                                <th>Female</th>
-                                <th>District</th>
-                                <th>Taluka</th>
-                                <th>Panchayat</th>
-                                <th>Village</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+    <section class="ticker" aria-label="Pandara Samaja scrolling title">
+        <div class="ticker__track">
+            <div class="ticker__item">
+                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
             </div>
-        </main>
+            <!-- duplicate for seamless loop -->
+            <div class="ticker__item" aria-hidden="true">
+                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
+            </div>
+        </div>
+    </section>
+    <!-- ─── main ────────────────────────────────────────────────── -->
+    <main class="members-page">
+        <div class="container">
+            <h1 class="page-title">Member Directory</h1>
+
+            <div class="dropdown-row centered">
+                <select id="districtSelect">
+                    <option value="">Select District</option>
+                </select>
+                <select id="talukaSelect" disabled>
+                    <option value="">Select Taluka</option>
+                </select>
+                <select id="panchayatSelect" disabled>
+                    <option value="">Select Panchayat</option>
+                </select>
+            </div>
+
+            <div id="leaderContainer" class="leader-strip" style="display:none;">
+                <img id="leaderImage" src="" alt="District leader" />
+            </div>
+
+            <div class="table-card">
+                <!-- Loading overlay -->
+                <div class="members-loader" id="membersLoader">
+                    <div class="loader-spinner">
+                        <div class="loader-ring"></div>
+                        <div class="loader-ring loader-ring--2"></div>
+                        <svg class="loader-logo" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0a4a96"
+                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                    </div>
+                    <p class="loader-text">ସଦସ୍ୟ ତଥ୍ୟ ଲୋଡ୍ ହେଉଛି<span class="loader-dots"></span></p>
+                    <p class="loader-subtext">Loading members...</p>
+                </div>
+                <table id="memberTable" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Membership No.</th>
+                            <th>Name</th>
+                            <th>Mobile</th>
+                            <th>Male</th>
+                            <th>Female</th>
+                            <th>District</th>
+                            <th>Taluka</th>
+                            <th>Panchayat</th>
+                            <th>Village</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
 
-        <!-- ─── scripts ─────────────────────────────────────────────── -->
-        <script src="assets/js/main.js"></script>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-        <script src="assets/js/config.js"></script>
-        <script src="assets/js/members.js"></script>
+    <!-- ─── scripts ─────────────────────────────────────────────── -->
+    <script src="assets/js/main.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/members.js"></script>
 
-    </body>
+</body>
+
 </html>
-
