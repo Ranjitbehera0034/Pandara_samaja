@@ -915,6 +915,13 @@ function showAddMemberModal() {
   // Enable membership number input for new members
   document.getElementById('membershipNo').disabled = false;
   document.getElementById('membershipNo').readOnly = false;
+  document.getElementById('memberAadhaar').value = '';
+  document.getElementById('memberAddress').value = '';
+
+  // Clear and add one empty family member row
+  document.getElementById('familyMembersContainer').innerHTML = '';
+  addFamilyMemberRow();
+
   document.getElementById('memberModal').style.display = 'flex';
 }
 
@@ -957,12 +964,23 @@ async function editMember(id) {
   document.getElementById('membershipNo').readOnly = true;
   document.getElementById('memberName').value = member.name || '';
   document.getElementById('memberMobile').value = member.mobile || '';
-  document.getElementById('memberMale').value = member.male || '';
-  document.getElementById('memberFemale').value = member.female || '';
+  document.getElementById('memberAadhaar').value = member.aadhar_no || '';
   document.getElementById('memberDistrict').value = member.district || '';
   document.getElementById('memberTaluka').value = member.taluka || '';
   document.getElementById('memberPanchayat').value = member.panchayat || '';
   document.getElementById('memberVillage').value = member.village || '';
+  document.getElementById('memberAddress').value = member.address || '';
+
+  // Populate family members
+  document.getElementById('familyMembersContainer').innerHTML = '';
+  if (member.family_members && Array.isArray(member.family_members) && member.family_members.length > 0) {
+    member.family_members.forEach(fm => {
+      addFamilyMemberRow(fm.name, fm.relation, fm.gender, fm.age);
+    });
+  } else {
+    // Fallback: add head of family as first row + use male/female counts
+    addFamilyMemberRow(member.name || '', 'Self', 'Male', '');
+  }
 
   document.getElementById('memberModal').style.display = 'flex';
 }
@@ -1006,13 +1024,21 @@ if (document.getElementById('memberForm')) {
       membership_no: document.getElementById('membershipNo').value.trim(),
       name: document.getElementById('memberName').value.trim(),
       mobile: document.getElementById('memberMobile').value.trim(),
-      male: Number(document.getElementById('memberMale').value) || 0,
-      female: Number(document.getElementById('memberFemale').value) || 0,
+      aadhar_no: document.getElementById('memberAadhaar').value.trim(),
       district: document.getElementById('memberDistrict').value.trim(),
       taluka: document.getElementById('memberTaluka').value.trim(),
       panchayat: document.getElementById('memberPanchayat').value.trim(),
-      village: document.getElementById('memberVillage').value.trim()
+      village: document.getElementById('memberVillage').value.trim(),
+      address: document.getElementById('memberAddress').value.trim()
     };
+
+    // Collect family members from dynamic rows
+    const familyMembers = collectFamilyMembers();
+    memberData.family_members = familyMembers;
+
+    // Auto-calculate male/female counts from family members
+    memberData.male = familyMembers.filter(fm => fm.gender === 'Male').length;
+    memberData.female = familyMembers.filter(fm => fm.gender === 'Female').length;
 
     if (!memberData.membership_no) {
       showToast('Please enter a Membership No.', 'error');
@@ -1689,12 +1715,32 @@ window.editBeforeApprove = function (index) {
     document.getElementById('membershipNo').readOnly = false;
     document.getElementById('memberName').value = sub.name;
     document.getElementById('memberMobile').value = sub.mobile;
-    document.getElementById('memberMale').value = sub.male;
-    document.getElementById('memberFemale').value = sub.female;
+    document.getElementById('memberAadhaar').value = sub.aadhar_no || '';
     document.getElementById('memberDistrict').value = sub.district;
     document.getElementById('memberTaluka').value = sub.taluka;
     document.getElementById('memberPanchayat').value = sub.panchayat || '';
     document.getElementById('memberVillage').value = sub.village || '';
+    document.getElementById('memberAddress').value = sub.address || '';
+
+    // Parse family members from the text field
+    document.getElementById('familyMembersContainer').innerHTML = '';
+    if (sub.family_members) {
+      // Try to parse lines like "Name - Relation" or "Name (Relation)"
+      const lines = sub.family_members.split('\n').filter(l => l.trim());
+      lines.forEach(line => {
+        const parts = line.split(/[-–]/).map(s => s.trim());
+        const fmName = parts[0] || '';
+        const fmRelation = parts[1] || '';
+        // Try to match relation to known relations
+        const matchedRelation = Object.keys(RELATION_GENDER_MAP).find(r =>
+          r.toLowerCase() === fmRelation.toLowerCase().replace(/[()]/g, '').trim()
+        ) || '';
+        const mappedGender = matchedRelation ? RELATION_GENDER_MAP[matchedRelation] : '';
+        addFamilyMemberRow(fmName, matchedRelation, mappedGender, '');
+      });
+    } else {
+      addFamilyMemberRow(sub.name, 'Self', '', '');
+    }
 
     document.getElementById('memberModal').style.display = 'flex';
   }, 300);
@@ -1722,3 +1768,163 @@ window.rejectSubmission = function (index) {
   renderSubmissions();
   showToast(`Submission from "${sub.name}" rejected`, 'success');
 }
+
+/* =========================================
+   FAMILY MEMBER ROW MANAGEMENT
+   ========================================= */
+
+let familyMemberRowCounter = 0;
+
+// Relation-to-gender auto-mapping
+const RELATION_GENDER_MAP = {
+  'Self': '',
+  'Wife': 'Female',
+  'Husband': 'Male',
+  'Father': 'Male',
+  'Mother': 'Female',
+  'Son': 'Male',
+  'Daughter': 'Female',
+  'Brother': 'Male',
+  'Sister': 'Female',
+  'Grandfather': 'Male',
+  'Grandmother': 'Female',
+  'Father-in-law': 'Male',
+  'Mother-in-law': 'Female',
+  'Son-in-law': 'Male',
+  'Daughter-in-law': 'Female',
+  'Grandson': 'Male',
+  'Granddaughter': 'Female',
+  'Uncle': 'Male',
+  'Aunt': 'Female',
+  'Nephew': 'Male',
+  'Niece': 'Female',
+  'Other': ''
+};
+
+// Add a family member row
+window.addFamilyMemberRow = function (name, relation, gender, age) {
+  const container = document.getElementById('familyMembersContainer');
+  const rowId = 'fm-row-' + (++familyMemberRowCounter);
+
+  const row = document.createElement('div');
+  row.id = rowId;
+  row.style.cssText = 'display: grid; grid-template-columns: 2fr 1.5fr 1fr 0.8fr 40px; gap: 0.5rem; align-items: center; padding: 6px 0; border-bottom: 1px solid #f0e0d0; animation: fadeIn 0.2s ease;';
+
+  const relationOptions = Object.keys(RELATION_GENDER_MAP).map(r =>
+    `<option value="${r}" ${r === (relation || '') ? 'selected' : ''}>${r}</option>`
+  ).join('');
+
+  row.innerHTML = `
+    <input type="text" class="fm-name" value="${escapeHtml(name || '')}" placeholder="Full Name"
+      style="padding: 8px 10px; border: 1.5px solid #e0e0e0; border-radius: 6px; font-size: 13px;">
+    <select class="fm-relation" onchange="onRelationChange(this, '${rowId}')"
+      style="padding: 8px 6px; border: 1.5px solid #e0e0e0; border-radius: 6px; font-size: 13px; background: white;">
+      <option value="">Select...</option>
+      ${relationOptions}
+    </select>
+    <select class="fm-gender" onchange="updateFamilyMemberCounts()"
+      style="padding: 8px 6px; border: 1.5px solid #e0e0e0; border-radius: 6px; font-size: 13px; background: white;">
+      <option value="" ${!gender ? 'selected' : ''}>--</option>
+      <option value="Male" ${gender === 'Male' ? 'selected' : ''}>Male</option>
+      <option value="Female" ${gender === 'Female' ? 'selected' : ''}>Female</option>
+    </select>
+    <input type="number" class="fm-age" value="${age || ''}" min="0" max="150" placeholder="Age"
+      style="padding: 8px 6px; border: 1.5px solid #e0e0e0; border-radius: 6px; font-size: 13px; width: 100%;">
+    <button type="button" onclick="removeFamilyMemberRow('${rowId}')"
+      style="background: #ff4d4d; color: white; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;"
+      title="Remove">✕</button>
+  `;
+
+  container.appendChild(row);
+  updateFamilyMemberCounts();
+}
+
+// Auto-set gender when relation changes
+window.onRelationChange = function (select, rowId) {
+  const relation = select.value;
+  const mappedGender = RELATION_GENDER_MAP[relation];
+  const row = document.getElementById(rowId);
+
+  if (mappedGender && row) {
+    const genderSelect = row.querySelector('.fm-gender');
+    if (genderSelect) {
+      genderSelect.value = mappedGender;
+    }
+  }
+  updateFamilyMemberCounts();
+}
+
+// Remove a family member row
+window.removeFamilyMemberRow = function (rowId) {
+  const row = document.getElementById(rowId);
+  if (row) {
+    row.style.opacity = '0';
+    row.style.transform = 'translateX(-20px)';
+    row.style.transition = 'all 0.2s ease';
+    setTimeout(() => {
+      row.remove();
+      updateFamilyMemberCounts();
+    }, 200);
+  }
+}
+
+// Update male/female/total counts from family member rows
+window.updateFamilyMemberCounts = function () {
+  const container = document.getElementById('familyMembersContainer');
+  if (!container) return;
+
+  const genders = container.querySelectorAll('.fm-gender');
+  let male = 0, female = 0;
+
+  genders.forEach(sel => {
+    if (sel.value === 'Male') male++;
+    else if (sel.value === 'Female') female++;
+  });
+
+  const maleEl = document.getElementById('autoMaleCount');
+  const femaleEl = document.getElementById('autoFemaleCount');
+  const totalEl = document.getElementById('autoTotalCount');
+
+  if (maleEl) maleEl.textContent = male;
+  if (femaleEl) femaleEl.textContent = female;
+  if (totalEl) totalEl.textContent = male + female;
+
+  // Update hidden fields
+  document.getElementById('memberMale').value = male;
+  document.getElementById('memberFemale').value = female;
+}
+
+// Collect all family members data from the dynamic rows
+function collectFamilyMembers() {
+  const container = document.getElementById('familyMembersContainer');
+  if (!container) return [];
+
+  const rows = container.children;
+  const members = [];
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const name = (row.querySelector('.fm-name')?.value || '').trim();
+    const relation = (row.querySelector('.fm-relation')?.value || '').trim();
+    const gender = (row.querySelector('.fm-gender')?.value || '').trim();
+    const age = parseInt(row.querySelector('.fm-age')?.value) || null;
+
+    if (name) { // Only include rows with a name
+      members.push({ name, relation, gender, age });
+    }
+  }
+
+  return members;
+}
+
+// Add a CSS animation for new rows
+(function () {
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `;
+  document.head.appendChild(style);
+})();
