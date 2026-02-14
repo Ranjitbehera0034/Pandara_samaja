@@ -1021,16 +1021,23 @@ if (document.getElementById('memberForm')) {
 
     try {
       showLoader();
-      const url = isEditing
-        ? `${API_BASE_URL}/api/members/${editId}`
-        : `${API_BASE_URL}/api/members`;
-      const method = isEditing ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
-        method: method,
-        headers: getAuthHeaders(),
-        body: JSON.stringify(memberData)
-      });
+      let res;
+      if (isEditing) {
+        // Update existing member
+        res = await fetch(`${API_BASE_URL}/api/members/${editId}`, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(memberData)
+        });
+      } else {
+        // Create new member using import-rows endpoint
+        res = await fetch(`${API_BASE_URL}/api/members/import-rows`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ rows: [memberData] })
+        });
+      }
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
@@ -1639,10 +1646,11 @@ window.approveSubmission = async function (index) {
     if (sub.family_members) memberData.family_members = sub.family_members;
     if (sub.head_photo_url) memberData.head_photo_url = sub.head_photo_url;
 
-    const res = await fetch(`${API_BASE_URL}/api/members`, {
+    // Use import-rows endpoint (backend doesn't have POST /api/members)
+    const res = await fetch(`${API_BASE_URL}/api/members/import-rows`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify(memberData)
+      body: JSON.stringify({ rows: [memberData] })
     });
 
     if (!res.ok) {
