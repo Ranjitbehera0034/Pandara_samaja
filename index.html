@@ -4,8 +4,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="Nikhila Odisha Pandara Samaja – Official website of the Pandara community in Odisha. Member directory, matrimony services, community news and leadership." />
+    <meta name="keywords" content="Pandara Samaja, Odisha, community, member directory, matrimony, Odia" />
+    <meta name="theme-color" content="#0a4a96" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Oriya:wght@400;700&display=swap" rel="stylesheet">
-    <title>ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Home</title>
+    <title>Nikhila Odisha Pandara Samaja | ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</title>
     <link rel="stylesheet" href="assets/css/main.css" />
     <!-- Google tag (gtag.js) -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4522290994121690"
@@ -17,17 +21,19 @@
             dataLayer.push(arguments);
         }
         gtag('js', new Date());
-
         gtag('config', 'G-LE9R5DCCNT');
     </script>
     <script src="assets/js/analytics.js" defer></script>
 </head>
 
 <body>
+    <!-- Skip to main content for accessibility -->
+    <a href="#mainContent" class="skip-link">Skip to main content</a>
+
     <header>
-        <nav class="navbar">
+        <nav class="navbar" role="navigation" aria-label="Main navigation">
             <div class="brand">
-                <img src="assets/img/pandara logo.png" alt="Pandara Samaja Logo" />
+                <img src="assets/img/pandara logo.png" alt="Nikhila Odisha Pandara Samaja Logo" />
                 <span>ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</span>
             </div>
             <button class="nav-toggle" aria-label="Toggle navigation">
@@ -47,33 +53,21 @@
                     <a href="matrimony.html">Matrimony</a>
                 </li>
                 <li>
-                    <a href="blogs.html">Recent Blogs</a>
-                </li>
-                <li>
-                    <a href="admin.html">Admin</a>
+                    <a href="blogs.html">Blogs</a>
                 </li>
             </ul>
         </nav>
     </header>
 
-    <section class="ticker" aria-label="Pandara Samaja scrolling title">
-        <div class="ticker__track">
-            <div class="ticker__item">
-                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-            </div>
-            <!-- duplicate for seamless loop -->
-            <div class="ticker__item" aria-hidden="true">
-                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-                ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
-            </div>
-        </div>
-    </section>
+    <!-- Announcement bar – replaces old scrolling ticker -->
+    <div class="announcement-bar" role="alert" aria-label="Announcements">
+        <span class="announcement-icon">📢</span>
+        <span class="announcement-text">ସମାଜର ଆସନ୍ତା ସଭା ତାରିଖ ଶୀଘ୍ର ଘୋଷଣା କରାଯିବ | Next meeting date will be announced
+            soon</span>
+    </div>
 
 
-    <main>
+    <main id="mainContent">
         <!-- Hero / banner -->
         <section class="hero hero--rings hero-full">
             <div class="hero-inner">
@@ -86,25 +80,23 @@
 
                 <div class="hero-copy">
                     <h1 class="hero-title">ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</h1>
-                    <p class="hero-tagline">ସମ୍ପ୍ରଦାୟ, ସହଯୋଗ ଓ ସମୃଦ୍ଧି ପାଇଁ ଏକତାର ମଞ୍ଚ ।</p>
+                    <p class="hero-subtitle">Nikhila Odisha Pandara Samaja</p>
+                    <p class="hero-tagline">ସମ୍ପ୍ରଦାୟ, ସହଯୋଗ ଓ ସମୃଦ୍ଧି ପାଇଁ ଏକତାର ମଞ୍ଚ ।<br>
+                        <span lang="en" style="font-size: 0.85em; opacity: 0.85;">A united platform for community,
+                            collaboration & prosperity.</span>
+                    </p>
 
                     <div class="hero-actions">
-                        <a class="btn btn-outline" href="members.html"
-                            onclick="trackHeroClick('Members Directory')">Members Directory</a>
+                        <a class="btn btn-primary" href="members.html" onclick="trackHeroClick('Members Directory')">📋
+                            Members Directory</a>
 
-                        <a class="btn btn-outline" href="blogs.html" onclick="trackHeroClick('Recent Blogs')">Recent
-                            Blogs</a>
+                        <a class="btn btn-outline" href="matrimony.html" onclick="trackHeroClick('Matrimony')">💍
+                            Matrimony</a>
 
-                        <a class="btn btn-outline" href="matrimony.html"
-                            onclick="trackHeroClick('Matrimony')">Matrimony</a>
+                        <a class="btn btn-outline" href="about.html" onclick="trackHeroClick('About Us')">ℹ️ About
+                            Us</a>
                     </div>
                 </div>
-
-                <!-- QR badge now participates in the grid -->
-                <a class="qr-badge" href="https://nikhilaodishapandarasamaja.in/" target="_blank" rel="noopener">
-                    <div class="qr-canvas" id="siteQR" aria-label="QR code for Pandara Samaja website"></div>
-                    <span class="qr-caption">Scan to open in Mobile</span>
-                </a>
             </div>
         </section>
 
@@ -246,23 +238,42 @@
 
         <!-- Updates -->
         <section class="updates">
-            <h2 class="section-title">Updates</h2>
+            <h2 class="section-title">ସୂଚନା | Updates</h2>
             <ul class="updates-list">
-                <li>📣 ଆସନ୍ତା ସଭା ତାରିଖ —
-                    <strong>ଶୀଘ୍ର ଘୋଷଣା</strong>.
-                </li>
-                <li>🗂️ Members data import — ଚାଲୁଛି, ଶୀଘ୍ର ନୂଆ ବିବରଣୀ ଯୋଡ଼ାହେବ ।</li>
+                <li>📣 ଆସନ୍ତା ସଭା ତାରିଖ — <strong>ଶୀଘ୍ର ଘୋଷଣା</strong> | Next meeting date — <em>to be announced
+                        soon</em></li>
+                <li>🗂️ Members data import — ଚାଲୁଛି, ଶୀଘ୍ର ନୂଆ ବିବରଣୀ ଯୋଡ଼ାହେବ | Member data import in progress</li>
+                <li>💍 Matrimony section launched — <a href="matrimony.html">ପ୍ରୋଫାଇଲ୍ ଦେଖନ୍ତୁ | View profiles</a></li>
             </ul>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact-section" id="contact">
+            <h2 class="section-title">ସମ୍ପର୍କ | Contact</h2>
+            <div class="contact-grid">
+                <div class="contact-card">
+                    <span class="contact-icon">📧</span>
+                    <h3>Email</h3>
+                    <a href="mailto:pandarasamaja@gmail.com">pandarasamaja@gmail.com</a>
+                </div>
+                <div class="contact-card">
+                    <span class="contact-icon">📱</span>
+                    <h3>Phone</h3>
+                    <p>Contact through your district leaders</p>
+                </div>
+                <div class="contact-card">
+                    <span class="contact-icon">📍</span>
+                    <h3>Odisha, India</h3>
+                    <p>Active across all districts</p>
+                </div>
+            </div>
         </section>
     </main>
 
     <footer class="site-footer">
         <div class="footer-content">
-            <p>Total Visitors:</p>
-            <img class="visitor-counter"
-                src="https://hitwebcounter.com/counter/counter.php?page=21260436&style=0001&nbdigits=5&type=page&initCount=144"
-                alt="Visit Counter" />
-            <p>© <span id="year"></span> Pramila Consultancy</p>
+            <p>© <span id="year"></span> ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ | Nikhila Odisha Pandara Samaja</p>
+            <p style="font-size: 0.8rem; opacity: 0.7; margin-top: 0.3rem;">Developed by Pramila Consultancy</p>
         </div>
     </footer>
 
@@ -329,72 +340,6 @@
     </script>
     <script src="assets/js/config.js"></script>
     <script src="assets/js/main.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-    <script>
-        (function () {
-            const SITE_URL = "https://nikhilaodishapandarasamaja.in/";
-            const holder = document.getElementById("siteQR");
-
-            function fallbackImg() {
-                const img = new Image();
-                img.alt = "QR code";
-                img.src = "https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=1&data=" + encodeURIComponent(SITE_URL);
-                holder.innerHTML = "";
-                holder.appendChild(img);
-            }
-
-            function qrSize() {
-                const w = window.innerWidth;
-                if (w <= 400)
-                    return 140;
-
-
-                if (w <= 640)
-                    return 160;
-
-
-                if (w <= 1024)
-                    return 180;
-
-
-                return 240;
-            }
-
-            function renderQR() {
-                const size = qrSize();
-                holder.innerHTML = "";
-                // prefer canvas
-                if (!window.QRCode || !QRCode.toCanvas)
-                    return fallbackImg();
-
-
-
-                const canvas = document.createElement("canvas");
-                holder.appendChild(canvas);
-                QRCode.toCanvas(canvas, SITE_URL, {
-                    width: size,
-                    margin: 1,
-                    color: {
-                        dark: "#0a2540",
-                        light: "#ffffff"
-                    }
-                }, err => {
-                    if (err)
-                        fallbackImg();
-
-
-                });
-            }
-
-            // Render and update on resize (debounced)
-            renderQR();
-            let t;
-            window.addEventListener("resize", () => {
-                clearTimeout(t);
-                t = setTimeout(renderQR, 150);
-            });
-        })();
-    </script>
 
 
 </body>

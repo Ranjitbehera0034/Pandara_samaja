@@ -162,7 +162,9 @@ a:hover {
 
 /* ───── WELCOME / HERO ───────────────────────────── */
 #welcome,
-.welcome {}
+.welcome {
+  display: block;
+}
 
 /* keep the old anchor working if linked elsewhere */
 
@@ -1754,4 +1756,146 @@ body {
     padding-left: 1rem;
     padding-right: 1rem;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SKIP LINK (Accessibility)
+   ═══════════════════════════════════════════════════════════════ */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  padding: 0.6rem 1.2rem;
+  background: #0a4a96;
+  color: #fff;
+  border-radius: 0 0 8px 8px;
+  z-index: 99999;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.25s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ANNOUNCEMENT BAR (replaces ticker)
+   ═══════════════════════════════════════════════════════════════ */
+.announcement-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, #0a3d7a, #0a4a96);
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-align: center;
+  flex-wrap: wrap;
+}
+
+.announcement-icon {
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.announcement-text {
+  line-height: 1.4;
+}
+
+@media (max-width: 480px) {
+  .announcement-bar {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.8rem;
+    gap: 0.4rem;
+  }
+}
+
+/* ── Hero subtitle ────────────────────────────── */
+.hero-subtitle {
+  margin: 0 0 0.4rem;
+  font-size: clamp(14px, 2vw, 18px);
+  color: rgba(255, 255, 255, .75);
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTACT SECTION
+   ═══════════════════════════════════════════════════════════════ */
+.contact-section {
+  max-width: 1000px;
+  margin: 0 auto 2rem;
+  padding: 0 1rem;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+  margin-top: 1rem;
+}
+
+.contact-card {
+  background: #f8fafd;
+  border: 1px solid #e7eef6;
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.contact-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(10, 70, 150, .1);
+}
+
+.contact-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.contact-card h3 {
+  margin: 0 0 0.3rem;
+  font-size: 1.05rem;
+  color: #0a4a96;
+}
+
+.contact-card p,
+.contact-card a {
+  font-size: 0.92rem;
+  color: #475569;
+  word-break: break-word;
+}
+
+.contact-card a:hover {
+  color: #0a4a96;
+}
+
+/* Dark mode overrides for new elements */
+html.dark .announcement-bar {
+  background: linear-gradient(135deg, #0d1b33, #141e30);
+}
+
+html.dark .contact-card {
+  background: #1a2332;
+  border-color: rgba(255, 255, 255, .08);
+  color: #d1d9e0;
+}
+
+html.dark .contact-card h3 {
+  color: #6aadff;
+}
+
+html.dark .contact-card p,
+html.dark .contact-card a {
+  color: #8899aa;
+}
+
+html.dark .contact-card a:hover {
+  color: #6aadff;
 }
