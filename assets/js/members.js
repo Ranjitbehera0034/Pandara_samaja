@@ -109,6 +109,13 @@ function showLeader(district) {
 (async function init() {
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
+  // Get loader and table elements
+  const loader = document.getElementById('membersLoader');
+  const memberTable = document.getElementById('memberTable');
+
+  // Initially hide the table while loading
+  if (memberTable) memberTable.style.display = 'none';
+
   try {
     const res = await fetch(`${API_BASE_URL}/api/members`);
     if (!res.ok) throw new Error(`API Error: ${res.status}`);
@@ -118,6 +125,16 @@ function showLeader(district) {
     console.error("Failed to load members:", err);
     allMembers = [];
   }
+
+  // Hide loader with smooth transition and show table
+  if (loader) {
+    loader.classList.add('hidden');
+    // Remove from DOM after transition completes
+    setTimeout(() => {
+      loader.style.display = 'none';
+    }, 500);
+  }
+  if (memberTable) memberTable.style.display = '';
 
   // populate District dropdown
   if (allMembers.length > 0) {

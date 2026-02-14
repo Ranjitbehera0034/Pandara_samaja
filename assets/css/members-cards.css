@@ -207,6 +207,138 @@ button.dt-button:hover {
   padding: 0 1rem;
 }
 
+/* ── Members Loader ──────────────────────────────────────────── */
+.members-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  gap: 1.2rem;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.members-loader.hidden {
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
+  position: absolute;
+  visibility: hidden;
+}
+
+/* Spinner wrapper */
+.loader-spinner {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: grid;
+  place-items: center;
+}
+
+/* Outer ring */
+.loader-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid rgba(10, 74, 150, 0.12);
+  border-top-color: #0a4a96;
+  animation: loaderSpin 1.1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+/* Inner ring – smaller, opposite direction */
+.loader-ring--2 {
+  inset: 10px;
+  border-width: 2.5px;
+  border-top-color: #4f9bff;
+  animation-direction: reverse;
+  animation-duration: 0.85s;
+}
+
+.loader-logo {
+  z-index: 1;
+  opacity: 0.7;
+  animation: loaderPulse 2s ease-in-out infinite;
+}
+
+@keyframes loaderSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loaderPulse {
+
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.92);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Text */
+.loader-text {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0a4a96;
+  letter-spacing: 0.2px;
+}
+
+.loader-subtext {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7f99;
+}
+
+/* Animated dots "..." */
+.loader-dots::after {
+  content: '';
+  display: inline-block;
+  width: 1.5em;
+  text-align: left;
+  animation: loaderDots 1.4s steps(4, end) infinite;
+}
+
+@keyframes loaderDots {
+  0% {
+    content: '';
+  }
+
+  25% {
+    content: '.';
+  }
+
+  50% {
+    content: '..';
+  }
+
+  75% {
+    content: '...';
+  }
+}
+
+/* Mobile tweak */
+@media (max-width: 480px) {
+  .loader-spinner {
+    width: 64px;
+    height: 64px;
+  }
+
+  .loader-logo {
+    width: 30px;
+    height: 30px;
+  }
+
+  .loader-text {
+    font-size: 0.95rem;
+  }
+}
+
 .page-title {
   margin: 0 0 1.25rem;
   font-size: clamp(1.8rem, 3vw, 2.6rem);
