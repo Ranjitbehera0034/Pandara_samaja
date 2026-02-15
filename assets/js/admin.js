@@ -1117,7 +1117,7 @@ function populateDistrictFilter() {
 
   filterDistrict.innerHTML = '<option value="">All Districts</option>';
   districts.forEach(d => {
-    filterDistrict.innerHTML += `< option value = "${d}" > ${d}</option > `;
+    filterDistrict.innerHTML += `<option value="${d}">${d}</option>`;
   });
 
   // Reset dependents
@@ -1143,7 +1143,7 @@ if (filterDistrict) {
         .filter(Boolean))].sort();
 
       talukas.forEach(t => {
-        filterTaluka.innerHTML += `< option value = "${t}" > ${t}</option > `;
+        filterTaluka.innerHTML += `<option value="${t}">${t}</option>`;
       });
     }
 
@@ -1168,7 +1168,7 @@ if (filterDistrict) {
         .filter(Boolean))].sort();
 
       panchayats.forEach(p => {
-        filterPanchayat.innerHTML += `< option value = "${p}" > ${p}</option > `;
+        filterPanchayat.innerHTML += `<option value="${p}">${p}</option>`;
       });
     }
   });
