@@ -4,16 +4,15 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="Read the latest blogs, announcements & community news from Nikhila Odisha Pandara Samaja." />
     <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png" />
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE9R5DCCNT"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag() {
-            dataLayer.push(arguments);
-        }
+        function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
-
         gtag('config', 'G-LE9R5DCCNT');
     </script>
     <script src="assets/js/analytics.js?v=2.1" defer></script>
@@ -33,7 +32,7 @@
             display: none !important;
         }
     </style>
-    <link rel="stylesheet" href="assets/css/blogs.css?v=2.1" />
+    <link rel="stylesheet" href="assets/css/blogs.css?v=3.0" />
 </head>
 
 <body>
@@ -80,6 +79,7 @@
             </ul>
         </nav>
     </header>
+
     <!-- Announcement bar -->
     <div class="announcement-bar" role="alert" aria-label="Announcements">
         <span class="announcement-icon">📢</span>
@@ -88,19 +88,67 @@
             <span class="lang-en">Next meeting date will be announced soon</span>
         </span>
     </div>
-    <main>
-        <section class="blog-section">
-            <h1>
-                <span class="lang-or">ସମ୍ପ୍ରତି ବ୍ଲଗ ଓ ଘୋଷଣା</span>
-                <span class="lang-en">Recent Blogs &amp; Announcements</span>
-            </h1>
-            <div id="blog-list" class="blog-list"></div>
-        </section>
-    </main>
+
+    <div class="blog-page">
+        <main>
+            <!-- ═══ Hero ═══ -->
+            <section class="blog-hero">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+
+                <div class="blog-hero-badge">
+                    <span class="dot"></span>
+                    <span class="lang-or">ସମ୍ପ୍ରତି</span>
+                    <span class="lang-en">Latest</span>
+                </div>
+
+                <h1>
+                    <span class="lang-or">ବ୍ଲଗ ଓ ଘୋଷଣା</span>
+                    <span class="lang-en">Blogs & Announcements</span>
+                </h1>
+
+                <p>
+                    <span class="lang-or">ସମାଜର ସାମ୍ପ୍ରତିକ ଖବର, ଘୋଷଣା ଓ ଲେଖା ପଢ଼ନ୍ତୁ</span>
+                    <span class="lang-en">Read the latest news, announcements & articles from our community</span>
+                </p>
+
+                <div class="blog-search-wrap">
+                    <span class="blog-search-icon">🔍</span>
+                    <input type="text" id="blogSearch" class="blog-search" placeholder="Search posts...">
+                </div>
+            </section>
+
+            <!-- ═══ Blog Content ═══ -->
+            <div class="blog-content">
+                <!-- Filter tabs -->
+                <div class="blog-filter-bar">
+                    <button class="blog-filter-tab active" data-filter="all">
+                        <span class="lang-or">ସବୁ</span>
+                        <span class="lang-en">All</span>
+                    </button>
+                    <button class="blog-filter-tab" data-filter="recent">
+                        <span class="lang-or">ସାମ୍ପ୍ରତିକ</span>
+                        <span class="lang-en">Recent</span>
+                    </button>
+                    <button class="blog-filter-tab" data-filter="oldest">
+                        <span class="lang-or">ପୂର୍ବତନ</span>
+                        <span class="lang-en">Oldest</span>
+                    </button>
+                </div>
+
+                <!-- Post count -->
+                <div class="blog-count" id="blogCount"></div>
+
+                <!-- Blog list -->
+                <div id="blog-list" class="blog-list"></div>
+            </div>
+        </main>
+    </div>
 
     <script src="assets/js/config.js?v=2.1"></script>
     <script src="assets/js/main.js?v=2.1"></script>
-    <script src="assets/js/blogs.js?v=2.1"></script>
+    <script src="assets/js/blogs.js?v=3.0"></script>
 
 </body>
 

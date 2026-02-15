@@ -1,4 +1,4 @@
-// File: assets/js/matrimony.js
+// File: assets/js/matrimony.js — Netflix-Level Redesign
 
 const container = document.getElementById("profile-list");
 const modal = document.getElementById("profile-modal");
@@ -16,21 +16,103 @@ let currentIndex = -1;
 function imageURL(raw) {
   if (!raw) return '';
   const m = raw.match(/id=([^&]+)/);
-  // Use thumbnail API with large size (w1000) to avoid strict download quotas (429 errors)
   return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000` : raw;
 }
 
+/* ─── Stats Counter Animation ─── */
+function animateCounter(el, target) {
+  if (!el) return;
+  let current = 0;
+  const step = Math.max(1, Math.ceil(target / 40));
+  const timer = setInterval(() => {
+    current += step;
+    if (current >= target) {
+      current = target;
+      clearInterval(timer);
+    }
+    el.textContent = current;
+  }, 30);
+}
+
+/* ─── Fetch & display stats ─── */
+async function loadStats() {
+  try {
+    const [maleRes, femaleRes] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/candidates?gender=male`),
+      fetch(`${API_BASE_URL}/api/candidates?gender=female`)
+    ]);
+    const males = await maleRes.json();
+    const females = await femaleRes.json();
+    const all = [...males, ...females];
+    const active = all.filter(c => !c.isMatched);
+    const matched = all.filter(c => c.isMatched);
+
+    animateCounter(document.getElementById('statProfiles'), active.length);
+    animateCounter(document.getElementById('statMatched'), matched.length);
+  } catch (e) {
+    console.warn('Stats unavailable:', e);
+  }
+}
+
+loadStats();
+
+/* ─── Skeleton Loading ─── */
+function showSkeleton() {
+  container.innerHTML = `
+    <div class="skeleton-grid">
+      ${Array(8).fill('').map(() => `
+        <div class="skeleton-card">
+          <div class="skeleton-img"></div>
+          <div class="skeleton-text"></div>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+/* ─── Profile Rendering ─── */
 async function renderProfiles(gender) {
-  container.innerHTML = "<p>Loading profiles...</p>";
+  showSkeleton();
+  const heroEl = document.querySelector('.matrimony-hero');
+  if (heroEl) heroEl.style.display = 'none';
+
   try {
     const res = await fetch(`${API_BASE_URL}/api/candidates?gender=${gender}`);
     const data = await res.json();
     const filtered = data.filter(c => !c.isMatched);
 
-    filtered.sort((a, b) => b.age - a.age); // Oldest to youngest
-    currentProfiles = filtered; // Store for references
+    filtered.sort((a, b) => b.age - a.age);
+    currentProfiles = filtered;
 
     container.innerHTML = "";
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">💍</div>
+          <p>
+            <span class="lang-or">ବର୍ତ୍ତମାନ କୌଣସି ପ୍ରୋଫାଇଲ୍ ଉପಲବ୍ଧ ନାହିଁ</span>
+            <span class="lang-en">No profiles available at the moment</span>
+          </p>
+        </div>`;
+      backToGender.style.display = "block";
+      return;
+    }
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'profiles-header';
+    header.innerHTML = `
+      <h2>
+        <span class="lang-or">${gender === 'male' ? 'ବର' : 'କନ୍ୟା'} ପ୍ରୋଫାଇଲ୍</span>
+        <span class="lang-en">${gender === 'male' ? 'Groom' : 'Bride'} Profiles</span>
+      </h2>
+      <div class="profiles-count">
+        <span class="lang-or">${filtered.length} ଟି ପ୍ରୋଫାଇଲ୍ ଉପಲବ୍ଧ</span>
+        <span class="lang-en">${filtered.length} profiles available</span>
+      </div>`;
+    container.appendChild(header);
+
+    // Grid
     const cardList = document.createElement("div");
     cardList.className = "card-list";
 
@@ -38,56 +120,81 @@ async function renderProfiles(gender) {
       const imgUrl = imageURL(person.photo);
       const card = document.createElement("div");
       card.className = "profile-card";
+      card.style.animationDelay = `${index * 0.05}s`;
+
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      const id = person.id || person._id;
 
       let adminHtml = '';
-      if (localStorage.getItem("isAdmin") === "true") {
-        const id = person.id || person._id;
-        adminHtml = `<button 
-              style="margin-top:10px; width:100%; padding:8px; background:#28a745; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;"
-              onclick="event.stopPropagation(); window.openMatchModal('${id}')"
-          >✅ Mark Matched</button>`;
+      if (isAdmin) {
+        adminHtml = `<button class="admin-match-btn" onclick="event.stopPropagation(); window.openMatchModal('${id}')">✅ Match</button>`;
       }
 
-      // Add loading="lazy" and referrerpolicy="no-referrer" to reduce load impact
       card.innerHTML = `
-  <img src="${imgUrl}" alt="${person.name}" loading="lazy" referrerpolicy="no-referrer">
-  <p>${person.name}</p>
-  ${adminHtml}
-`;
+        <img src="${imgUrl}" alt="${person.name}" loading="lazy" referrerpolicy="no-referrer"
+             onerror="this.onerror=null; this.style.background='linear-gradient(135deg,#1a1a2e,#16213e)'; this.style.objectFit='contain';">
+        <div class="card-info">
+          <p class="card-name">${person.name}</p>
+          <div class="card-action">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+            </svg>
+            <span class="lang-or">ଦେଖନ୍ତୁ</span>
+            <span class="lang-en">View Profile</span>
+          </div>
+        </div>
+        ${adminHtml}`;
 
-      card.querySelector("img")
-        .addEventListener("click", () => showModal(index));
+      card.addEventListener("click", (e) => {
+        if (e.target.closest('.admin-match-btn')) return;
+        showModal(index);
+      });
 
       cardList.appendChild(card);
     });
 
     container.appendChild(cardList);
     backToGender.style.display = "block";
+
+    // Animate cards in with stagger
+    requestAnimationFrame(() => {
+      const cards = cardList.querySelectorAll('.profile-card');
+      cards.forEach((c, i) => {
+        c.style.opacity = '0';
+        c.style.transform = 'translateY(30px)';
+        setTimeout(() => {
+          c.style.transition = 'all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)';
+          c.style.opacity = '1';
+          c.style.transform = 'translateY(0)';
+        }, i * 60);
+      });
+    });
+
   } catch (err) {
     console.error("Error loading profiles:", err);
-    container.innerHTML = "<p>Failed to load profiles</p>";
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <p>
+          <span class="lang-or">ପ୍ରୋଫାଇଲ୍ ଲୋଡ୍ କରିବାରେ ତ୍ରୁଟି</span>
+          <span class="lang-en">Failed to load profiles</span>
+        </p>
+      </div>`;
   }
 }
 
+/* ─── Modal Functions ─── */
 function updateModalView(p) {
-  document.getElementById("modal-photo").src = imageURL(p.photo);
-  // When switching images quickly, it's nice to reset or update name
-  document.getElementById("modal-name").textContent = p.name;
-
-  // Hide details that are now in the image (or clear them if element exists)
-  const fields = ["modal-age", "modal-height", "modal-blood", "modal-gotra", "modal-edu", "modal-occ", "modal-father", "modal-mother", "modal-phone", "modal-email", "modal-address"];
-  fields.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = "";
-  });
+  const photo = document.getElementById("modal-photo");
+  const name = document.getElementById("modal-name");
+  if (photo) photo.src = imageURL(p.photo);
+  if (name) name.textContent = p.name;
 }
 
 function showModal(index) {
   if (index < 0 || index >= currentProfiles.length) return;
   currentIndex = index;
-  const p = currentProfiles[currentIndex];
-
-  updateModalView(p);
+  updateModalView(currentProfiles[currentIndex]);
   modal.classList.remove("hidden");
 }
 
@@ -105,7 +212,7 @@ function showPrev() {
   }
 }
 
-// Swipe Logic
+/* ─── Touch / Swipe ─── */
 let touchStartX = 0;
 let touchStartY = 0;
 let touchEndX = 0;
@@ -126,22 +233,14 @@ function handleSwipe() {
   const threshold = 50;
   const xDiff = touchEndX - touchStartX;
   const yDiff = touchEndY - touchStartY;
-
-  // If vertical movement is greater than horizontal, assume scroll and do nothing
   if (Math.abs(yDiff) > Math.abs(xDiff)) return;
-
   if (Math.abs(xDiff) > threshold) {
-    if (xDiff < 0) {
-      // Swipe Left -> Next
-      showNext();
-    } else {
-      // Swipe Right -> Prev
-      showPrev();
-    }
+    if (xDiff < 0) showNext();
+    else showPrev();
   }
 }
 
-// Keyboard navigation support as bonus
+/* ─── Keyboard Navigation ─── */
 document.addEventListener('keydown', (e) => {
   if (modal.classList.contains('hidden')) return;
   if (e.key === 'ArrowRight') showNext();
@@ -149,18 +248,17 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') modal.classList.add("hidden");
 });
 
-
-
+/* ─── Button Listeners ─── */
 if (prevBtn) {
   prevBtn.addEventListener("click", (e) => {
-    e.stopPropagation(); // prevent modal close
+    e.stopPropagation();
     showPrev();
   });
 }
 
 if (nextBtn) {
   nextBtn.addEventListener("click", (e) => {
-    e.stopPropagation(); // prevent modal close
+    e.stopPropagation();
     showNext();
   });
 }
@@ -184,27 +282,35 @@ backToGender.addEventListener("click", () => {
   container.innerHTML = "";
   backToGender.style.display = "none";
   genderSelection.style.display = "block";
+  const heroEl = document.querySelector('.matrimony-hero');
+  if (heroEl) heroEl.style.display = '';
 });
 
-/* =========================================
+/* ═════════════════════════════════════════════════════════════
    ADMIN MATCH LOGIC
-   ========================================= */
+   ═════════════════════════════════════════════════════════════ */
 
-// Simple Toast function since matrimony.js doesn't have it
 function showToast(msg, type = 'success') {
   const el = document.createElement('div');
   el.textContent = msg;
   el.style.cssText = `
-        position: fixed; bottom: 20px; right: 20px; 
-        background: ${type === 'success' ? '#28a745' : '#dc3545'}; 
-        color: white; padding: 12px 24px; border-radius: 8px; z-index: 3000;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 600;
-        opacity: 1; transition: opacity 0.3s;
-    `;
+    position: fixed; bottom: 20px; right: 20px;
+    background: ${type === 'success' ? 'linear-gradient(135deg, #28a745, #20c997)' : 'linear-gradient(135deg, #e50914, #ff3d47)'};
+    color: white; padding: 14px 28px; border-radius: 12px; z-index: 3000;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3); font-weight: 700;
+    font-family: 'Inter', sans-serif; font-size: 0.9rem;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  `;
   document.body.appendChild(el);
+  requestAnimationFrame(() => {
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+  });
   setTimeout(() => {
     el.style.opacity = '0';
-    setTimeout(() => el.remove(), 300);
+    el.style.transform = 'translateY(20px)';
+    setTimeout(() => el.remove(), 400);
   }, 3000);
 }
 
@@ -251,7 +357,6 @@ if (document.getElementById('matchForm')) {
 
       showToast("Marked as Matched!", "success");
       closeMatchModal();
-      // Just reload to refresh the list cleanly
       location.reload();
     } catch (err) {
       console.error(err);
