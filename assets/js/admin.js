@@ -918,6 +918,10 @@ function showAddMemberModal() {
   document.getElementById('memberAadhaar').value = '';
   document.getElementById('memberAddress').value = '';
 
+  // Reset head of family gender
+  const headGenderEl = document.getElementById('headGender');
+  if (headGenderEl) headGenderEl.value = '';
+
   // Clear and add one empty family member row
   document.getElementById('familyMembersContainer').innerHTML = '';
   addFamilyMemberRow();
@@ -963,6 +967,9 @@ async function editMember(id) {
   document.getElementById('membershipNo').disabled = false;
   document.getElementById('membershipNo').readOnly = true;
   document.getElementById('memberName').value = member.name || '';
+  // Set head of family gender
+  const headGenderEl = document.getElementById('headGender');
+  if (headGenderEl) headGenderEl.value = member.head_gender || '';
   document.getElementById('memberMobile').value = member.mobile || '';
   document.getElementById('memberAadhaar').value = member.aadhar_no || '';
   document.getElementById('memberDistrict').value = member.district || '';
@@ -1020,9 +1027,11 @@ if (document.getElementById('memberForm')) {
     const editId = document.getElementById('memberId').value;
     const isEditing = !!editId;
 
+    const headGender = (document.getElementById('headGender')?.value || '').trim();
     const memberData = {
       membership_no: document.getElementById('membershipNo').value.trim(),
       name: document.getElementById('memberName').value.trim(),
+      head_gender: headGender,
       mobile: document.getElementById('memberMobile').value.trim(),
       aadhar_no: document.getElementById('memberAadhaar').value.trim(),
       district: document.getElementById('memberDistrict').value.trim(),
@@ -1036,9 +1045,13 @@ if (document.getElementById('memberForm')) {
     const familyMembers = collectFamilyMembers();
     memberData.family_members = familyMembers;
 
-    // Auto-calculate male/female counts from family members
-    memberData.male = familyMembers.filter(fm => fm.gender === 'Male').length;
-    memberData.female = familyMembers.filter(fm => fm.gender === 'Female').length;
+    // Auto-calculate male/female counts (head of family + other family members)
+    let maleCount = familyMembers.filter(fm => fm.gender === 'Male').length;
+    let femaleCount = familyMembers.filter(fm => fm.gender === 'Female').length;
+    if (headGender === 'Male') maleCount++;
+    else if (headGender === 'Female') femaleCount++;
+    memberData.male = maleCount;
+    memberData.female = femaleCount;
 
     if (!memberData.membership_no) {
       showToast('Please enter a Membership No.', 'error');
@@ -1876,10 +1889,16 @@ window.updateFamilyMemberCounts = function () {
   const genders = container.querySelectorAll('.fm-gender');
   let male = 0, female = 0;
 
+  // Count family member rows
   genders.forEach(sel => {
     if (sel.value === 'Male') male++;
     else if (sel.value === 'Female') female++;
   });
+
+  // Include head of family in the count
+  const headGender = (document.getElementById('headGender')?.value || '').trim();
+  if (headGender === 'Male') male++;
+  else if (headGender === 'Female') female++;
 
   const maleEl = document.getElementById('autoMaleCount');
   const femaleEl = document.getElementById('autoFemaleCount');
