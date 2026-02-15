@@ -5,6 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Find your perfect life partner within the Pandara Samaja community. Browse verified profiles from across Odisha.">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png" />
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
     <title>Matrimony | ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</title>
@@ -22,7 +24,7 @@
             display: none !important;
         }
     </style>
-    <link rel="stylesheet" href="assets/css/matrimony.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/matrimony.css?v=3.0">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE9R5DCCNT"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -30,7 +32,6 @@
             dataLayer.push(arguments);
         }
         gtag('js', new Date());
-
         gtag('config', 'G-LE9R5DCCNT');
     </script>
     <script src="assets/js/analytics.js?v=2.1" defer></script>
@@ -80,6 +81,7 @@
             </ul>
         </nav>
     </header>
+
     <!-- Announcement bar -->
     <div class="announcement-bar" role="alert" aria-label="Announcements">
         <span class="announcement-icon">📢</span>
@@ -88,110 +90,161 @@
             <span class="lang-en">Next meeting date will be announced soon</span>
         </span>
     </div>
+
     <main>
+        <!-- ═══ Cinematic Hero ═══ -->
+        <section class="matrimony-hero">
+            <!-- Sparkle particles -->
+            <div class="hero-sparkle"></div>
+            <div class="hero-sparkle"></div>
+            <div class="hero-sparkle"></div>
+            <div class="hero-sparkle"></div>
+            <div class="hero-sparkle"></div>
+
+            <div class="hero-badge">
+                <span class="pulse-dot"></span>
+                <span class="lang-or">ବିଶ୍ୱସ୍ତ ସମ୍ପର୍କ</span>
+                <span class="lang-en">Trusted Connections</span>
+            </div>
+
+            <h1 class="hero-title">
+                <span class="lang-or">ଆପଣଙ୍କ ଜୀବନ ସାଥୀ ଖୋଜନ୍ତୁ</span>
+                <span class="lang-en">Find Your Life Partner</span>
+            </h1>
+
+            <p class="hero-subtitle">
+                <span class="lang-or">ପନ୍ଦରା ସମାଜର ବିଶ୍ୱସ୍ତ ପ୍ରୋଫାଇଲ୍ ମଧ୍ୟରୁ ଆପଣଙ୍କ ସପନା ସାଥୀ ଖୋଜନ୍ତୁ । ସମସ୍ତ ପ୍ରୋଫାଇଲ୍
+                    ଯାଞ୍ଚ ହୋଇଥାଏ ।</span>
+                <span class="lang-en">Discover verified profiles from the Pandara community across Odisha. Every
+                    profile is community-verified.</span>
+            </p>
+
+            <div class="hero-stats" id="heroStats">
+                <div class="hero-stat">
+                    <div class="hero-stat-number" id="statProfiles">--</div>
+                    <div class="hero-stat-label">
+                        <span class="lang-or">ପ୍ରୋଫାଇଲ୍</span>
+                        <span class="lang-en">Profiles</span>
+                    </div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number" id="statMatched">--</div>
+                    <div class="hero-stat-label">
+                        <span class="lang-or">ସଫଳ ମେଳ</span>
+                        <span class="lang-en">Matched</span>
+                    </div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number">100%</div>
+                    <div class="hero-stat-label">
+                        <span class="lang-or">ଯାଞ୍ଚ</span>
+                        <span class="lang-en">Verified</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ Gender Selection ═══ -->
         <div id="gender-selection" class="gender-panel">
             <h2>
                 <span class="lang-or">ଆପଣ କାହାକୁ ଖୋଜୁଛନ୍ତି?</span>
-                <span class="lang-en">Looking for?</span>
+                <span class="lang-en">Who are you looking for?</span>
             </h2>
+            <p class="gender-sub">
+                <span class="lang-or">ଆପଣଙ୍କ ପସନ୍ଦ ଅନୁଯାୟୀ ପ୍ରୋଫାଇଲ୍ ଦେଖନ୍ତୁ</span>
+                <span class="lang-en">Browse profiles based on your preference</span>
+            </p>
             <div class="gender-choices">
                 <div id="selectMale" class="gender-card">
                     <img src="assets/img/male.jpg" alt="Male">
                     <p>
-                        <span class="lang-or">ପୁରୁଷ</span>
-                        <span class="lang-en">Male</span>
+                        <span class="lang-or">ବର</span>
+                        <span class="lang-en">Groom</span>
                     </p>
+                    <div class="gender-arrow">→</div>
                 </div>
                 <div id="selectFemale" class="gender-card">
                     <img src="assets/img/female.jpg" alt="Female">
                     <p>
-                        <span class="lang-or">ମହିଳା</span>
-                        <span class="lang-en">Female</span>
+                        <span class="lang-or">କନ୍ୟା</span>
+                        <span class="lang-en">Bride</span>
                     </p>
+                    <div class="gender-arrow">→</div>
                 </div>
             </div>
         </div>
 
-        <button id="backToGender" style="display:none;margin:1rem auto;">
-            <span class="lang-or">⬅ ପଛକୁ</span>
-            <span class="lang-en">⬅ Back</span>
+        <!-- Back button -->
+        <button id="backToGender">
+            <span class="lang-or">← ପଛକୁ ଫେରନ୍ତୁ</span>
+            <span class="lang-en">← Back to Selection</span>
         </button>
 
+        <!-- Profile list -->
         <section id="profile-list"></section>
 
-        <!-- Modal - Navigation buttons are now OUTSIDE modal-content -->
+        <!-- ═══ Profile Modal — Cinematic ═══ -->
         <div id="profile-modal" class="hidden">
-
-
             <div class="modal-content">
                 <span class="close-btn">&times;</span>
-
                 <div class="modal-body">
                     <div class="modal-left">
                         <button id="prevBtn" class="nav-btn prev">&#10094;</button>
                         <img id="modal-photo" src="" alt="photo">
                         <button id="nextBtn" class="nav-btn next">&#10095;</button>
                     </div>
-
-                    <div class="modal-right" style="width: 100%; text-align: center;">
+                    <div class="modal-right">
                         <h2 id="modal-name"></h2>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Match Candidate Modal (Admin Only) -->
+        <!-- ═══ Match Candidate Modal (Admin Only) ═══ -->
         <div id="matchModal" class="hidden"
-            style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center;">
+            style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); align-items: center; justify-content: center;">
             <div class="modal-content"
-                style="background: white; padding: 2.5rem; border-radius: 12px; width: 90%; max-width: 500px; position: relative;">
+                style="background: linear-gradient(145deg, #1a1a2e, #16213e); padding: 2.5rem; border-radius: 20px; width: 90%; max-width: 500px; position: relative; border: 1px solid rgba(255,255,255,0.08);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h3 style="margin: 0;">
+                    <h3 style="margin: 0; color: #f0f0f0;">
                         <span class="lang-or">ମ୍ୟାଚ୍ ଚିହ୍ନଟ କରନ୍ତୁ</span>
                         <span class="lang-en">Mark as Matched</span>
                     </h3>
                     <button onclick="closeMatchModal()"
-                        style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
+                        style="background: rgba(255,255,255,0.1); border: none; font-size: 20px; cursor: pointer; color: #999; width: 36px; height: 36px; border-radius: 50; display: flex; align-items: center; justify-content: center;">&times;</button>
                 </div>
                 <form id="matchForm">
                     <input type="hidden" id="matchCandidateId">
                     <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                        <label
+                            style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #8899aa; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
                             <span class="lang-or">ସାଥୀଙ୍କ ନାମ *</span>
                             <span class="lang-en">Partner Name *</span>
                         </label>
                         <input type="text" id="partnerName" required
-                            style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                            style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 15px; color: #f0f0f0; box-sizing: border-box;">
                     </div>
                     <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                        <label
+                            style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #8899aa; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
                             <span class="lang-or">ସାଥୀଙ୍କ ଲିଙ୍ଗ *</span>
                             <span class="lang-en">Partner Gender *</span>
                         </label>
                         <select id="partnerGender" required
-                            style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
-                            <option value="">
-                                <span class="lang-or">ଲିଙ୍ଗ ବାଛନ୍ତୁ</span>
-                                <span class="lang-en">Select Gender</span>
-                            </option>
-                            <option value="Male">
-                                <span class="lang-or">ପୁରୁଷ</span>
-                                <span class="lang-en">Male</span>
-                            </option>
-                            <option value="Female">
-                                <span class="lang-or">ମହିଳା</span>
-                                <span class="lang-en">Female</span>
-                            </option>
+                            style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 15px; color: #f0f0f0; box-sizing: border-box;">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male / ପୁରୁଷ</option>
+                            <option value="Female">Female / ମହିଳା</option>
                         </select>
                     </div>
                     <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                        <button type="submit" class="btn primary"
-                            style="flex: 1; padding: 12px; background: #0a4a96; color: white; border:none; border-radius:8px; cursor:pointer;">
+                        <button type="submit"
+                            style="flex: 1; padding: 12px; background: #e50914; color: white; border:none; border-radius:10px; cursor:pointer; font-weight: 700; font-size: 0.95rem; transition: all 0.3s;">
                             <span class="lang-or">ନିଶ୍ଚିତ କରନ୍ତୁ</span>
                             <span class="lang-en">Confirm Match</span>
                         </button>
-                        <button type="button" onclick="closeMatchModal()" class="btn ghost"
-                            style="padding: 12px; background:white; border:1px solid #ddd; border-radius:8px; cursor:pointer;">
+                        <button type="button" onclick="closeMatchModal()"
+                            style="padding: 12px 20px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; cursor:pointer; color: #f0f0f0; font-weight: 600;">
                             <span class="lang-or">ବାତିଲ</span>
                             <span class="lang-en">Cancel</span>
                         </button>
@@ -203,7 +256,7 @@
     </main>
     <script src="assets/js/main.js?v=2.1"></script>
     <script src="assets/js/config.js?v=2.1"></script>
-    <script src="assets/js/matrimony.js?v=2.1"></script>
+    <script src="assets/js/matrimony.js?v=3.0"></script>
 
 </body>
 
