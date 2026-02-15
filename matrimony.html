@@ -1,11 +1,11 @@
 <!-- matrimony.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="or">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matrimony | Nikhila Odisha Pandara Samaja</title>
+    <title>Matrimony | ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</title>
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/matrimony.css">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE9R5DCCNT"></script>
@@ -33,19 +33,34 @@
             </button>
             <ul class="nav-links" id="navLinks">
                 <li>
-                    <a href="index.html">Home</a>
+                    <a href="index.html">
+                        <span class="lang-en">Home</span>
+                        <span class="lang-or">ମୂଳ ପୃଷ୍ଠା</span>
+                    </a>
                 </li>
                 <li>
-                    <a href="about.html">About</a>
+                    <a href="about.html">
+                        <span class="lang-en">About</span>
+                        <span class="lang-or">ପରିଚୟ</span>
+                    </a>
                 </li>
                 <li>
-                    <a href="members.html">Members</a>
+                    <a href="members.html">
+                        <span class="lang-en">Members</span>
+                        <span class="lang-or">ସଦସ୍ୟ</span>
+                    </a>
                 </li>
                 <li>
-                    <a href="matrimony.html" class="active">Matrimony</a>
+                    <a href="matrimony.html" class="active">
+                        <span class="lang-en">Matrimony</span>
+                        <span class="lang-or">ବିବାହ</span>
+                    </a>
                 </li>
                 <li>
-                    <a href="blogs.html">Recent Blogs</a>
+                    <a href="blogs.html">
+                        <span class="lang-en">Blogs</span>
+                        <span class="lang-or">ବ୍ଲଗ</span>
+                    </a>
                 </li>
             </ul>
         </nav>
@@ -53,25 +68,39 @@
     <!-- Announcement bar -->
     <div class="announcement-bar" role="alert" aria-label="Announcements">
         <span class="announcement-icon">📢</span>
-        <span class="announcement-text">ସମାଜର ଆସନ୍ତା ସଭା ତାରିଖ ଶୀଘ୍ର ଘୋଷଣା କରାଯିବ | Next meeting date will be announced
-            soon</span>
+        <span class="announcement-text">
+            <span class="lang-or">ସମାଜର ଆସନ୍ତା ସଭା ତାରିଖ ଶୀଘ୍ର ଘୋଷଣା କରାଯିବ</span>
+            <span class="lang-en">Next meeting date will be announced soon</span>
+        </span>
     </div>
     <main>
         <div id="gender-selection" class="gender-panel">
-            <h2>Looking for?</h2>
+            <h2>
+                <span class="lang-or">ଆପଣ କାହାକୁ ଖୋଜୁଛନ୍ତି?</span>
+                <span class="lang-en">Looking for?</span>
+            </h2>
             <div class="gender-choices">
                 <div id="selectMale" class="gender-card">
                     <img src="assets/img/male.jpg" alt="Male">
-                    <p>Male</p>
+                    <p>
+                        <span class="lang-or">ପୁରୁଷ</span>
+                        <span class="lang-en">Male</span>
+                    </p>
                 </div>
                 <div id="selectFemale" class="gender-card">
                     <img src="assets/img/female.jpg" alt="Female">
-                    <p>Female</p>
+                    <p>
+                        <span class="lang-or">ମହିଳା</span>
+                        <span class="lang-en">Female</span>
+                    </p>
                 </div>
             </div>
         </div>
 
-        <button id="backToGender" style="display:none;margin:1rem auto;">⬅ Back</button>
+        <button id="backToGender" style="display:none;margin:1rem auto;">
+            <span class="lang-or">⬅ ପଛକୁ</span>
+            <span class="lang-en">⬅ Back</span>
+        </button>
 
         <section id="profile-list"></section>
 
@@ -102,34 +131,55 @@
             <div class="modal-content"
                 style="background: white; padding: 2.5rem; border-radius: 12px; width: 90%; max-width: 500px; position: relative;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h3 style="margin: 0;">Mark as Matched</h3>
+                    <h3 style="margin: 0;">
+                        <span class="lang-or">ମ୍ୟାଚ୍ ଚିହ୍ନଟ କରନ୍ତୁ</span>
+                        <span class="lang-en">Mark as Matched</span>
+                    </h3>
                     <button onclick="closeMatchModal()"
                         style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
                 </div>
                 <form id="matchForm">
                     <input type="hidden" id="matchCandidateId">
                     <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Partner
-                            Name *</label>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                            <span class="lang-or">ସାଥୀଙ୍କ ନାମ *</span>
+                            <span class="lang-en">Partner Name *</span>
+                        </label>
                         <input type="text" id="partnerName" required
                             style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
                     </div>
                     <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Partner
-                            Gender *</label>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                            <span class="lang-or">ସାଥୀଙ୍କ ଲିଙ୍ଗ *</span>
+                            <span class="lang-en">Partner Gender *</span>
+                        </label>
                         <select id="partnerGender" required
                             style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
-                            <option value="">Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
+                            <option value="">
+                                <span class="lang-or">ଲିଙ୍ଗ ବାଛନ୍ତୁ</span>
+                                <span class="lang-en">Select Gender</span>
+                            </option>
+                            <option value="Male">
+                                <span class="lang-or">ପୁରୁଷ</span>
+                                <span class="lang-en">Male</span>
+                            </option>
+                            <option value="Female">
+                                <span class="lang-or">ମହିଳା</span>
+                                <span class="lang-en">Female</span>
+                            </option>
                         </select>
                     </div>
                     <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                         <button type="submit" class="btn primary"
-                            style="flex: 1; padding: 12px; background: #0a4a96; color: white; border:none; border-radius:8px; cursor:pointer;">Confirm
-                            Match</button>
+                            style="flex: 1; padding: 12px; background: #0a4a96; color: white; border:none; border-radius:8px; cursor:pointer;">
+                            <span class="lang-or">ନିଶ୍ଚିତ କରନ୍ତୁ</span>
+                            <span class="lang-en">Confirm Match</span>
+                        </button>
                         <button type="button" onclick="closeMatchModal()" class="btn ghost"
-                            style="padding: 12px; background:white; border:1px solid #ddd; border-radius:8px; cursor:pointer;">Cancel</button>
+                            style="padding: 12px; background:white; border:1px solid #ddd; border-radius:8px; cursor:pointer;">
+                            <span class="lang-or">ବାତିଲ</span>
+                            <span class="lang-en">Cancel</span>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -139,7 +189,6 @@
     <script src="assets/js/main.js"></script>
     <script src="assets/js/config.js"></script>
     <script src="assets/js/matrimony.js"></script>
-    <!-- Google tag (gtag.js) -->
 
 </body>
 
