@@ -23,7 +23,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const posts = await res.json();
 
     if (!posts.length) {
-      blogList.innerHTML = "<p>No posts available.</p>";
+      blogList.innerHTML = `
+        <div style="text-align:center; padding:3rem 1.5rem;">
+          <p style="font-size:2.5rem; margin-bottom:0.5rem;">📝</p>
+          <h3 style="color:#0a4a96; margin-bottom:0.5rem;">ଲେଖା ଶୀଘ୍ର ପ୍ରକାଶିତ ହେବ</h3>
+          <p style="font-size:0.95rem; color:#475569;">Articles and announcements will be published soon.</p>
+          <p style="font-size:0.85rem; margin-top:0.5rem; opacity:0.7;">Check back later for community news and updates.</p>
+        </div>`;
       return;
     }
 
@@ -92,7 +98,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   } catch (err) {
     console.error("Error loading posts:", err);
-    blogList.innerHTML = "<p>Failed to load posts.</p>";
+    blogList.innerHTML = `
+      <div style="text-align:center; padding:3rem 1.5rem;">
+        <p style="font-size:2.5rem; margin-bottom:0.5rem;">📝</p>
+        <h3 style="color:#0a4a96; margin-bottom:0.5rem;">ଲେଖା ଶୀଘ୍ର ପ୍ରକାଶିତ ହେବ</h3>
+        <p style="font-size:0.95rem; color:#475569;">Articles and community news will be published here soon.</p>
+        <p style="font-size:0.85rem; margin-top:0.5rem; opacity:0.7;">Stay tuned for updates from Nikhila Odisha Pandara Samaja.</p>
+      </div>`;
   }
 });
 
