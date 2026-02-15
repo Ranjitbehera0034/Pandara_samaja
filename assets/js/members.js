@@ -1,27 +1,25 @@
-/* assets/js/members.js – cascading dropdowns + DataTable + leader gallery */
+/* assets/js/members.js – Netflix-Level Member Directory v2
+   Features: Expandable cards, Search, Responsive table, View toggle */
 
 let allMembers = [];
 let dataTable = null;
+let currentFiltered = []; // track filtered list for search
 
-// Helper function to get auth headers with JWT token
+// ── Auth helpers ─────────────────────────────────────────────
 function getAuthHeaders() {
-  const token = localStorage.getItem("adminToken");
-  const headers = {
-    'Content-Type': 'application/json'
-  };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
+  const headers = { 'Content-Type': 'application/json' };
+  const token = localStorage.getItem('token');
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
 }
 
+// ── DOM refs ─────────────────────────────────────────────────
 const districtSelect = document.getElementById('districtSelect');
 const talukaSelect = document.getElementById('talukaSelect');
 const panchayatSelect = document.getElementById('panchayatSelect');
 const leaderContainer = document.getElementById('leaderContainer');
 
+// ── Leader images ────────────────────────────────────────────
 const districtLeaderImages = {
   "GANJAM": [
     { "name": "Ashok Kumar Badatya", "src": "assets/img/GANJAM/Ashok Kumar Badatya.png" },
@@ -45,6 +43,7 @@ const districtLeaderImages = {
     { "name": "Tuna Badatya", "src": "assets/img/JHARSAGUDA/Tuna Badatya.jpg" }
   ],
   "SAMBALAPUR": [
+
     { "name": "IMG-20250630-WA0003", "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0003.jpg" },
     { "name": "IMG-20250630-WA0002", "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0002.jpg" },
     { "name": "IMG-20250630-WA0006", "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0006.jpg" },
@@ -61,59 +60,463 @@ const districtLeaderImages = {
 };
 
 function showLeader(district) {
-  const key = district.toUpperCase().replace(/\s+/g, '');
-  const leaders = districtLeaderImages[key] || [];
-
-  leaderContainer.innerHTML = '';
-
-  if (leaders.length === 0) {
+  const leaders = districtLeaderImages[district];
+  if (!leaders || leaders.length === 0) {
     leaderContainer.style.display = 'none';
     return;
   }
 
-  leaders.forEach(({ name, src }) => {
+  leaderContainer.style.display = '';
+  leaderContainer.innerHTML = '';
+
+  const galleryDiv = document.createElement('div');
+  galleryDiv.style.cssText = 'display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;padding:0.5rem;';
+  leaderContainer.appendChild(galleryDiv);
+
+  leaders.forEach((leader) => {
     const wrapper = document.createElement('div');
-    wrapper.style.display = 'inline-block';
-    wrapper.style.textAlign = 'center';
-    wrapper.style.margin = '10px';
+    wrapper.style.cssText = 'text-align:center;max-width:140px;';
 
     const img = document.createElement('img');
-    img.src = src;
-    img.alt = name;
+    img.src = leader.src;
+    img.alt = leader.name;
+    img.loading = 'lazy';
+    img.style.cssText = 'max-height:160px;border-radius:12px;box-shadow:0 6px 18px rgba(10,70,150,.12);width:100%;object-fit:cover;';
+    img.onerror = function () { wrapper.style.display = 'none'; };
 
-    const PLACEHOLDER = 'assets/img/placeholder.png';
-
-    img.onerror = () => {
-      img.onerror = null;
-      console.warn('Image not found:', src);
-      img.src = PLACEHOLDER;
-      img.alt = name + ' (photo unavailable)';
-    };
-
-    img.style.maxHeight = '200px';
-    img.style.borderRadius = '8px';
-    img.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)';
-    img.style.display = 'block';
-    img.style.marginBottom = '5px';
+    const nameP = document.createElement('p');
+    nameP.style.cssText = 'margin:0.4rem 0 0;font-size:0.75rem;font-weight:600;color:#0a4a96;';
+    nameP.textContent = leader.name.replace(/IMG-\d+-WA\d+/i, 'Leader');
 
     wrapper.appendChild(img);
-    leaderContainer.appendChild(wrapper);
+    wrapper.appendChild(nameP);
+    galleryDiv.appendChild(wrapper);
   });
-
-  leaderContainer.style.display = 'block';
 }
 
-/* ────────────────────────────────────────────────────────────────
-   1) Fetch data and initialise table
-   ──────────────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   UI HELPERS
+   ════════════════════════════════════════════════════════════════ */
+
+function maskMobile(mobile) {
+  if (!mobile || mobile.length < 4) return '******';
+  return '******' + mobile.slice(-4);
+}
+
+function maskAadhar(aadhar) {
+  if (!aadhar || aadhar.length < 4) return '********';
+  return '********' + aadhar.slice(-4);
+}
+
+function getInitials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CARD RENDERING — Batch + Lazy Family Loading for Performance
+   ════════════════════════════════════════════════════════════════ */
+
+const BATCH_SIZE = 30; // render this many cards per frame
+let renderRAF = null;  // track pending animation frame
+
+function buildCardHtml(m, isAdmin) {
+  const initials = getInitials(m.name);
+  const mobile = isAdmin ? escHtml(m.mobile || '') : maskMobile(m.mobile || '');
+  const aadhar = isAdmin ? escHtml(m.aadhar_no || '') : maskAadhar(m.aadhar_no || '');
+  const male = m.male || 0;
+  const female = m.female || 0;
+  const familyCount = (m.family_members || []).length;
+
+  // Family placeholder — actual table built lazily on first expand
+  const familyPlaceholder = familyCount > 0
+    ? `<div class="family-lazy-slot" data-loaded="false"></div>`
+    : '';
+
+  return `
+    <div class="member-card">
+      <div class="member-card-header">
+        <div class="member-avatar">${initials}</div>
+        <div class="member-header-info">
+          <div class="member-name">${escHtml(m.name)}</div>
+          <div class="member-id">#${escHtml(m.membership_no || '—')}</div>
+        </div>
+        ${m.district ? `<span class="member-district-badge">${escHtml(m.district)}</span>` : ''}
+        <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+      <div class="member-card-body">
+        <div class="member-details">
+          <div class="member-detail">
+            <span class="detail-icon">📱</span>
+            <span class="detail-label">
+              <span class="lang-or">ମୋବାଇଲ</span>
+              <span class="lang-en">Mobile</span>
+            </span>
+            <span class="detail-value">${mobile || '—'}</span>
+          </div>
+          <div class="member-detail">
+            <span class="detail-icon">👨‍👩‍👦</span>
+            <span class="detail-label">
+              <span class="lang-or">ପରିବାର</span>
+              <span class="lang-en">Family</span>
+            </span>
+            <span class="detail-value">${male}M / ${female}F</span>
+          </div>
+          <div class="member-detail">
+            <span class="detail-icon">🪪</span>
+            <span class="detail-label">
+              <span class="lang-or">ଆଧାର</span>
+              <span class="lang-en">Aadhaar</span>
+            </span>
+            <span class="detail-value">${aadhar || '—'}</span>
+          </div>
+          <div class="member-detail">
+            <span class="detail-icon">📍</span>
+            <span class="detail-label">
+              <span class="lang-or">ତାଳୁକା</span>
+              <span class="lang-en">Taluka</span>
+            </span>
+            <span class="detail-value">${escHtml(m.taluka || '—')}</span>
+          </div>
+          <div class="member-detail">
+            <span class="detail-icon">🏛️</span>
+            <span class="detail-label">
+              <span class="lang-or">ପଞ୍ଚାୟତ</span>
+              <span class="lang-en">Panchayat</span>
+            </span>
+            <span class="detail-value">${escHtml(m.panchayat || '—')}</span>
+          </div>
+          <div class="member-detail">
+            <span class="detail-icon">🏘️</span>
+            <span class="detail-label">
+              <span class="lang-or">ଗ୍ରାମ</span>
+              <span class="lang-en">Village</span>
+            </span>
+            <span class="detail-value">${escHtml(m.village || '—')}</span>
+          </div>
+          <div class="member-detail full-width">
+            <span class="detail-icon">🏠</span>
+            <span class="detail-label">
+              <span class="lang-or">ଠିକଣା</span>
+              <span class="lang-en">Address</span>
+            </span>
+            <span class="detail-value">${escHtml(m.address || '—')}</span>
+          </div>
+        </div>
+        ${familyPlaceholder}
+      </div>
+    </div>`;
+}
+
+function buildFamilyHtml(familyMembers) {
+  return `
+    <div class="family-members-section">
+      <div class="family-section-header">
+        <span class="detail-icon">👨‍👩‍👧‍👦</span>
+        <span class="family-section-title">
+          <span class="lang-or">ପରିବାର ସଦସ୍ୟ</span>
+          <span class="lang-en">Family Members</span>
+        </span>
+        <span class="family-count-badge">${familyMembers.length}</span>
+      </div>
+      <table class="family-table">
+        <thead>
+          <tr>
+            <th><span class="lang-or">ନାମ</span><span class="lang-en">Name</span></th>
+            <th><span class="lang-or">ବୟସ</span><span class="lang-en">Age</span></th>
+            <th><span class="lang-or">ଲିଙ୍ଗ</span><span class="lang-en">Gender</span></th>
+            <th><span class="lang-or">ସମ୍ପର୍କ</span><span class="lang-en">Relation</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${familyMembers.map(fm => `
+            <tr>
+              <td>${escHtml(fm.name || '—')}</td>
+              <td>${fm.age || '—'}</td>
+              <td>
+                <span class="gender-badge gender-${(fm.gender || '').toLowerCase()}">
+                  ${fm.gender === 'Male' ? '♂' : fm.gender === 'Female' ? '♀' : ''} ${escHtml(fm.gender || '—')}
+                </span>
+              </td>
+              <td>${escHtml(fm.relation || '—')}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function handleCardClick(e) {
+  const card = e.currentTarget;
+  card.classList.toggle('expanded');
+
+  // Lazy-load family table on first expand
+  if (card.classList.contains('expanded')) {
+    const slot = card.querySelector('.family-lazy-slot[data-loaded="false"]');
+    if (slot) {
+      const idx = parseInt(card.dataset.memberIdx, 10);
+      const m = card._memberRef;
+      if (m && m.family_members && m.family_members.length > 0) {
+        slot.innerHTML = buildFamilyHtml(m.family_members);
+        slot.dataset.loaded = 'true';
+      }
+    }
+  }
+}
+
+function renderCards(members) {
+  const grid = document.getElementById('membersGrid');
+  if (!grid) return;
+
+  // Cancel any pending batch render
+  if (renderRAF) {
+    cancelAnimationFrame(renderRAF);
+    renderRAF = null;
+  }
+
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+  if (members.length === 0) {
+    grid.innerHTML = `
+      <div class="members-empty" style="grid-column:1/-1;">
+        <div class="empty-icon">🔍</div>
+        <p><span class="lang-or">କୌଣସି ସଦସ୍ୟ ମିଳିଲା ନାହିଁ</span>
+           <span class="lang-en">No members found</span></p>
+      </div>`;
+    grid.style.display = 'grid';
+    return;
+  }
+
+  // Clear grid
+  grid.innerHTML = '';
+  grid.style.display = 'grid';
+
+  let offset = 0;
+
+  function renderBatch() {
+    const end = Math.min(offset + BATCH_SIZE, members.length);
+    const fragment = document.createDocumentFragment();
+
+    for (let i = offset; i < end; i++) {
+      const m = members[i];
+      const tmp = document.createElement('div');
+      tmp.innerHTML = buildCardHtml(m, isAdmin);
+      const card = tmp.firstElementChild;
+      card.dataset.memberIdx = i;
+      card._memberRef = m; // store reference for lazy family load
+      card.addEventListener('click', handleCardClick);
+      fragment.appendChild(card);
+    }
+
+    grid.appendChild(fragment);
+    offset = end;
+
+    if (offset < members.length) {
+      renderRAF = requestAnimationFrame(renderBatch);
+    }
+  }
+
+  // Kick off first batch immediately
+  renderBatch();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SEARCH — Instant search across all member fields
+   ════════════════════════════════════════════════════════════════ */
+
+function setupSearch() {
+  const searchInput = document.getElementById('cardSearch');
+  const clearBtn = document.getElementById('searchClear');
+  const searchWrap = document.getElementById('searchBarWrap');
+  if (!searchInput) return;
+
+  let debounceTimer;
+
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim();
+
+    // Show/hide clear button
+    if (clearBtn) {
+      clearBtn.classList.toggle('visible', q.length > 0);
+    }
+
+    // Debounce search
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      performSearch(q);
+    }, 200);
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.classList.remove('visible');
+      performSearch('');
+      searchInput.focus();
+    });
+  }
+}
+
+function performSearch(query) {
+  const q = query.toLowerCase();
+
+  let base = currentFiltered; // the dropdown-filtered list
+
+  if (!q) {
+    renderCards(base);
+    updateResultCount(base.length);
+    return;
+  }
+
+  const results = base.filter(m => {
+    const fields = [
+      m.name, m.membership_no, m.mobile,
+      m.district, m.taluka, m.panchayat, m.village
+    ];
+    return fields.some(f => f && f.toLowerCase().includes(q));
+  });
+
+  renderCards(results);
+  updateResultCount(results.length);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STATS — Populate hero stats bar with animated counting
+   ════════════════════════════════════════════════════════════════ */
+
+function updateStats(members) {
+  const total = members.length;
+  const districts = new Set(members.map(m => m.district).filter(Boolean)).size;
+  const totalMale = members.reduce((s, m) => s + (parseInt(m.male) || 0), 0);
+  const totalFemale = members.reduce((s, m) => s + (parseInt(m.female) || 0), 0);
+
+  animateCount('statTotal', total);
+  animateCount('statDistricts', districts);
+  animateCount('statMale', totalMale);
+  animateCount('statFemale', totalFemale);
+}
+
+function animateCount(elId, target) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (target === 0) { el.textContent = '0'; return; }
+
+  let current = 0;
+  const step = Math.max(1, Math.ceil(target / 40));
+  const interval = setInterval(() => {
+    current += step;
+    if (current >= target) {
+      current = target;
+      clearInterval(interval);
+    }
+    el.textContent = current.toLocaleString();
+  }, 30);
+}
+
+function updateResultCount(count) {
+  const el = document.getElementById('resultCount');
+  if (!el) return;
+  if (count === allMembers.length) {
+    el.innerHTML = `<span class="lang-or">ମୋଟ <strong>${count}</strong> ସଦସ୍ୟ</span>
+                    <span class="lang-en">Showing <strong>${count}</strong> members</span>`;
+  } else {
+    el.innerHTML = `<span class="lang-or"><strong>${count}</strong> ସଦସ୍ୟ ଫିଲ୍ଟର ହୋଇଛି</span>
+                    <span class="lang-en">Showing <strong>${count}</strong> of ${allMembers.length} members</span>`;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   VIEW TOGGLE — Cards ↔ Table
+   ════════════════════════════════════════════════════════════════ */
+
+function setupViewToggle() {
+  const cardsBtn = document.getElementById('viewCards');
+  const tableBtn = document.getElementById('viewTable');
+  const grid = document.getElementById('membersGrid');
+  const tableCard = document.getElementById('tableCard');
+  const searchWrap = document.getElementById('searchBarWrap');
+
+  if (!cardsBtn || !tableBtn) return;
+
+  cardsBtn.addEventListener('click', () => {
+    cardsBtn.classList.add('active');
+    tableBtn.classList.remove('active');
+    if (grid) grid.style.display = 'grid';
+    if (tableCard) tableCard.style.display = 'none';
+    if (searchWrap) searchWrap.style.display = '';
+  });
+
+  tableBtn.addEventListener('click', () => {
+    tableBtn.classList.add('active');
+    cardsBtn.classList.remove('active');
+    if (grid) grid.style.display = 'none';
+    if (tableCard) tableCard.style.display = '';
+    if (searchWrap) searchWrap.style.display = 'none';
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE TABLE — Add data-label attributes for mobile
+   ════════════════════════════════════════════════════════════════ */
+
+function addTableDataLabels() {
+  const table = document.getElementById('memberTable');
+  if (!table) return;
+
+  const columnLabels = ['Membership No.', 'Name', 'Mobile', 'Male', 'Female', 'District', 'Taluka', 'Panchayat', 'Village', 'Aadhaar', 'Address', 'Family Members'];
+
+  // Use MutationObserver to add data-labels whenever rows change
+  const observer = new MutationObserver(() => {
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      cells.forEach((cell, i) => {
+        if (i < columnLabels.length && !cell.hasAttribute('data-label')) {
+          cell.setAttribute('data-label', columnLabels[i]);
+        }
+      });
+    });
+  });
+
+  observer.observe(table.querySelector('tbody') || table, {
+    childList: true,
+    subtree: true
+  });
+
+  // Also do initial pass
+  const rows = table.querySelectorAll('tbody tr');
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    cells.forEach((cell, i) => {
+      if (i < columnLabels.length) {
+        cell.setAttribute('data-label', columnLabels[i]);
+      }
+    });
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════
+   INIT — Fetch data and set everything up
+   ════════════════════════════════════════════════════════════════ */
+
 (async function init() {
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
-  // Get loader and table elements
-  const loader = document.getElementById('membersLoader');
+  const skeletonLoader = document.getElementById('skeletonLoader');
+  const membersGrid = document.getElementById('membersGrid');
   const memberTable = document.getElementById('memberTable');
 
-  // Initially hide the table while loading
   if (memberTable) memberTable.style.display = 'none';
 
   try {
@@ -125,65 +528,50 @@ function showLeader(district) {
     console.error("Failed to load members:", err);
     allMembers = [];
 
-    // Show a helpful error message in the table area
-    const tableCard = document.querySelector('.table-card');
-    if (tableCard && !document.getElementById('memberLoadError')) {
-      const errorDiv = document.createElement('div');
-      errorDiv.id = 'memberLoadError';
-      errorDiv.style.cssText = 'text-align:center; padding:3rem 1.5rem; color:#475569;';
-      errorDiv.innerHTML = `
-        <p style="font-size:2.5rem; margin-bottom:0.5rem;">📋</p>
-        <h3 style="color:#0a4a96; margin-bottom:0.5rem;">ସଦସ୍ୟ ତଥ୍ୟ ଶୀଘ୍ର ଉପಲବ୍ଧ ହେବ</h3>
-        <p style="font-size:0.95rem;">Member data is being imported and will be available soon.</p>
-        <p style="font-size:0.85rem; margin-top:0.5rem; opacity:0.7;">Please check back later or contact your district leaders for information.</p>
-      `;
-      tableCard.prepend(errorDiv);
+    if (membersGrid) {
+      membersGrid.innerHTML = `
+        <div class="members-empty" style="grid-column:1/-1;">
+          <div class="empty-icon">📋</div>
+          <p><span class="lang-or">ସଦସ୍ୟ ତଥ୍ୟ ଶୀଘ୍ର ଉପଲବ୍ଧ ହେବ</span>
+             <span class="lang-en">Member data will be available soon.</span></p>
+        </div>`;
+      membersGrid.style.display = 'grid';
     }
   }
 
-  // Hide loader with smooth transition and show table
-  if (loader) {
-    loader.classList.add('hidden');
-    // Remove from DOM after transition completes
-    setTimeout(() => {
-      loader.style.display = 'none';
-    }, 500);
-  }
+  // Hide skeleton
+  if (skeletonLoader) skeletonLoader.style.display = 'none';
+
+  // Set initial filtered list = all members
+  currentFiltered = [...allMembers];
+
+  // Render cards + stats
+  renderCards(currentFiltered);
+  updateStats(allMembers);
+  updateResultCount(currentFiltered.length);
+
+  // Show table (hidden by default behind card view)
   if (memberTable) memberTable.style.display = '';
 
-  // populate District dropdown
+  // Populate District dropdown
   if (allMembers.length > 0) {
     [...new Set(allMembers.map(m => m.district))]
       .filter(Boolean)
       .sort()
       .forEach(d => {
-        districtSelect.insertAdjacentHTML(
-          'beforeend',
-          `<option value="${d}">${d}</option>`
-        );
+        districtSelect.insertAdjacentHTML('beforeend', `<option value="${d}">${d}</option>`);
       });
   }
 
-  // Helper function to mask mobile numbers (show only last 4 digits)
-  function maskMobile(mobile) {
-    if (!mobile || mobile.length < 4) return '******';
-    return '******' + mobile.slice(-4);
-  }
-
-  // Build columns - mask mobile for non-admin users
+  // ── DataTable columns ──────────────────────────────────────
   const columns = [
     { data: 'membership_no', title: 'Membership No.', defaultContent: '' },
     { data: 'name', title: 'Name', defaultContent: '' },
     {
-      data: 'mobile',
-      title: 'Mobile',
-      defaultContent: '',
-      render: function (data, type, row) {
-        // Only mask for display, not for sorting/filtering
-        if (type === 'display' && !isAdmin) {
-          return maskMobile(data);
-        }
-        return data || '';
+      data: 'mobile', title: 'Mobile', defaultContent: '',
+      render: function (data, type) {
+        if (type !== 'display') return data;
+        return isAdmin ? escHtml(data || '') : maskMobile(data);
       }
     },
     { data: 'male', title: 'Male', defaultContent: '0' },
@@ -191,53 +579,71 @@ function showLeader(district) {
     { data: 'district', title: 'District', defaultContent: '' },
     { data: 'taluka', title: 'Taluka', defaultContent: '' },
     { data: 'panchayat', title: 'Panchayat', defaultContent: '' },
-    { data: 'village', title: 'Village', defaultContent: '' }
+    { data: 'village', title: 'Village', defaultContent: '' },
+    {
+      data: 'aadhar_no', title: 'Aadhaar', defaultContent: '',
+      render: function (data, type) {
+        if (type !== 'display') return data;
+        return isAdmin ? escHtml(data || '') : maskAadhar(data);
+      }
+    },
+    { data: 'address', title: 'Address', defaultContent: '' },
+    {
+      data: 'family_members', title: 'Family Members', defaultContent: '—',
+      render: function (data, type) {
+        if (!data || !Array.isArray(data) || data.length === 0) return '—';
+        if (type !== 'display') return data.map(fm => fm.name).join(', ');
+        return data.map(fm =>
+          `<span class="table-family-chip">${escHtml(fm.name)} <small>(${escHtml(fm.relation)}, ${fm.age || '—'}, ${fm.gender === 'Male' ? '♂' : '♀'})</small></span>`
+        ).join(' ');
+      }
+    }
   ];
 
-  // Add actions column for admin - but also need to add the column to HTML table
+  // Admin actions column
   if (isAdmin) {
-    // Check if Actions column header exists, if not add it
     const thead = document.querySelector('#memberTable thead tr');
-    if (thead && !thead.querySelector('th:nth-child(10)')) {
+    if (thead && !thead.querySelector('th[data-admin]')) {
       const th = document.createElement('th');
       th.textContent = 'Actions';
+      th.setAttribute('data-admin', 'true');
       thead.appendChild(th);
     }
 
     columns.push({
-      data: null,
-      title: 'Actions',
-      orderable: false,
+      data: null, title: 'Actions', orderable: false,
       render: function (data, type, row) {
-        const id = row.id || row._id;
-        if (!id) return '';
-        return `<button class="btn-delete" data-id="${id}" style="background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Delete</button>`;
+        const id = row.id || row._id || '';
+        return `<button class="btn-delete" data-id="${id}" style="background:#dc3545;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem;">Delete</button>`;
       }
     });
   }
 
-  // Destroy existing DataTable if present
+  // Destroy old DataTable
   if ($.fn.DataTable.isDataTable('#memberTable')) {
     $('#memberTable').DataTable().destroy();
-    // Clear the table body to prevent column mismatch
     $('#memberTable tbody').empty();
   }
 
-  // Initialize DataTable
+  // Init DataTable
   dataTable = $('#memberTable').DataTable({
     data: allMembers,
     columns: columns,
     dom: 'Bfrtip',
     buttons: ['csv'],
-    language: {
-      emptyTable: "No members found"
-    },
-    destroy: true // Allow reinitialization
+    language: { emptyTable: "No members found" },
+    destroy: true,
+    scrollX: true, // allow horizontal scroll for wider table
+    autoWidth: false,
+    drawCallback: function () {
+      // Add data-labels for responsive table on every redraw
+      addTableDataLabels();
+    }
   });
 
-  // Add delete handler for admin
+  // Admin delete handler
   if (isAdmin) {
-    $('#memberTable tbody').off('click', 'button.btn-delete'); // Remove any existing handlers
+    $('#memberTable tbody').off('click', 'button.btn-delete');
     $('#memberTable tbody').on('click', 'button.btn-delete', async function () {
       const id = $(this).data('id');
       if (!id) return alert("Member ID not found");
@@ -253,11 +659,15 @@ function showLeader(district) {
             throw new Error(`Failed to delete: ${errorText}`);
           }
 
-          // Remove row from DataTable
           dataTable.row($(this).parents('tr')).remove().draw();
-
-          // Update local data array
           allMembers = allMembers.filter(m => (m.id || m._id) != id);
+
+          // Re-render
+          const f = getCurrentFilter();
+          currentFiltered = filterMembers(f);
+          renderCards(currentFiltered);
+          updateStats(allMembers);
+          updateResultCount(currentFiltered.length);
         } catch (err) {
           alert('Failed to delete member: ' + err.message);
           console.error(err);
@@ -265,76 +675,94 @@ function showLeader(district) {
       }
     });
   }
+
+  // Setup features
+  setupViewToggle();
+  setupSearch();
+  addTableDataLabels();
+
 })();
 
-/* ────────────────────────────────────────────────────────────────
-   2) Cascading dropdown logic
-   ──────────────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   CASCADING DROPDOWNS
+   ════════════════════════════════════════════════════════════════ */
+
+function getCurrentFilter() {
+  return {
+    district: districtSelect.value,
+    taluka: talukaSelect.value,
+    panchayat: panchayatSelect.value
+  };
+}
 
 districtSelect.addEventListener('change', () => {
   const d = districtSelect.value;
-
-  // show leader gallery
   showLeader(d);
 
-  // rebuild Taluka list
   talukaSelect.disabled = !d;
   talukaSelect.innerHTML = '<option value="">Select Taluka</option>';
   if (d) {
     [...new Set(allMembers.filter(m => m.district === d).map(m => m.taluka))]
-      .filter(Boolean)
-      .sort()
-      .forEach(t => {
-        talukaSelect.insertAdjacentHTML('beforeend', `<option value="${t}">${t}</option>`);
-      });
+      .filter(Boolean).sort()
+      .forEach(t => { talukaSelect.insertAdjacentHTML('beforeend', `<option value="${t}">${t}</option>`); });
   }
 
-  // reset Panchayat
   panchayatSelect.disabled = true;
   panchayatSelect.innerHTML = '<option value="">Select Panchayat</option>';
 
-  filterTable({ district: d });
+  filterAndRender({ district: d });
 });
 
 talukaSelect.addEventListener('change', () => {
   const d = districtSelect.value;
   const t = talukaSelect.value;
 
-  // rebuild Panchayat list
   panchayatSelect.disabled = !t;
   panchayatSelect.innerHTML = '<option value="">Select Panchayat</option>';
   if (t) {
-    [...new Set(
-      allMembers
-        .filter(m => m.district === d && m.taluka === t)
-        .map(m => m.panchayat)
-    )]
-      .filter(Boolean)
-      .sort()
-      .forEach(p => {
-        panchayatSelect.insertAdjacentHTML('beforeend', `<option value="${p}">${p}</option>`);
-      });
+    [...new Set(allMembers.filter(m => m.district === d && m.taluka === t).map(m => m.panchayat))]
+      .filter(Boolean).sort()
+      .forEach(p => { panchayatSelect.insertAdjacentHTML('beforeend', `<option value="${p}">${p}</option>`); });
   }
 
-  filterTable({ district: d, taluka: t });
+  filterAndRender({ district: d, taluka: t });
 });
 
 panchayatSelect.addEventListener('change', () => {
-  filterTable({
+  filterAndRender({
     district: districtSelect.value,
     taluka: talukaSelect.value,
     panchayat: panchayatSelect.value
   });
 });
 
-/* ────────────────────────────────────────────────────────────────
-   3) Helper to apply filtering
-   ──────────────────────────────────────────────────────────────── */
-function filterTable(f) {
-  const filtered = allMembers.filter(m =>
+/* ════════════════════════════════════════════════════════════════
+   FILTER HELPERS
+   ════════════════════════════════════════════════════════════════ */
+
+function filterMembers(f) {
+  return allMembers.filter(m =>
     (!f.district || m.district === f.district) &&
     (!f.taluka || m.taluka === f.taluka) &&
     (!f.panchayat || m.panchayat === f.panchayat)
   );
-  dataTable.clear().rows.add(filtered).draw();
+}
+
+function filterAndRender(f) {
+  currentFiltered = filterMembers(f);
+
+  // Clear search when filter changes
+  const searchInput = document.getElementById('cardSearch');
+  const clearBtn = document.getElementById('searchClear');
+  if (searchInput) searchInput.value = '';
+  if (clearBtn) clearBtn.classList.remove('visible');
+
+  // Update cards
+  renderCards(currentFiltered);
+  updateResultCount(currentFiltered.length);
+
+  // Update DataTable
+  if (dataTable) {
+    dataTable.clear().rows.add(currentFiltered).draw();
+  }
 }
