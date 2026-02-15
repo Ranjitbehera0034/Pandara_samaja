@@ -1,12 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="or">
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin | Nikhila Odisha Pandara Samaja</title>
+    <meta name="description"
+        content="Admin Dashboard for Nikhila Odisha Pandara Samaja — manage members, matrimony candidates, blog posts, and review submissions.">
     <link rel="stylesheet" href="assets/css/admin.css">
     <link rel="stylesheet" href="assets/css/matrimony.css">
     <link rel="stylesheet" href="assets/css/main.css?v=2.1">
+    <!-- Critical inline CSS: hide wrong language immediately -->
+    <style>
+        html[lang="or"] .lang-en,
+        html[lang="or"] .lang-en-block {
+            display: none !important;
+        }
+
+        html[lang="en"] .lang-or,
+        html[lang="en"] .lang-or-block {
+            display: none !important;
+        }
+    </style>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE9R5DCCNT"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -14,7 +29,6 @@
             dataLayer.push(arguments);
         }
         gtag('js', new Date());
-
         gtag('config', 'G-LE9R5DCCNT');
     </script>
     <script src="assets/js/analytics.js" defer></script>
@@ -25,33 +39,30 @@
         <nav class="navbar">
             <div class="brand">
                 <img src="assets/img/pandara logo.png" alt="Pandara Samaja Logo" />
-                <span>ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</span>
+                <span>
+                    <span class="lang-or">ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</span>
+                    <span class="lang-en">Pandara Samaja</span>
+                </span>
             </div>
             <button class="nav-toggle" aria-label="Toggle navigation">
                 <span class="hamburger"></span>
             </button>
             <ul class="nav-links" id="navLinks">
-                <li>
-                    <a href="index.html">Home</a>
+                <li><a href="index.html"><span class="lang-or">ମୂଳ ପୃଷ୍ଠା</span><span class="lang-en">Home</span></a>
                 </li>
-                <li>
-                    <a href="about.html">About</a>
+                <li><a href="about.html"><span class="lang-or">ପରିଚୟ</span><span class="lang-en">About</span></a></li>
+                <li><a href="members.html"><span class="lang-or">ସଦସ୍ୟ</span><span class="lang-en">Members</span></a>
                 </li>
-                <li>
-                    <a href="members.html">Members</a>
+                <li><a href="matrimony.html"><span class="lang-or">ବିବାହ</span><span
+                            class="lang-en">Matrimony</span></a></li>
+                <li><a href="blogs.html"><span class="lang-or">ବ୍ଲଗ</span><span class="lang-en">Recent Blogs</span></a>
                 </li>
-                <li>
-                    <a href="matrimony.html">Matrimony</a>
-                </li>
-                <li>
-                    <a href="blogs.html">Recent Blogs</a>
-                </li>
-                <li>
-                    <a href="admin.html" class="active">Admin</a>
-                </li>
+                <li><a href="admin.html" class="active"><span class="lang-or">ଆଡମିନ</span><span
+                            class="lang-en">Admin</span></a></li>
             </ul>
         </nav>
     </header>
+
     <section class="ticker" aria-label="Pandara Samaja scrolling title">
         <div class="ticker__track">
             <div class="ticker__item">
@@ -59,7 +70,6 @@
                 ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
                 ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
             </div>
-            <!-- duplicate for seamless loop -->
             <div class="ticker__item" aria-hidden="true">
                 ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
                 ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ • Nikhila Odisha Pandara Samaja •
@@ -67,100 +77,159 @@
             </div>
         </div>
     </section>
+
     <main class="admin-container">
+
+        <!-- ═══ LOGIN CARD ═══ -->
         <div id="admin-login" class="auth-card">
-            <h2>Admin Login</h2>
+            <div style="text-align:center; margin-bottom: 1.5rem;">
+                <div
+                    style="width:56px; height:56px; margin:0 auto 1rem; background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-light)); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
+                    🔐
+                </div>
+                <h2 style="margin:0 0 0.25rem;">
+                    <span class="lang-or">ସ୍ୱାଗତ</span>
+                    <span class="lang-en">Welcome Back</span>
+                </h2>
+                <p style="margin:0; color: var(--admin-text-muted); font-size: 0.9rem;">
+                    <span class="lang-or">ଆଡମିନ ଡ୍ୟାସବୋର୍ଡ ଆକସେସ କରିବାକୁ ସାଇନ ଇନ କରନ୍ତୁ</span>
+                    <span class="lang-en">Sign in to access the admin dashboard</span>
+                </p>
+            </div>
             <form id="adminLoginForm">
-                <input type="text" id="loginUser" placeholder="Username" required>
-                <input type="password" id="loginPass" placeholder="Password" required>
-                <button class="btn primary" type="submit" style="width:100%;">Login</button>
+                <div style="margin-bottom: 1rem;">
+                    <label
+                        style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color: var(--admin-text-muted);">
+                        <span class="lang-or">ଚାଳକନାମ</span>
+                        <span class="lang-en">Username</span>
+                    </label>
+                    <input type="text" id="loginUser" placeholder="Enter your username" required>
+                </div>
+                <div style="margin-bottom: 1.25rem;">
+                    <label
+                        style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color: var(--admin-text-muted);">
+                        <span class="lang-or">ପାସୱାର୍ଡ</span>
+                        <span class="lang-en">Password</span>
+                    </label>
+                    <input type="password" id="loginPass" placeholder="Enter your password" required>
+                </div>
+                <button class="btn primary" type="submit" style="width:100%; padding:0.85rem; font-size:0.95rem;">
+                    <span class="lang-or">ସାଇନ ଇନ →</span>
+                    <span class="lang-en">Sign In →</span>
+                </button>
             </form>
         </div>
 
-        <div id="admin-panel" class="panel-card" style="display:none;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h1 class="page-title">Admin Dashboard</h1>
-                <button id="adminLogoutBtn" class="btn" style="background: #dc3545; color: white;">Logout</button>
+        <!-- ═══ ADMIN DASHBOARD ═══ -->
+        <div id="admin-panel" class="panel-card"
+            style="display:none; border:none; box-shadow:none; background:transparent; padding:0;">
+
+            <!-- Header -->
+            <div class="admin-header">
+                <h1 class="page-title">
+                    <span class="lang-or">ଆଡମିନ ଡ୍ୟାସବୋର୍ଡ</span>
+                    <span class="lang-en">Admin Dashboard</span>
+                </h1>
+                <button id="adminLogoutBtn" class="btn-logout">⏻ <span class="lang-or">ଲଗଆଉଟ</span><span
+                        class="lang-en">Logout</span></button>
             </div>
 
+            <!-- Tab Navigation -->
             <div class="section-tabs" role="tablist" aria-label="Admin sections">
                 <button class="tab" id="tab-matrimony" role="tab" aria-controls="matrimonySection" aria-selected="true"
-                    onclick="setActiveSection('matrimonySection', this)">Matrimony Candidate Management</button>
+                    onclick="setActiveSection('matrimonySection', this)">💍 <span class="lang-or">ବିବାହ</span><span
+                        class="lang-en">Matrimony</span></button>
                 <button class="tab" id="tab-members" role="tab" aria-controls="memberSection" aria-selected="false"
-                    onclick="setActiveSection('memberSection', this)">Member Management</button>
+                    onclick="setActiveSection('memberSection', this)">👥 <span class="lang-or">ସଦସ୍ୟ</span><span
+                        class="lang-en">Members</span></button>
                 <button class="tab" id="tab-reviews" role="tab" aria-controls="reviewSection" aria-selected="false"
-                    onclick="setActiveSection('reviewSection', this)">📋 Review Submissions</button>
+                    onclick="setActiveSection('reviewSection', this)">📋 <span class="lang-or">ସମୀକ୍ଷା</span><span
+                        class="lang-en">Reviews</span></button>
                 <button class="tab" id="tab-posts" role="tab" aria-controls="postSection" aria-selected="false"
-                    onclick="setActiveSection('postSection', this)">Post Management</button>
+                    onclick="setActiveSection('postSection', this)">📝 <span class="lang-or">ପୋଷ୍ଟ</span><span
+                        class="lang-en">Posts</span></button>
             </div>
 
-            <!-- ========= MATRIMONY SECTION ========= -->
+            <!-- ═══════════ MATRIMONY SECTION ═══════════ -->
             <section id="matrimonySection" class="admin-section panel-card">
-                <h3 class="section-title">Matrimony Candidate Management</h3>
+                <h3 class="section-title">💍 <span class="lang-or">ବିବାହ ପ୍ରାର୍ଥୀ ପରିଚାଳନା</span><span
+                        class="lang-en">Matrimony Candidate Management</span></h3>
 
-                <!-- Search & Actions Bar -->
-                <div class="search-container" style="margin-bottom: 2rem;">
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                        <input type="text" id="candidateSearchInput" placeholder="Search by Name"
-                            style="flex: 1; min-width: 250px; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
-                        <button onclick="searchCandidates()" class="btn primary"
-                            style="padding: 12px 24px; white-space: nowrap;">
-                            🔍 Search
-                        </button>
-                        <button onclick="clearCandidateSearch()" class="btn ghost"
-                            style="padding: 12px 24px; white-space: nowrap;">
-                            Clear
-                        </button>
-                    </div>
+                <!-- Search Bar -->
+                <div class="admin-toolbar">
+                    <input type="text" id="candidateSearchInput" placeholder="Search candidates by name..."
+                        class="admin-search-input">
+                    <button onclick="searchCandidates()" class="btn primary"><span class="lang-or">ଖୋଜନ୍ତୁ</span><span
+                            class="lang-en">Search</span></button>
+                    <button onclick="clearCandidateSearch()" class="btn ghost"><span class="lang-or">ସଫା
+                            କରନ୍ତୁ</span><span class="lang-en">Clear</span></button>
                 </div>
 
                 <div class="form-grid">
-
-                    <!-- Candidate Form (Left Side) -->
-                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
-                        <h4 id="candidateFormTitle" style="margin-top: 0; color: #0a4a96;">Add New Candidate</h4>
+                    <!-- Candidate Form -->
+                    <div class="form-section blue">
+                        <h4 id="candidateFormTitle" class="form-section-title">➕ <span class="lang-or">ନୂଆ ପ୍ରାର୍ଥୀ
+                                ଯୋଡ଼ନ୍ତୁ</span><span class="lang-en">Add New Candidate</span></h4>
                         <form id="addCandidateForm" enctype="multipart/form-data">
                             <input type="hidden" id="candidateId">
 
                             <div class="form-group">
-                                <label style="font-weight: 600; font-size: 0.9rem;">Name</label>
+                                <label
+                                    style="display:block; margin-bottom:0.35rem; font-weight:600; font-size:0.85rem; color: var(--admin-text-muted);">
+                                    <span class="lang-or">ନାମ *</span>
+                                    <span class="lang-en">Name *</span>
+                                </label>
                                 <input type="text" id="adminName" placeholder="Full Name" required class="form-control">
                             </div>
 
                             <div class="form-group">
-                                <label style="font-weight: 600; font-size: 0.9rem;">Gender</label>
+                                <label
+                                    style="display:block; margin-bottom:0.35rem; font-weight:600; font-size:0.85rem; color: var(--admin-text-muted);">
+                                    <span class="lang-or">ଲିଙ୍ଗ *</span>
+                                    <span class="lang-en">Gender *</span>
+                                </label>
                                 <select id="adminGender" required class="form-control">
-                                    <option value="">Select Gender</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
+                                    <option value="">Select Gender / ଲିଙ୍ଗ ବାଛନ୍ତୁ</option>
+                                    <option value="male">Male / ପୁରୁଷ</option>
+                                    <option value="female">Female / ମହିଳା</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
-                                <label style="font-weight: 600; font-size: 0.9rem;">Marriage Form (Image)</label>
+                                <label
+                                    style="display:block; margin-bottom:0.35rem; font-weight:600; font-size:0.85rem; color: var(--admin-text-muted);">
+                                    <span class="lang-or">ବିବାହ ଫର୍ମ (ଛବି)</span>
+                                    <span class="lang-en">Marriage Form (Image)</span>
+                                </label>
                                 <input type="file" id="adminPhotoFile" accept="image/*"
-                                    style="border: 2px dashed #ccc; padding: 10px; width: 100%; background: #fff; border-radius: 8px;">
-                                <small style="display:block; color: #666; margin-top: 5px;">Leave empty to keep existing
-                                    photo when updating.</small>
+                                    style="border: 2px dashed var(--admin-border); padding: 0.65rem; width: 100%; background: var(--admin-surface-2); border-radius: var(--admin-radius-xs); font-family: var(--admin-font); font-size: 0.85rem;">
+                                <small
+                                    style="display:block; color: var(--admin-text-light); margin-top: 0.35rem; font-size: 0.8rem;">
+                                    <span class="lang-or">ଅପଡେଟ୍ ସମୟରେ ବିଦ୍ୟମାନ ଫଟୋ ରଖିବାକୁ ଖାଲି ରଖନ୍ତୁ ।</span>
+                                    <span class="lang-en">Leave empty to keep existing photo when updating.</span>
+                                </small>
                             </div>
 
-                            <div style="display: flex; gap: 10px; margin-top: 1rem;">
-                                <button type="submit" class="btn primary" style="flex: 1;">Save Candidate</button>
+                            <div style="display: flex; gap: 0.65rem; margin-top: 1rem;">
+                                <button type="submit" class="btn primary" style="flex: 1;">💾 <span
+                                        class="lang-or">ସଞ୍ଚୟ କରନ୍ତୁ</span><span class="lang-en">Save
+                                        Candidate</span></button>
                                 <button type="button" id="cancelCandidateEdit" class="btn ghost" style="display:none;"
-                                    onclick="resetCandidateForm()">Cancel</button>
+                                    onclick="resetCandidateForm()"><span class="lang-or">ବାତିଲ</span><span
+                                        class="lang-en">Cancel</span></button>
                             </div>
                         </form>
                     </div>
 
-                    <!-- Candidate List (Right Side) -->
-                    <div id="adminCandidatesList" style="overflow-x: auto;">
-                        <table id="candidatesTable"
-                            style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                            <thead style="background: #e7eef6; color: #333;">
+                    <!-- Candidate Table -->
+                    <div id="adminCandidatesList" class="admin-table-wrap">
+                        <table id="candidatesTable">
+                            <thead>
                                 <tr>
-                                    <th style="padding: 12px; text-align: left;">Name</th>
-                                    <th style="padding: 12px; text-align: left;">Gender</th>
-                                    <th style="padding: 12px; text-align: right;">Actions</th>
+                                    <th><span class="lang-or">ନାମ</span><span class="lang-en">Name</span></th>
+                                    <th><span class="lang-or">ଲିଙ୍ଗ</span><span class="lang-en">Gender</span></th>
+                                    <th style="text-align:right;"><span class="lang-or">କାର୍ଯ୍ୟ</span><span
+                                            class="lang-en">Actions</span></th>
                                 </tr>
                             </thead>
                             <tbody id="candidatesTableBody">
@@ -172,83 +241,70 @@
             </section>
 
 
-            <!-- ========= MEMBER MANAGEMENT SECTION ========= -->
+            <!-- ═══════════ MEMBER MANAGEMENT SECTION ═══════════ -->
             <section id="memberSection" class="admin-section" style="display:none;">
-                <h3 class="section-title">Member Management</h3>
+                <div class="panel-card" style="margin-bottom:1.5rem;">
+                    <h3 class="section-title">👥 <span class="lang-or">ସଦସ୍ୟ ପରିଚାଳନା</span><span class="lang-en">Member
+                            Management</span></h3>
 
-                <!-- Search Bar -->
-                <div class="search-container" style="margin-bottom: 2rem;">
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem;">
+                    <!-- Search & Actions -->
+                    <div class="admin-toolbar">
                         <input type="text" id="memberSearchInput"
-                            placeholder="Search by Membership No., Name, or Mobile"
-                            style="flex: 1; min-width: 250px; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; transition: all 0.3s;">
-                        <button onclick="searchMembers()" class="btn primary"
-                            style="padding: 12px 24px; white-space: nowrap;">
-                            🔍 Search
-                        </button>
-                        <button onclick="clearSearch()" class="btn ghost"
-                            style="padding: 12px 24px; white-space: nowrap;">
-                            Clear
-                        </button>
+                            placeholder="Search by Membership No., Name, or Mobile..." class="admin-search-input">
+                        <button onclick="searchMembers()" class="btn primary"><span class="lang-or">ଖୋଜନ୍ତୁ</span><span
+                                class="lang-en">Search</span></button>
+                        <button onclick="clearSearch()" class="btn ghost"><span class="lang-or">ସଫା କରନ୍ତୁ</span><span
+                                class="lang-en">Clear</span></button>
                         <button onclick="showAddMemberModal()" class="btn"
-                            style="padding: 12px 24px; background: #28a745; color: white; white-space: nowrap;">
-                            ➕ Add Member
-                        </button>
+                            style="background: var(--admin-success); color:#fff;">➕ <span class="lang-or">ସଦସ୍ୟ
+                                ଯୋଡ଼ନ୍ତୁ</span><span class="lang-en">Add Member</span></button>
                         <button onclick="showBulkUpload()" class="btn"
-                            style="padding: 12px 24px; background: #17a2b8; color: white; white-space: nowrap;">
-                            📊 Bulk Upload
-                        </button>
+                            style="background: var(--admin-info); color:#fff;">📊 <span class="lang-or">ଏକାଧିକ
+                                ଅପଲୋଡ</span><span class="lang-en">Bulk Upload</span></button>
                     </div>
 
                     <!-- Filters & Export -->
-                    <div
-                        style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; background: #f8f9fa; padding: 1rem; border-radius: 8px; border: 1px solid #e9ecef;">
-                        <select id="filterDistrict"
-                            style="padding: 10px; border-radius: 6px; border: 1px solid #ced4da; min-width: 150px;">
+                    <div class="admin-filter-bar">
+                        <select id="filterDistrict">
                             <option value="">All Districts</option>
                         </select>
-                        <select id="filterTaluka"
-                            style="padding: 10px; border-radius: 6px; border: 1px solid #ced4da; min-width: 150px;"
-                            disabled>
+                        <select id="filterTaluka" disabled>
                             <option value="">All Talukas</option>
                         </select>
-                        <select id="filterPanchayat"
-                            style="padding: 10px; border-radius: 6px; border: 1px solid #ced4da; min-width: 150px;"
-                            disabled>
+                        <select id="filterPanchayat" disabled>
                             <option value="">All Panchayats</option>
                         </select>
 
-                        <div style="margin-left: auto; display: flex; gap: 10px;">
+                        <div style="margin-left: auto; display: flex; gap: 0.5rem;">
                             <button onclick="exportMembers()" class="btn"
-                                style="background: #218838; color: white; padding: 10px 20px;">
-                                📥 Export
-                            </button>
-                            <button onclick="printMembers()" class="btn"
-                                style="background: #6c757d; color: white; padding: 10px 20px;">
-                                🖨️ Print
-                            </button>
+                                style="background: var(--admin-success); color:#fff;">📥 <span
+                                    class="lang-or">ଡାଉନଲୋଡ</span><span class="lang-en">Export</span></button>
+                            <button onclick="printMembers()" class="btn ghost">🖨️ <span
+                                    class="lang-or">ପ୍ରିଣ୍ଟ</span><span class="lang-en">Print</span></button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Members Table -->
-                <div id="membersTableContainer"
-                    style="overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <table id="membersTable" style="width: 100%; border-collapse: collapse;">
-                        <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="admin-table-wrap" id="membersTableContainer">
+                    <table id="membersTable">
+                        <thead>
                             <tr>
-                                <th style="padding: 16px; text-align: left; font-weight: 600;">Membership No.</th>
-                                <th style="padding: 16px; text-align: left; font-weight: 600;">Name</th>
-                                <th style="padding: 16px; text-align: left; font-weight: 600;">Mobile</th>
-                                <th style="padding: 16px; text-align: left; font-weight: 600;">District</th>
-                                <th style="padding: 16px; text-align: left; font-weight: 600;">Taluka</th>
-                                <th style="padding: 16px; text-align: left; font-weight: 600;">Actions</th>
+                                <th><span class="lang-or">ସଦସ୍ୟତା ନଂ.</span><span class="lang-en">Membership No.</span>
+                                </th>
+                                <th><span class="lang-or">ନାମ</span><span class="lang-en">Name</span></th>
+                                <th><span class="lang-or">ମୋବାଇଲ</span><span class="lang-en">Mobile</span></th>
+                                <th><span class="lang-or">ଜିଲ୍ଲା</span><span class="lang-en">District</span></th>
+                                <th><span class="lang-or">ତାଲୁକା</span><span class="lang-en">Taluka</span></th>
+                                <th><span class="lang-or">କାର୍ଯ୍ୟ</span><span class="lang-en">Actions</span></th>
                             </tr>
                         </thead>
                         <tbody id="membersTableBody">
                             <tr>
-                                <td colspan="7" style="padding: 40px; text-align: center; color: #999;">
-                                    Loading members...
+                                <td colspan="6"
+                                    style="padding: 3rem; text-align: center; color: var(--admin-text-light);">
+                                    <span class="lang-or">ସଦସ୍ୟ ଲୋଡ ହେଉଛି...</span><span class="lang-en">Loading
+                                        members...</span>
                                 </td>
                             </tr>
                         </tbody>
@@ -256,25 +312,26 @@
                 </div>
 
                 <!-- Pagination -->
-                <div id="membersPagination"
-                    style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
-                </div>
+                <div id="membersPagination"></div>
 
-                <!-- Bulk Upload Modal/Section -->
+                <!-- Bulk Upload Modal -->
                 <div id="bulkUploadModal" class="modal" style="display: none;">
-                    <div class="modal-content"
-                        style="max-width: 600px; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+                    <div class="modal-content" style="max-width: 560px; padding: 2rem;">
                         <div
                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                            <h3 style="margin: 0;">Bulk Upload Members</h3>
+                            <h3 style="margin: 0; font-weight: 700; font-size: 1.15rem;">📊 <span class="lang-or">ଏକାଧିକ
+                                    ସଦସ୍ୟ ଅପଲୋଡ</span><span class="lang-en">Bulk Upload Members</span></h3>
                             <button onclick="closeBulkUpload()"
-                                style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
+                                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--admin-text-light); line-height: 1;">×</button>
                         </div>
-                        <p style="color: #666; margin-bottom: 1.5rem;">Upload an Excel file (.xlsx) with member data</p>
-                        <input type="file" id="excelFileInput" accept=".xlsx,.xls"
-                            style="margin-bottom: 1rem; width: 100%; padding: 10px; border: 2px dashed #ddd; border-radius: 8px;" />
-                        <button id="uploadExcelBtn" class="btn primary" style="width: 100%; padding: 12px;">Start
-                            Upload</button>
+                        <p style="color: var(--admin-text-muted); margin-bottom: 1.25rem; font-size: 0.9rem;">
+                            <span class="lang-or">ସଦସ୍ୟ ତଥ୍ୟ ସହ ଏକ Excel ଫାଇଲ (.xlsx) ଅପଲୋଡ କରନ୍ତୁ ।</span>
+                            <span class="lang-en">Upload an Excel file (.xlsx) with member data.</span>
+                        </p>
+                        <input type="file" id="excelFileInput" accept=".xlsx,.xls" />
+                        <button id="uploadExcelBtn" class="btn primary"
+                            style="width: 100%; margin-top: 1rem; padding: 0.85rem;">🚀 <span class="lang-or">ଅପଲୋଡ
+                                ଆରମ୍ଭ କରନ୍ତୁ</span><span class="lang-en">Start Upload</span></button>
                         <div id="excelStatus" class="status" style="margin-top: 1rem;"></div>
                         <div id="excelLoader" class="loader" hidden></div>
                     </div>
@@ -283,257 +340,280 @@
                 <!-- Add/Edit Member Modal -->
                 <div id="memberModal" class="modal" style="display: none;">
                     <div class="modal-content"
-                        style="max-width: 900px; max-height: 90vh; overflow-y: auto; background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+                        style="max-width: 900px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;">
+
+                        <!-- Fixed Modal Header — always visible -->
                         <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; position: sticky; top: 0; background: white; padding-bottom: 0.5rem; border-bottom: 2px solid #e9ecef; z-index: 1;">
-                            <h3 id="memberModalTitle" style="margin: 0;">Add New Member</h3>
+                            style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2.5rem; background: var(--admin-surface); border-bottom: 2px solid var(--admin-border-light); flex-shrink: 0; z-index: 2;">
+                            <h3 id="memberModalTitle" style="margin: 0; font-weight: 700; font-size: 1.15rem;">
+                                <span class="lang-or">ନୂଆ ସଦସ୍ୟ ଯୋଡ଼ନ୍ତୁ</span>
+                                <span class="lang-en">Add New Member</span>
+                            </h3>
                             <button onclick="closeMemberModal()"
-                                style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
+                                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--admin-text-light); line-height: 1;">×</button>
                         </div>
-                        <form id="memberForm">
-                            <input type="hidden" id="memberId">
 
-                            <!-- Section: Basic Info -->
-                            <div
-                                style="background: #f0f4ff; padding: 1rem 1.2rem; border-radius: 8px; margin-bottom: 1.2rem; border-left: 4px solid #667eea;">
-                                <h4 style="margin: 0 0 1rem 0; color: #0a4a96; font-size: 0.95rem;">👤 Head of Family
-                                    Details</h4>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                    <div style="grid-column: 1 / -1;">
-                                        <label
-                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Membership
-                                            No. *</label>
-                                        <input type="text" id="membershipNo" required
-                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-                                    </div>
-                                    <div>
-                                        <label
-                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Head
-                                            of Family Name *</label>
-                                        <input type="text" id="memberName" required
-                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-                                    </div>
-                                    <div>
-                                        <label
-                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Mobile
-                                            *</label>
-                                        <input type="tel" id="memberMobile" required pattern="[0-9]{10}"
-                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-                                    </div>
-                                    <div>
-                                        <label
-                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Aadhaar
-                                            No.</label>
-                                        <input type="text" id="memberAadhaar" maxlength="12" pattern="[0-9]{12}"
-                                            placeholder="12-digit Aadhaar number"
-                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Scrollable Form Body -->
+                        <div style="overflow-y: auto; flex: 1; padding: 2rem 2.5rem;">
+                            <form id="memberForm">
+                                <input type="hidden" id="memberId">
 
-                            <!-- Section: Address -->
-                            <div
-                                style="background: #f0faf0; padding: 1rem 1.2rem; border-radius: 8px; margin-bottom: 1.2rem; border-left: 4px solid #38ef7d;">
-                                <h4 style="margin: 0 0 1rem 0; color: #1a7a3a; font-size: 0.95rem;">📍 Address Details
-                                </h4>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                    <div>
-                                        <label
-                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">District
-                                            *</label>
-                                        <input type="text" id="memberDistrict" required
-                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-                                    </div>
-                                    <div>
-                                        <label
-                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Taluka
-                                            *</label>
-                                        <input type="text" id="memberTaluka" required
-                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-                                    </div>
-                                    <div>
-                                        <label
-                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Panchayat</label>
-                                        <input type="text" id="memberPanchayat"
-                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-                                    </div>
-                                    <div>
-                                        <label
-                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Village</label>
-                                        <input type="text" id="memberVillage"
-                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-                                    </div>
-                                    <div style="grid-column: 1 / -1;">
-                                        <label
-                                            style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.85rem;">Full
-                                            Address</label>
-                                        <textarea id="memberAddress" rows="2"
-                                            placeholder="House/Street details (optional)"
-                                            style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Section: Family Members -->
-                            <div
-                                style="background: #fff8f0; padding: 1rem 1.2rem; border-radius: 8px; margin-bottom: 1.2rem; border-left: 4px solid #f7971e;">
-                                <div
-                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                    <h4 style="margin: 0; color: #b85c00; font-size: 0.95rem;">👨‍👩‍👧‍👦 Family
-                                        Members</h4>
-                                    <div style="display: flex; gap: 1rem; align-items: center;">
-                                        <span style="font-size: 0.8rem; color: #666;">
-                                            👨 Male: <strong id="autoMaleCount">0</strong> &nbsp;|&nbsp;
-                                            👩 Female: <strong id="autoFemaleCount">0</strong> &nbsp;|&nbsp;
-                                            Total: <strong id="autoTotalCount">0</strong>
-                                        </span>
-                                        <button type="button" onclick="addFamilyMemberRow()"
-                                            style="background: #f7971e; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
-                                            ➕ Add Member
-                                        </button>
+                                <!-- Section: Basic Info -->
+                                <div class="form-section blue">
+                                    <h4 class="form-section-title">👤 <span class="lang-or">ପରିବାର ମୁଖ୍ୟଙ୍କ
+                                            ବିବରଣୀ</span><span class="lang-en">Head of Family Details</span></h4>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                        <div style="grid-column: 1 / -1;">
+                                            <label
+                                                style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--admin-text-muted); font-size: 0.85rem;">
+                                                <span class="lang-or">ସଦସ୍ୟତା ନଂ. *</span>
+                                                <span class="lang-en">Membership No. *</span>
+                                            </label>
+                                            <input type="text" id="membershipNo" required class="form-control">
+                                        </div>
+                                        <div>
+                                            <label
+                                                style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--admin-text-muted); font-size: 0.85rem;">
+                                                <span class="lang-or">ପରିବାର ମୁଖ୍ୟଙ୍କ ନାମ *</span>
+                                                <span class="lang-en">Head of Family Name *</span>
+                                            </label>
+                                            <input type="text" id="memberName" required class="form-control">
+                                        </div>
+                                        <div>
+                                            <label
+                                                style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--admin-text-muted); font-size: 0.85rem;">
+                                                <span class="lang-or">ମୋବାଇଲ *</span>
+                                                <span class="lang-en">Mobile *</span>
+                                            </label>
+                                            <input type="tel" id="memberMobile" required pattern="[0-9]{10}"
+                                                class="form-control">
+                                        </div>
+                                        <div>
+                                            <label
+                                                style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--admin-text-muted); font-size: 0.85rem;">
+                                                <span class="lang-or">ଆଧାର ନଂ.</span>
+                                                <span class="lang-en">Aadhaar No.</span>
+                                            </label>
+                                            <input type="text" id="memberAadhaar" maxlength="12" pattern="[0-9]{12}"
+                                                placeholder="12-digit Aadhaar number" class="form-control">
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Family member table header -->
-                                <div
-                                    style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 0.8fr 40px; gap: 0.5rem; padding: 6px 0; border-bottom: 2px solid #f0d9b5; margin-bottom: 0.5rem;">
-                                    <span
-                                        style="font-weight: 700; font-size: 0.78rem; color: #666; text-transform: uppercase;">Name</span>
-                                    <span
-                                        style="font-weight: 700; font-size: 0.78rem; color: #666; text-transform: uppercase;">Relation</span>
-                                    <span
-                                        style="font-weight: 700; font-size: 0.78rem; color: #666; text-transform: uppercase;">Gender</span>
-                                    <span
-                                        style="font-weight: 700; font-size: 0.78rem; color: #666; text-transform: uppercase;">Age</span>
-                                    <span></span>
+                                <!-- Section: Address -->
+                                <div class="form-section green">
+                                    <h4 class="form-section-title">📍 <span class="lang-or">ଠିକଣା ବିବରଣୀ</span><span
+                                            class="lang-en">Address Details</span></h4>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                        <div>
+                                            <label
+                                                style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--admin-text-muted); font-size: 0.85rem;">
+                                                <span class="lang-or">ଜିଲ୍ଲା *</span>
+                                                <span class="lang-en">District *</span>
+                                            </label>
+                                            <input type="text" id="memberDistrict" required class="form-control">
+                                        </div>
+                                        <div>
+                                            <label
+                                                style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--admin-text-muted); font-size: 0.85rem;">
+                                                <span class="lang-or">ତାଲୁକା *</span>
+                                                <span class="lang-en">Taluka *</span>
+                                            </label>
+                                            <input type="text" id="memberTaluka" required class="form-control">
+                                        </div>
+                                        <div>
+                                            <label
+                                                style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--admin-text-muted); font-size: 0.85rem;">
+                                                <span class="lang-or">ପଞ୍ଚାୟତ</span>
+                                                <span class="lang-en">Panchayat</span>
+                                            </label>
+                                            <input type="text" id="memberPanchayat" class="form-control">
+                                        </div>
+                                        <div>
+                                            <label
+                                                style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--admin-text-muted); font-size: 0.85rem;">
+                                                <span class="lang-or">ଗ୍ରାମ</span>
+                                                <span class="lang-en">Village</span>
+                                            </label>
+                                            <input type="text" id="memberVillage" class="form-control">
+                                        </div>
+                                        <div style="grid-column: 1 / -1;">
+                                            <label
+                                                style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--admin-text-muted); font-size: 0.85rem;">
+                                                <span class="lang-or">ସମ୍ପୂର୍ଣ ଠିକଣା</span>
+                                                <span class="lang-en">Full Address</span>
+                                            </label>
+                                            <textarea id="memberAddress" rows="2"
+                                                placeholder="House/Street details (optional)" class="form-control"
+                                                style="resize: vertical;"></textarea>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <!-- Dynamic rows container -->
-                                <div id="familyMembersContainer">
-                                    <!-- Rows added by JS -->
+                                <!-- Section: Family Members -->
+                                <div class="form-section orange">
+                                    <div
+                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                        <h4 class="form-section-title" style="margin:0;">👨‍👩‍👧‍👦 <span
+                                                class="lang-or">ପରିବାର ସଦସ୍ୟ</span><span class="lang-en">Family
+                                                Members</span></h4>
+                                        <div style="display: flex; gap: 1rem; align-items: center;">
+                                            <span style="font-size: 0.8rem; color: var(--admin-text-muted);">
+                                                👨 <span class="lang-or">ପୁରୁଷ</span><span class="lang-en">Male</span>:
+                                                <strong id="autoMaleCount">0</strong> &nbsp;|&nbsp;
+                                                👩 <span class="lang-or">ମହିଳା</span><span
+                                                    class="lang-en">Female</span>:
+                                                <strong id="autoFemaleCount">0</strong> &nbsp;|&nbsp;
+                                                <span class="lang-or">ମୋଟ</span><span class="lang-en">Total</span>:
+                                                <strong id="autoTotalCount">0</strong>
+                                            </span>
+                                            <button type="button" onclick="addFamilyMemberRow()" class="btn primary"
+                                                style="padding: 0.4rem 0.85rem; font-size: 0.8rem;">
+                                                ➕ <span class="lang-or">ଯୋଡ଼ନ୍ତୁ</span><span class="lang-en">Add</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Family header -->
+                                    <div
+                                        style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 0.8fr 40px; gap: 0.5rem; padding: 0.5rem 0; border-bottom: 2px solid rgba(245,158,11,0.2); margin-bottom: 0.5rem;">
+                                        <span
+                                            style="font-weight: 700; font-size: 0.75rem; color: var(--admin-text-light); text-transform: uppercase; letter-spacing: 0.05em;"><span
+                                                class="lang-or">ନାମ</span><span class="lang-en">Name</span></span>
+                                        <span
+                                            style="font-weight: 700; font-size: 0.75rem; color: var(--admin-text-light); text-transform: uppercase; letter-spacing: 0.05em;"><span
+                                                class="lang-or">ସମ୍ପର୍କ</span><span
+                                                class="lang-en">Relation</span></span>
+                                        <span
+                                            style="font-weight: 700; font-size: 0.75rem; color: var(--admin-text-light); text-transform: uppercase; letter-spacing: 0.05em;"><span
+                                                class="lang-or">ଲିଙ୍ଗ</span><span class="lang-en">Gender</span></span>
+                                        <span
+                                            style="font-weight: 700; font-size: 0.75rem; color: var(--admin-text-light); text-transform: uppercase; letter-spacing: 0.05em;"><span
+                                                class="lang-or">ବୟସ</span><span class="lang-en">Age</span></span>
+                                        <span></span>
+                                    </div>
+
+                                    <!-- Dynamic rows -->
+                                    <div id="familyMembersContainer">
+                                        <!-- Rows added by JS -->
+                                    </div>
+
+                                    <input type="hidden" id="memberMale">
+                                    <input type="hidden" id="memberFemale">
                                 </div>
+                            </form>
+                        </div>
 
-                                <input type="hidden" id="memberMale">
-                                <input type="hidden" id="memberFemale">
-                            </div>
-
-                            <!-- Save / Cancel -->
-                            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                                <button type="submit" class="btn primary"
-                                    style="flex: 1; padding: 14px; font-size: 16px;">
-                                    💾 Save Member
-                                </button>
-                                <button type="button" onclick="closeMemberModal()" class="btn ghost"
-                                    style="padding: 14px 24px;">
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
+                        <!-- Fixed Modal Footer — always visible -->
+                        <div
+                            style="display: flex; gap: 1rem; padding: 1.25rem 2.5rem; background: var(--admin-surface); border-top: 2px solid var(--admin-border-light); flex-shrink: 0;">
+                            <button type="submit" form="memberForm" class="btn primary"
+                                style="flex: 1; padding: 0.85rem; font-size: 0.95rem;">
+                                💾 <span class="lang-or">ସଦସ୍ୟ ସଞ୍ଚୟ କରନ୍ତୁ</span><span class="lang-en">Save
+                                    Member</span>
+                            </button>
+                            <button type="button" onclick="closeMemberModal()" class="btn ghost"
+                                style="padding: 0.85rem 1.5rem;">
+                                <span class="lang-or">ବାତିଲ</span><span class="lang-en">Cancel</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Match Candidate Modal -->
+                <!-- Match Candidate Modal (commented out) -->
                 <!-- <div id="matchModal" class="modal" style="display: none;">
-                    <div class="modal-content"
-                        style="max-width: 500px; background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <div class="modal-content" style="max-width: 500px; padding: 2.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                             <h3 style="margin: 0;">Mark as Matched</h3>
-                            <button onclick="closeMatchModal()"
-                                style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
+                            <button onclick="closeMatchModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--admin-text-light);">×</button>
                         </div>
                         <form id="matchForm">
                             <input type="hidden" id="matchCandidateId">
                             <div style="margin-bottom: 1rem;">
-                                <label
-                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Partner
-                                    Name *</label>
-                                <input type="text" id="partnerName" required
-                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--admin-text);">Partner Name *</label>
+                                <input type="text" id="partnerName" required class="form-control">
                             </div>
                             <div style="margin-bottom: 1rem;">
-                                <label
-                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Partner
-                                    Gender *</label>
-                                <select id="partnerGender" required
-                                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--admin-text);">Partner Gender *</label>
+                                <select id="partnerGender" required class="form-control">
                                     <option value="">Select Gender</option>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
                                 </select>
                             </div>
                             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                                <button type="submit" class="btn primary" style="flex: 1; padding: 12px;">Confirm
-                                    Match</button>
-                                <button type="button" onclick="closeMatchModal()" class="btn ghost"
-                                    style="padding: 12px;">Cancel</button>
+                                <button type="submit" class="btn primary" style="flex: 1; padding: 0.85rem;">Confirm Match</button>
+                                <button type="button" onclick="closeMatchModal()" class="btn ghost" style="padding: 0.85rem;">Cancel</button>
                             </div>
                         </form>
                     </div>
-                </div>-->
+                </div> -->
             </section>
 
 
-            <!-- ========= REVIEW SUBMISSIONS SECTION ========= -->
+            <!-- ═══════════ REVIEW SUBMISSIONS SECTION ═══════════ -->
             <section id="reviewSection" class="admin-section" style="display:none;">
-                <h3 class="section-title">📋 Review Google Form Submissions</h3>
+                <div class="panel-card" style="margin-bottom:1.5rem;">
+                    <h3 class="section-title">📋 <span class="lang-or">ଗୁଗଲ ଫର୍ମ ସମୀକ୍ଷା</span><span
+                            class="lang-en"></span>Review Google Form Submissions</span></h3>
 
-                <!-- Google Sheet Configuration -->
-                <div
-                    style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 1.5rem; border-radius: 12px; border: 1px solid #dee2e6; margin-bottom: 2rem;">
-                    <h4 style="margin: 0 0 1rem 0; color: #495057; font-size: 1rem;">⚙️ Google Sheet Configuration</h4>
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
-                        <div style="flex: 1; min-width: 300px;">
-                            <label
-                                style="display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.85rem; color: #555;">Google
-                                Sheet ID</label>
-                            <input type="text" id="googleSheetId"
-                                placeholder="e.g. 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"
-                                style="width: 100%; padding: 10px 14px; border: 2px solid #ced4da; border-radius: 8px; font-size: 14px; font-family: monospace;">
+                    <!-- Google Sheet Configuration -->
+                    <div class="review-config">
+                        <h4>⚙️ <span class="lang-or">ଗୁଗଲ ଶୀଟ୍ କନ୍ଫିଗରେଶନ</span><span class="lang-en">Google Sheet
+                                Configuration</span></h4>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+                            <div style="flex: 1; min-width: 280px;">
+                                <label
+                                    style="display: block; margin-bottom: 0.35rem; font-weight: 600; font-size: 0.85rem; color: var(--admin-text-muted);">Google
+                                    Sheet ID</label>
+                                <input type="text" id="googleSheetId"
+                                    placeholder="e.g. 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
+                            </div>
+                            <div style="min-width: 180px;">
+                                <label
+                                    style="display: block; margin-bottom: 0.35rem; font-weight: 600; font-size: 0.85rem; color: var(--admin-text-muted);">Sheet
+                                    Name (tab)</label>
+                                <input type="text" id="googleSheetTab" placeholder="Form Responses 1"
+                                    value="Form Responses 1">
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="saveSheetConfig()" class="btn ghost"
+                                    style="padding: 0.65rem 1.25rem;">💾 <span class="lang-or">ସଞ୍ଚୟ</span><span
+                                        class="lang-en">Save</span></button>
+                                <button onclick="fetchGoogleSheetSubmissions()" class="btn primary"
+                                    style="padding: 0.65rem 1.25rem;">🔄 <span class="lang-or">ଆଣନ୍ତୁ</span><span
+                                        class="lang-en">Fetch</span></button>
+                            </div>
                         </div>
-                        <div style="min-width: 200px;">
-                            <label
-                                style="display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.85rem; color: #555;">Sheet
-                                Name (tab)</label>
-                            <input type="text" id="googleSheetTab" placeholder="Form Responses 1"
-                                value="Form Responses 1"
-                                style="width: 100%; padding: 10px 14px; border: 2px solid #ced4da; border-radius: 8px; font-size: 14px;">
-                        </div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="saveSheetConfig()" class="btn"
-                                style="padding: 10px 20px; background: #6c757d; color: white; white-space: nowrap;">💾
-                                Save Config</button>
-                            <button onclick="fetchGoogleSheetSubmissions()" class="btn primary"
-                                style="padding: 10px 20px; white-space: nowrap;">🔄 Fetch Submissions</button>
-                        </div>
+                        <p style="margin: 0.75rem 0 0; font-size: 0.8rem; color: var(--admin-text-light);">
+                            📌 <strong>How to find Sheet ID:</strong> Open your Google Sheet → copy the long ID from the
+                            URL:<br>
+                            <code
+                                style="background: var(--admin-surface); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">https://docs.google.com/spreadsheets/d/<strong
+                                    style="color: var(--admin-primary);">{THIS_IS_THE_ID}</strong>/edit</code><br>
+                            📌 Make sure the sheet is <strong>published to web</strong>: File → Share → Publish to web →
+                            Publish
+                        </p>
                     </div>
-                    <p style="margin: 0.8rem 0 0 0; font-size: 0.8rem; color: #888;">
-                        📌 <strong>How to find Sheet ID:</strong> Open your Google Sheet → copy the long ID from the
-                        URL:<br>
-                        <code
-                            style="background: #fff; padding: 2px 6px; border-radius: 4px;">https://docs.google.com/spreadsheets/d/<strong style="color: #0a4a96;">{THIS_IS_THE_ID}</strong>/edit</code><br>
-                        📌 Make sure the sheet is <strong>published to web</strong>: File → Share → Publish to web →
-                        Publish
-                    </p>
                 </div>
 
-                <!-- Stats Bar -->
+                <!-- Stats -->
                 <div id="reviewStats" style="display: none; margin-bottom: 1.5rem;">
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <div
-                            style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1.2rem; border-radius: 10px; text-align: center;">
-                            <div style="font-size: 2rem; font-weight: 700;" id="statTotal">0</div>
-                            <div style="font-size: 0.85rem; opacity: 0.9;">Total Submissions</div>
+                    <div class="admin-stats">
+                        <div class="stat-card purple">
+                            <div class="stat-value" id="statTotal">0</div>
+                            <div class="stat-label"><span class="lang-or">ମୋଟ ପ୍ରେରଣ</span><span class="lang-en">Total
+                                    Submissions</span></div>
                         </div>
-                        <div
-                            style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #f7971e, #ffd200); color: white; padding: 1.2rem; border-radius: 10px; text-align: center;">
-                            <div style="font-size: 2rem; font-weight: 700;" id="statPending">0</div>
-                            <div style="font-size: 0.85rem; opacity: 0.9;">Pending Review</div>
+                        <div class="stat-card amber">
+                            <div class="stat-value" id="statPending">0</div>
+                            <div class="stat-label"><span class="lang-or">ବିଚାରାଧୀନ</span><span class="lang-en">Pending
+                                    Review</span></div>
                         </div>
-                        <div
-                            style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 1.2rem; border-radius: 10px; text-align: center;">
-                            <div style="font-size: 2rem; font-weight: 700;" id="statApproved">0</div>
-                            <div style="font-size: 0.85rem; opacity: 0.9;">Already Approved</div>
+                        <div class="stat-card emerald">
+                            <div class="stat-value" id="statApproved">0</div>
+                            <div class="stat-label"><span class="lang-or">ପୂର୍ବରୁ ଅନୁମୋଦିତ</span><span
+                                    class="lang-en">Already Approved</span></div>
                         </div>
                     </div>
                 </div>
@@ -541,79 +621,96 @@
                 <!-- Filter Tabs -->
                 <div id="reviewFilterBar"
                     style="display: none; margin-bottom: 1.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <button class="btn" onclick="filterSubmissions('all')" id="filterAll"
-                        style="padding: 8px 18px; background: #0a4a96; color: white; font-size: 0.85rem;">All</button>
+                    <button class="btn primary" onclick="filterSubmissions('all')" id="filterAll"
+                        style="padding: 0.5rem 1.25rem; font-size: 0.85rem;"><span class="lang-or">ସବୁ</span><span
+                            class="lang-en">All</span></button>
                     <button class="btn ghost" onclick="filterSubmissions('pending')" id="filterPending"
-                        style="padding: 8px 18px; font-size: 0.85rem;">⏳ Pending</button>
+                        style="padding: 0.5rem 1.25rem; font-size: 0.85rem;">⏳ <span
+                            class="lang-or">ବିଚାରାଧୀନ</span><span class="lang-en">Pending</span></button>
                     <button class="btn ghost" onclick="filterSubmissions('approved')" id="filterApproved"
-                        style="padding: 8px 18px; font-size: 0.85rem;">✅ Approved</button>
+                        style="padding: 0.5rem 1.25rem; font-size: 0.85rem;">✅ <span
+                            class="lang-or">ଅନୁମୋଦିତ</span><span class="lang-en">Approved</span></button>
                 </div>
 
                 <!-- Submissions List -->
                 <div id="submissionsContainer">
-                    <div style="text-align: center; padding: 4rem 2rem; color: #999;">
-                        <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
-                        <p style="font-size: 1.1rem; font-weight: 600;">No submissions loaded</p>
-                        <p style="font-size: 0.9rem;">Configure your Google Sheet ID above and click "Fetch Submissions"
+                    <div class="admin-empty">
+                        <div class="icon">📋</div>
+                        <p style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.5rem;">
+                            <span class="lang-or">କୋଣସି ପ୍ରେରଣ ଲୋଡ ହୋଇନାହିଁ</span>
+                            <span class="lang-en">No submissions loaded</span>
+                        </p>
+                        <p style="font-size: 0.9rem;">
+                            <span class="lang-or">ଉପରେ ଆପଣଙ୍କ Google Sheet ID କନ୍ଫିଗର କରନ୍ତୁ ଏବଂ "ଆଣନ୍ତୁ" କ୍ଲିକ
+                                କରନ୍ତୁ</span>
+                            <span class="lang-en">Configure your Google Sheet ID above and click "Fetch"</span>
                         </p>
                     </div>
                 </div>
             </section>
 
-            <section id="postSection" class="admin-section panel-card" style="display:none;">
-                <h3 class="section-title">Post Management</h3>
 
-                <!-- Search & Actions Bar -->
-                <div class="search-container" style="margin-bottom: 2rem;">
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                        <input type="text" id="postSearchInput" placeholder="Search by Title"
-                            style="flex: 1; min-width: 250px; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;">
-                        <button onclick="searchPosts()" class="btn primary"
-                            style="padding: 12px 24px; white-space: nowrap;">
-                            🔍 Search
-                        </button>
-                        <button onclick="clearPostSearch()" class="btn ghost"
-                            style="padding: 12px 24px; white-space: nowrap;">
-                            Clear
-                        </button>
-                    </div>
+            <!-- ═══════════ POST MANAGEMENT SECTION ═══════════ -->
+            <section id="postSection" class="admin-section panel-card" style="display:none;">
+                <h3 class="section-title">📝 <span class="lang-or">ପୋଷ୍ଟ ପରିଚାଳନା</span><span class="lang-en">Post
+                        Management</span></h3>
+
+                <!-- Search -->
+                <div class="admin-toolbar">
+                    <input type="text" id="postSearchInput" placeholder="Search posts by title..."
+                        class="admin-search-input">
+                    <button onclick="searchPosts()" class="btn primary"><span class="lang-or">ଖୋଜନ୍ତୁ</span><span
+                            class="lang-en">Search</span></button>
+                    <button onclick="clearPostSearch()" class="btn ghost"><span class="lang-or">ସଫା କରନ୍ତୁ</span><span
+                            class="lang-en">Clear</span></button>
                 </div>
 
                 <div class="form-grid">
-
                     <!-- Post Form -->
-                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
-                        <h4 id="postFormTitle" style="margin-top: 0; color: #0a4a96;">Add New Post</h4>
+                    <div class="form-section blue">
+                        <h4 id="postFormTitle" class="form-section-title">➕ <span class="lang-or">ନୂଆ ପୋଷ୍ଟ
+                                ଯୋଡ଼ନ୍ତୁ</span><span class="lang-en">Add New Post</span></h4>
                         <form id="addPostForm">
                             <input type="hidden" id="postId">
                             <div class="form-group">
-                                <label style="font-weight: 600; font-size: 0.9rem;">Title</label>
+                                <label
+                                    style="display:block; margin-bottom:0.35rem; font-weight:600; font-size:0.85rem; color: var(--admin-text-muted);">
+                                    <span class="lang-or">ଶୀର୍ଷକ *</span>
+                                    <span class="lang-en">Title *</span>
+                                </label>
                                 <input type="text" id="postTitle" placeholder="Post Title" required
                                     class="form-control">
                             </div>
                             <div class="form-group">
-                                <label style="font-weight: 600; font-size: 0.9rem;">Content</label>
-                                <textarea id="postContent" placeholder="Post Content" rows="6" required
-                                    class="form-control"></textarea>
+                                <label
+                                    style="display:block; margin-bottom:0.35rem; font-weight:600; font-size:0.85rem; color: var(--admin-text-muted);">
+                                    <span class="lang-or">ବିଷୟବସ୍ତୁ *</span>
+                                    <span class="lang-en">Content *</span>
+                                </label>
+                                <textarea id="postContent" placeholder="Write your post content here..." rows="6"
+                                    required class="form-control"></textarea>
                             </div>
-                            <div class="form-actions" style="display:flex; gap:10px; margin-top: 1rem;">
-                                <button type="submit" id="savePostBtn" class="btn primary" style="flex: 1;">Save
-                                    Post</button>
+                            <div style="display:flex; gap:0.65rem; margin-top: 1rem;">
+                                <button type="submit" id="savePostBtn" class="btn primary" style="flex: 1;">💾 <span
+                                        class="lang-or">ପୋଷ୍ଟ ସଞ୍ଚୟ କରନ୍ତୁ</span><span class="lang-en">Save
+                                        Post</span></button>
                                 <button type="button" id="cancelPostEdit" class="btn ghost" style="display:none;"
-                                    onclick="resetPostForm()">Cancel</button>
+                                    onclick="resetPostForm()"><span class="lang-or">ବାତିଲ</span><span
+                                        class="lang-en">Cancel</span></button>
                             </div>
                         </form>
                     </div>
 
                     <!-- Post List -->
-                    <div id="adminPostsList" style="overflow-x: auto;">
-                        <table id="postsTable"
-                            style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                            <thead style="background: #e7eef6; color: #333;">
+                    <div id="adminPostsList" class="admin-table-wrap">
+                        <table id="postsTable">
+                            <thead>
                                 <tr>
-                                    <th style="padding: 12px; text-align: left;">Title</th>
-                                    <th style="padding: 12px; text-align: left;">Content Preview</th>
-                                    <th style="padding: 12px; text-align: right;">Actions</th>
+                                    <th><span class="lang-or">ଶୀର୍ଷକ</span><span class="lang-en">Title</span></th>
+                                    <th><span class="lang-or">ବିଷୟବସ୍ତୁ ପୂର୍ବଦୃଶ୍ୟ</span><span class="lang-en">Content
+                                            Preview</span></th>
+                                    <th style="text-align:right;"><span class="lang-or">କାର୍ଯ୍ୟ</span><span
+                                            class="lang-en">Actions</span></th>
                                 </tr>
                             </thead>
                             <tbody id="postsTableBody">
@@ -623,13 +720,14 @@
                     </div>
                 </div>
             </section>
+
         </div>
     </main>
 
     <!-- Global Loader Overlay -->
     <div id="globalLoader" class="loader-overlay" style="display: none;">
         <div class="loader-spinner"></div>
-        <p style="color: white; margin-top: 15px; font-weight: 600;">Processing...</p>
+        <p><span class="lang-or">ପ୍ରକ୍ରିୟା ଚାଲୁଛି...</span><span class="lang-en">Processing...</span></p>
     </div>
 
     <script>
