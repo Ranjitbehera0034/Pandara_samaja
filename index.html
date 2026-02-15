@@ -283,42 +283,21 @@
 
         // ---- Render State Leaders ----
         const leaders = [
-            // Use exact paths and cases; update names & roles
-            {
-                src: 'assets/img/NOPS/Bijaya Kumar Badatya.png'
-            },
-            {
-                src: 'assets/img/NOPS/ChandrSekher Badatya.png'
-            },
-            {
-                src: 'assets/img/NOPS/Madan sekher Badatya.png'
-            },
-            {
-                src: 'assets/img/NOPS/Chiranjibi Badatya.png'
-            }, {
-                src: 'assets/img/NOPS/Kishore Hari Badatya.png'
-            }, {
-                src: 'assets/img/NOPS/Sarat Chandra Behera.png'
-            }, {
-                src: 'assets/img/NOPS/Purna chandra Behera.png'
-            }, {
-                src: 'assets/img/NOPS/Bharata Bhusana Badatya.png'
-            }, {
-                src: 'assets/img/NOPS/Bhagawan Badatya.png'
-            }, {
-                src: 'assets/img/NOPS/Rajendra Badatya.png'
-            }, {
-                src: 'assets/img/NOPS/Arjuna Behera.png'
-            }, {
-                src: 'assets/img/NOPS/Sukanta Badatya.png'
-            }, {
-                src: 'assets/img/NOPS/Ganesh Behera.png'
-            }, {
-                src: 'assets/img/NOPS/Chandrakanta Badatya.png'
-            }, {
-                src: 'assets/img/NOPS/Hemant Kumar Behera.png'
-            },
-
+            { name: 'Bijaya Kumar Badatya', role: 'State Committee', src: 'assets/img/NOPS/Bijaya Kumar Badatya.png' },
+            { name: 'ChandrSekher Badatya', role: 'State Committee', src: 'assets/img/NOPS/ChandrSekher Badatya.png' },
+            { name: 'Madan Sekher Badatya', role: 'State Committee', src: 'assets/img/NOPS/Madan sekher Badatya.png' },
+            { name: 'Chiranjibi Badatya', role: 'State Committee', src: 'assets/img/NOPS/Chiranjibi Badatya.png' },
+            { name: 'Kishore Hari Badatya', role: 'State Committee', src: 'assets/img/NOPS/Kishore Hari Badatya.png' },
+            { name: 'Sarat Chandra Behera', role: 'State Committee', src: 'assets/img/NOPS/Sarat Chandra Behera.png' },
+            { name: 'Purna Chandra Behera', role: 'State Committee', src: 'assets/img/NOPS/Purna chandra Behera.png' },
+            { name: 'Bharata Bhusana Badatya', role: 'State Committee', src: 'assets/img/NOPS/Bharata Bhusana Badatya.png' },
+            { name: 'Bhagawan Badatya', role: 'State Committee', src: 'assets/img/NOPS/Bhagawan Badatya.png' },
+            { name: 'Rajendra Badatya', role: 'State Committee', src: 'assets/img/NOPS/Rajendra Badatya.png' },
+            { name: 'Arjuna Behera', role: 'State Committee', src: 'assets/img/NOPS/Arjuna Behera.png' },
+            { name: 'Sukanta Badatya', role: 'State Committee', src: 'assets/img/NOPS/Sukanta Badatya.png' },
+            { name: 'Ganesh Behera', role: 'State Committee', src: 'assets/img/NOPS/Ganesh Behera.png' },
+            { name: 'Chandrakanta Badatya', role: 'State Committee', src: 'assets/img/NOPS/Chandrakanta Badatya.png' },
+            { name: 'Hemant Kumar Behera', role: 'State Committee', src: 'assets/img/NOPS/Hemant Kumar Behera.png' },
         ];
 
         const grid = document.getElementById('stateLeaders');
@@ -328,8 +307,10 @@
             const card = document.createElement('div');
             card.className = 'leader-card';
             card.innerHTML = `
-        <img alt="${name}" src="${src}">       
-      `;
+                <img alt="${name || 'Leader'}" src="${src}" loading="lazy">
+                <h4>${name || 'Leader'}</h4>
+                <p class="role">${role || ''}</p>
+            `;
             const img = card.querySelector('img');
             img.onerror = () => {
                 img.onerror = null;

@@ -124,6 +124,21 @@ function showLeader(district) {
   } catch (err) {
     console.error("Failed to load members:", err);
     allMembers = [];
+
+    // Show a helpful error message in the table area
+    const tableCard = document.querySelector('.table-card');
+    if (tableCard && !document.getElementById('memberLoadError')) {
+      const errorDiv = document.createElement('div');
+      errorDiv.id = 'memberLoadError';
+      errorDiv.style.cssText = 'text-align:center; padding:3rem 1.5rem; color:#475569;';
+      errorDiv.innerHTML = `
+        <p style="font-size:2.5rem; margin-bottom:0.5rem;">📋</p>
+        <h3 style="color:#0a4a96; margin-bottom:0.5rem;">ସଦସ୍ୟ ତଥ୍ୟ ଶୀଘ୍ର ଉପಲବ୍ଧ ହେବ</h3>
+        <p style="font-size:0.95rem;">Member data is being imported and will be available soon.</p>
+        <p style="font-size:0.85rem; margin-top:0.5rem; opacity:0.7;">Please check back later or contact your district leaders for information.</p>
+      `;
+      tableCard.prepend(errorDiv);
+    }
   }
 
   // Hide loader with smooth transition and show table
