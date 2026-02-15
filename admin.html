@@ -382,6 +382,22 @@
                                         <div>
                                             <label
                                                 style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--admin-text-muted); font-size: 0.85rem;">
+                                                <span class="lang-or">ଲିଙ୍ଗ *</span>
+                                                <span class="lang-en">Gender *</span>
+                                            </label>
+                                            <select id="headGender" required class="form-control"
+                                                onchange="updateFamilyMemberCounts()">
+                                                <option value="" disabled selected>
+                                                    <span class="lang-or">ବାଛନ୍ତୁ</span>
+                                                    <span class="lang-en">Select</span>
+                                                </option>
+                                                <option value="Male">Male / ପୁରୁଷ</option>
+                                                <option value="Female">Female / ମହିଳା</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label
+                                                style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--admin-text-muted); font-size: 0.85rem;">
                                                 <span class="lang-or">ମୋବାଇଲ *</span>
                                                 <span class="lang-en">Mobile *</span>
                                             </label>
