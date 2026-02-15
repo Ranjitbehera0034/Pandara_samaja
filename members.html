@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png" />
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
 
     <!-- Oriya font -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Oriya:wght@400;700&display=swap" rel="stylesheet">
@@ -12,6 +14,8 @@
 
     <!-- Base styles -->
     <link rel="stylesheet" href="assets/css/main.css?v=2.1" />
+    <link rel="stylesheet" href="assets/css/splash.css?v=2.1" />
+    <script src="assets/js/splash.js?v=2.1" defer></script>
     <style>
         html[lang="or"] .lang-en,
         html[lang="or"] .lang-en-block {
@@ -28,7 +32,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
 
     <!-- dropdown styling + tweaks -->
-    <link rel="stylesheet" href="assets/css/members-cards.css?v=2.1" />
+    <link rel="stylesheet" href="assets/css/members-cards.css?v=3.0" />
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE9R5DCCNT"></script>
     <script>
@@ -99,37 +103,171 @@
     </div>
     <!-- main -->
     <main class="members-page">
-        <div class="container">
+
+        <!-- Hero Header -->
+        <div class="members-hero">
             <h1 class="page-title">
                 <span class="lang-or">ସଦସ୍ୟ ସୂଚି</span>
                 <span class="lang-en">Member Directory</span>
             </h1>
+            <p class="page-subtitle">
+                <span class="lang-or">ସମଗ୍ର ଓଡ଼ିଶାରେ ପନ୍ଦରା ସମାଜ</span>
+                <span class="lang-en">Pandara Samaja across Odisha</span>
+            </p>
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-chip">
+                    <span class="stat-icon">👥</span>
+                    <span class="lang-or">ମୋଟ ସଦସ୍ୟ</span>
+                    <span class="lang-en">Total</span>
+                    <span class="stat-value" id="statTotal">—</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-icon">🏘️</span>
+                    <span class="lang-or">ଜିଲ୍ଲା</span>
+                    <span class="lang-en">Districts</span>
+                    <span class="stat-value" id="statDistricts">—</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-icon">👨</span>
+                    <span class="lang-or">ପୁରୁଷ</span>
+                    <span class="lang-en">Male</span>
+                    <span class="stat-value" id="statMale">—</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-icon">👩</span>
+                    <span class="lang-or">ମହିଳା</span>
+                    <span class="lang-en">Female</span>
+                    <span class="stat-value" id="statFemale">—</span>
+                </div>
+            </div>
+        </div>
 
-            <div class="dropdown-row centered">
-                <select id="districtSelect">
-                    <option value="">
-                        Select District
-                    </option>
-                </select>
-                <select id="talukaSelect" disabled>
-                    <option value="">
-                        Select Taluka
-                    </option>
-                </select>
-                <select id="panchayatSelect" disabled>
-                    <option value="">
-                        Select Panchayat
-                    </option>
-                </select>
+        <div class="container">
+
+            <!-- Filter Card -->
+            <div class="filter-section">
+                <div class="filter-card">
+                    <span class="filter-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                        </svg>
+                        <span class="lang-or">ଫିଲ୍ଟର</span>
+                        <span class="lang-en">Filter Members</span>
+                    </span>
+                    <select id="districtSelect">
+                        <option value="">
+                            <span class="lang-or">ଜିଲ୍ଲା ଚୟନ</span>
+                            <span class="lang-en">Select District</span>
+                        </option>
+                    </select>
+                    <select id="talukaSelect" disabled>
+                        <option value="">
+                            <span class="lang-or">ତାଳୁକା ଚୟନ</span>
+                            <span class="lang-en">Select Taluka</span>
+                        </option>
+                    </select>
+                    <select id="panchayatSelect" disabled>
+                        <option value="">
+                            <span class="lang-or">ପଞ୍ଚାୟତ ଚୟନ</span>
+                            <span class="lang-en">Select Panchayat</span>
+                        </option>
+                    </select>
+                </div>
             </div>
 
+            <!-- Leader Images -->
             <div id="leaderContainer" class="leader-strip" style="display:none;">
                 <img id="leaderImage" src="" alt="District leader" />
             </div>
 
-            <div class="table-card">
+            <!-- Search Bar (for card view) -->
+            <div class="search-bar-wrap" id="searchBarWrap">
+                <svg class="search-bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input type="text" class="search-bar" id="cardSearch" placeholder="Search by name, mobile, village…"
+                    autocomplete="off" />
+                <button class="search-bar-clear" id="searchClear" aria-label="Clear search">&times;</button>
+            </div>
+
+            <!-- Toolbar: count + view toggle -->
+            <div class="toolbar-row">
+                <p class="result-count" id="resultCount"></p>
+                <div class="view-toggle">
+                    <button class="view-toggle-btn active" id="viewCards" title="Card View" aria-label="Card view">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7" rx="1" />
+                            <rect x="14" y="3" width="7" height="7" rx="1" />
+                            <rect x="3" y="14" width="7" height="7" rx="1" />
+                            <rect x="14" y="14" width="7" height="7" rx="1" />
+                        </svg>
+                    </button>
+                    <button class="view-toggle-btn" id="viewTable" title="Table View" aria-label="Table view">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Skeleton Loader (shown while fetching) -->
+            <div class="skeleton-grid" id="skeletonLoader">
+                <div class="skeleton-card">
+                    <div class="skeleton-line circle"></div>
+                    <div class="skeleton-text-group">
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-line circle"></div>
+                    <div class="skeleton-text-group">
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-line circle"></div>
+                    <div class="skeleton-text-group">
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-line circle"></div>
+                    <div class="skeleton-text-group">
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-line circle"></div>
+                    <div class="skeleton-text-group">
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-line circle"></div>
+                    <div class="skeleton-text-group">
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Member Cards Grid (populated by JS) -->
+            <div class="members-grid" id="membersGrid" style="display:none;"></div>
+
+            <!-- DataTable (hidden by default, shown when table view is active) -->
+            <div class="table-card" id="tableCard" style="display:none;">
                 <!-- Loading overlay -->
-                <div class="members-loader" id="membersLoader">
+                <div class="members-loader" id="membersLoader" style="display:none;">
                     <div class="loader-spinner">
                         <div class="loader-ring"></div>
                         <div class="loader-ring loader-ring--2"></div>
@@ -190,6 +328,18 @@
                                 <span class="lang-or">ଗ୍ରାମ</span>
                                 <span class="lang-en">Village</span>
                             </th>
+                            <th>
+                                <span class="lang-or">ଆଧାର</span>
+                                <span class="lang-en">Aadhaar</span>
+                            </th>
+                            <th>
+                                <span class="lang-or">ଠିକଣା</span>
+                                <span class="lang-en">Address</span>
+                            </th>
+                            <th>
+                                <span class="lang-or">ପରିବାର ସଦସ୍ୟ</span>
+                                <span class="lang-en">Family Members</span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -203,8 +353,10 @@
     <script src="assets/js/main.js?v=2.1"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
     <script src="assets/js/config.js?v=2.1"></script>
-    <script src="assets/js/members.js?v=2.1"></script>
+    <script src="assets/js/members.js?v=3.0"></script>
 
 </body>
 
