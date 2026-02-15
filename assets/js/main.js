@@ -115,3 +115,34 @@ if (navToggle && navLinks) {
     createToggleButton();
   }
 })();
+
+// ─── Floating Developer Badge (auto-inject on all pages) ────────
+(function injectDevBadge() {
+  function create() {
+    if (document.getElementById('devFloatBadge')) return;
+
+    const badge = document.createElement('a');
+    badge.id = 'devFloatBadge';
+    badge.className = 'dev-float-badge';
+    badge.href = 'https://ranjitbehera.in/';
+    badge.target = '_blank';
+    badge.rel = 'noopener noreferrer';
+    badge.title = 'Developed by Ranjit Behera';
+
+    badge.innerHTML = `
+      <div class="dev-float-icon"><img src="assets/img/RanjitPhoto.jpeg" alt="Ranjit Behera" class="dev-float-photo"></div>
+      <div class="dev-float-info">
+        <span class="dev-float-name">RANJIT BEHERA</span>
+        <span class="dev-float-role">Secretary, Palur Panchayat</span>
+        <span class="dev-float-link">ranjitbehera.in ↗</span>
+      </div>`;
+
+    document.body.appendChild(badge);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', create);
+  } else {
+    create();
+  }
+})();
