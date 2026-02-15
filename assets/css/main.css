@@ -21,60 +21,158 @@ body {
   line-height: 1.5;
 }
 
-/* ---------- HEADER ---------- */
+/* ════════════════════════════════════════════════════════════════
+   HEADER / NAVBAR  —  Modern glassmorphism nav
+   ════════════════════════════════════════════════════════════════ */
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
 .navbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.6rem 1.2rem;
-  background: var(--blue-900);
+  gap: 0.6rem;
+  padding: 0.55rem 1.5rem;
+  background: linear-gradient(135deg, #0a3d8f 0%, #0b5fcc 50%, #1a73e8 100%);
   color: var(--white);
   position: relative;
+  box-shadow: 0 2px 20px rgba(10, 61, 143, .35);
+  transition: background 0.4s, box-shadow 0.4s;
 }
 
+/* Subtle shimmer overlay */
+.navbar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg,
+      transparent 40%,
+      rgba(255, 255, 255, .04) 45%,
+      rgba(255, 255, 255, .08) 50%,
+      rgba(255, 255, 255, .04) 55%,
+      transparent 60%);
+  pointer-events: none;
+}
+
+/* ── Brand / logo ─────────────────────────────── */
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  font-size: 1.15rem;
+  gap: 0.65rem;
+  font-size: 1.08rem;
   font-weight: 700;
   white-space: nowrap;
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .18);
+  z-index: 2;
 }
 
 .brand img {
-  height: 42px;
+  height: 40px;
   width: auto;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .25),
+    0 2px 8px rgba(0, 0, 0, .15);
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
-/* ---------- NAV LINKS ---------- */
+.brand img:hover {
+  transform: scale(1.08) rotate(-3deg);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .4),
+    0 4px 14px rgba(0, 0, 0, .2);
+}
+
+/* ── Nav links (desktop) ──────────────────────── */
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 1.4rem;
+  align-items: center;
+  gap: 0.25rem;
+  z-index: 2;
+  margin-left: auto;
+  /* push nav + buttons to the right */
+  order: 1;
+}
+
+/* Ensure JS-injected buttons stay right, in order */
+.lang-toggle {
+  order: 2;
+  flex-shrink: 0;
+}
+
+.dark-mode-toggle {
+  order: 3;
+}
+
+.nav-toggle {
+  order: 4;
 }
 
 .nav-links a {
-  color: var(--white);
+  color: rgba(255, 255, 255, .88);
   text-decoration: none;
   font-weight: 600;
-  transition: color 0.2s;
+  font-size: 0.88rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  position: relative;
+  transition: color 0.25s, background 0.25s, transform 0.2s;
+  letter-spacing: 0.3px;
 }
 
+/* Active bottom-bar indicator */
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 60%;
+  height: 2.5px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, .85);
+  transition: transform 0.3s cubic-bezier(.4, 0, .2, 1);
+}
 
-.nav-links a:hover,
+.nav-links a:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, .12);
+  transform: translateY(-1px);
+}
+
+.nav-links a:hover::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
 .nav-links a.active {
-  color: #e3e7ec;
+  color: #fff;
+  background: rgba(255, 255, 255, .15);
 }
 
-/* ---------- HAMBURGER ---------- */
+.nav-links a.active::after {
+  transform: translateX(-50%) scaleX(1);
+  background: #ffd166;
+}
+
+/* ── Hamburger (mobile toggle) ────────────────── */
 .nav-toggle {
   display: none;
-  background: none;
-  border: 2px solid var(--blue-200);
-  padding: 0.35rem 0.4rem;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, .1);
+  border: 1.5px solid rgba(255, 255, 255, .25);
+  padding: 7px 6px;
+  border-radius: 8px;
   cursor: pointer;
+  z-index: 10001;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.nav-toggle:hover {
+  background: rgba(255, 255, 255, .2);
+  border-color: rgba(255, 255, 255, .4);
 }
 
 .hamburger,
@@ -82,10 +180,12 @@ body {
 .hamburger::after {
   content: "";
   display: block;
-  width: 22px;
+  width: 20px;
   height: 2px;
   background: var(--white);
-  transition: transform 0.3s;
+  border-radius: 2px;
+  transition: transform 0.35s cubic-bezier(.4, 0, .2, 1),
+    opacity 0.25s;
 }
 
 .hamburger::before {
@@ -96,38 +196,124 @@ body {
   transform: translateY(4px);
 }
 
-/* ---------- BREAKPOINT ---------- */
-@media (max-width: 680px) {
+/* Animated X when open */
+.nav-toggle.active .hamburger {
+  background: transparent;
+}
+
+.nav-toggle.active .hamburger::before {
+  transform: translateY(0) rotate(45deg);
+}
+
+.nav-toggle.active .hamburger::after {
+  transform: translateY(-2px) rotate(-45deg);
+}
+
+/* ── Mobile breakpoint ────────────────────────── */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.5rem 1rem;
+  }
+
   .nav-toggle {
     display: block;
-    position: absolute;
-    /* pin so Flex doesn’t push it away */
-    right: 1rem;
-    /* same padding as navbar */
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 9999;
-    /* above drop-down panel */
   }
 
   .nav-links {
     display: none;
+    flex-direction: column;
     position: absolute;
     top: 100%;
     left: 0;
     width: 100%;
-    background: #3f55d5ab;
-    padding: 1rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    background: linear-gradient(180deg, #0a3d8fF2 0%, #0b5fccF0 100%);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    padding: 0.5rem 0 0.8rem;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .25);
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    gap: 0;
+    z-index: 10000;
   }
 
   .nav-links.open {
-    display: block;
+    display: flex;
+    animation: navSlideDown 0.35s cubic-bezier(.4, 0, .2, 1) forwards;
+  }
+
+  @keyframes navSlideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .nav-links li {
     text-align: center;
+    opacity: 0;
+    animation: navItemFadeIn 0.3s ease forwards;
+  }
+
+  /* Stagger the items */
+  .nav-links.open li:nth-child(1) {
+    animation-delay: 0.05s;
+  }
+
+  .nav-links.open li:nth-child(2) {
+    animation-delay: 0.10s;
+  }
+
+  .nav-links.open li:nth-child(3) {
+    animation-delay: 0.15s;
+  }
+
+  .nav-links.open li:nth-child(4) {
+    animation-delay: 0.20s;
+  }
+
+  .nav-links.open li:nth-child(5) {
+    animation-delay: 0.25s;
+  }
+
+  @keyframes navItemFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .nav-links li a {
+    display: block;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    border-radius: 0;
+  }
+
+  .nav-links a::after {
+    display: none;
+    /* hide bottom indicator on mobile */
+  }
+
+  .nav-links a:hover {
+    background: rgba(255, 255, 255, .1);
+    transform: none;
+  }
+
+  .nav-links a.active {
+    background: rgba(255, 255, 255, .15);
+    border-left: 3px solid #ffd166;
   }
 }
 
@@ -236,16 +422,8 @@ a:hover {
   animation: fadeSlide .8s ease-out both;
 }
 
-@media (max-width: 680px) {
-  .nav-links li a {
-    display: block;
-    /* take full row width */
-    padding: 0.6rem 0;
-    /* nicer tap target */
-    white-space: nowrap;
-    /* ⬅ NO wrapping between letters */
-  }
-}
+
+
 
 /* ==== Home / About helpers ==== */
 /* ==== HERO (improved) ======================================= */
@@ -1212,10 +1390,10 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, .35);
+  border: 1.5px solid rgba(255, 255, 255, .3);
   background: rgba(255, 255, 255, .1);
   color: #fff;
   cursor: pointer;
@@ -1227,23 +1405,40 @@ a:hover {
 
 .dark-mode-toggle:hover {
   background: rgba(255, 255, 255, .2);
-  border-color: rgba(255, 255, 255, .6);
+  border-color: rgba(255, 255, 255, .5);
   transform: rotate(20deg) scale(1.1);
 }
 
-/* On mobile, position it nicely */
-@media (max-width: 680px) {
-  .dark-mode-toggle {
+/* On mobile, position toggle buttons neatly right-to-left */
+@media (max-width: 768px) {
+
+  /* Remove flexbox order on mobile — use absolute positioning */
+  .lang-toggle,
+  .dark-mode-toggle,
+  .nav-toggle {
     position: absolute;
-    right: 3.5rem;
     top: 50%;
     transform: translateY(-50%);
-    width: 34px;
-    height: 34px;
+  }
+
+  .nav-toggle {
+    right: 0.8rem;
+  }
+
+  .dark-mode-toggle {
+    right: 3.5rem;
+    width: 30px;
+    height: 30px;
   }
 
   .dark-mode-toggle:hover {
     transform: translateY(-50%) rotate(20deg) scale(1.1);
+  }
+
+  .lang-toggle {
+    right: 6.2rem;
+    font-size: 0.72rem;
+    padding: 3px 8px;
   }
 }
 
@@ -1271,17 +1466,45 @@ html.dark main {
 
 /* ── Navbar ────────────────────────────────── */
 html.dark .navbar {
-  background: #1a1f2e;
+  background: linear-gradient(135deg, #0f1724 0%, #162240 50%, #1a2d52 100%);
   border-bottom: 1px solid rgba(255, 255, 255, .06);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, .5);
+}
+
+html.dark .navbar::after {
+  background: linear-gradient(105deg,
+      transparent 40%,
+      rgba(255, 255, 255, .015) 45%,
+      rgba(255, 255, 255, .03) 50%,
+      rgba(255, 255, 255, .015) 55%,
+      transparent 60%);
+}
+
+html.dark .brand img {
+  box-shadow: 0 0 0 2px rgba(79, 155, 255, .3),
+    0 2px 8px rgba(0, 0, 0, .3);
 }
 
 html.dark .nav-links a {
-  color: #c8cfd6;
+  color: rgba(200, 210, 220, .85);
 }
 
-html.dark .nav-links a:hover,
+html.dark .nav-links a:hover {
+  color: #fff;
+  background: rgba(79, 155, 255, .12);
+}
+
+html.dark .nav-links a:hover::after {
+  background: rgba(79, 155, 255, .7);
+}
+
 html.dark .nav-links a.active {
-  color: #4f9bff;
+  color: #fff;
+  background: rgba(79, 155, 255, .15);
+}
+
+html.dark .nav-links a.active::after {
+  background: #ffd166;
 }
 
 html.dark .dark-mode-toggle {
@@ -1295,10 +1518,20 @@ html.dark .dark-mode-toggle:hover {
   border-color: rgba(79, 155, 255, .7);
 }
 
-/* Mobile dropdown */
-@media (max-width: 680px) {
+html.dark .nav-toggle {
+  background: rgba(79, 155, 255, .1);
+  border-color: rgba(79, 155, 255, .25);
+}
+
+/* Mobile dropdown dark */
+@media (max-width: 768px) {
   html.dark .nav-links {
-    background: #1a1f2eee;
+    background: linear-gradient(180deg, #0f1724F2 0%, #162240F0 100%);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .5);
+  }
+
+  html.dark .nav-links a.active {
+    border-left-color: #ffd166;
   }
 }
 
@@ -1898,4 +2131,86 @@ html.dark .contact-card a {
 
 html.dark .contact-card a:hover {
   color: #6aadff;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LANGUAGE TOGGLE SYSTEM
+   ═══════════════════════════════════════════════════════════════ */
+
+/* By default (no JS or fallback), show both languages */
+.lang-en,
+.lang-or {
+  display: inline;
+}
+
+/* When English mode is active */
+html[lang="en"] .lang-or {
+  display: none !important;
+}
+
+html[lang="en"] .lang-en {
+  display: inline !important;
+}
+
+/* When Odia mode is active */
+html[lang="or"] .lang-en {
+  display: none !important;
+}
+
+html[lang="or"] .lang-or {
+  display: inline !important;
+}
+
+/* Block-level variants for paragraphs, sections, divs */
+html[lang="en"] .lang-or-block {
+  display: none !important;
+}
+
+html[lang="en"] .lang-en-block {
+  display: block !important;
+}
+
+html[lang="or"] .lang-en-block {
+  display: none !important;
+}
+
+html[lang="or"] .lang-or-block {
+  display: block !important;
+}
+
+.lang-en-block,
+.lang-or-block {
+  display: block;
+}
+
+/* Language toggle button in navbar */
+.lang-toggle {
+  background: rgba(255, 255, 255, .15);
+  border: 1.5px solid rgba(255, 255, 255, .3);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, border-color 0.2s;
+  letter-spacing: 0.5px;
+  min-width: 36px;
+  text-align: center;
+}
+
+.lang-toggle:hover {
+  background: rgba(255, 255, 255, .25);
+  border-color: rgba(255, 255, 255, .5);
+}
+
+/* Dark mode override */
+html.dark .lang-toggle {
+  background: rgba(255, 255, 255, .08);
+  border-color: rgba(255, 255, 255, .15);
+}
+
+html.dark .lang-toggle:hover {
+  background: rgba(255, 255, 255, .15);
 }

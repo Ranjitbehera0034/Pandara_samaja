@@ -16,7 +16,7 @@
     <!-- DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
 
-    <!-- NEW: dropdown styling + tweaks -->
+    <!-- dropdown styling + tweaks -->
     <link rel="stylesheet" href="assets/css/members-cards.css" />
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE9R5DCCNT"></script>
@@ -33,7 +33,7 @@
 </head>
 
 <body>
-    <!-- ─── nav bar ─────────────────────────────────────────────── -->
+    <!-- nav bar -->
     <header>
         <nav class="navbar">
             <div class="brand">
@@ -45,19 +45,34 @@
             </button>
             <ul class="nav-links" id="navLinks">
                 <li>
-                    <a href="index.html">Home</a>
+                    <a href="index.html">
+                        <span class="lang-en">Home</span>
+                        <span class="lang-or">ମୂଳ ପୃଷ୍ଠା</span>
+                    </a>
                 </li>
                 <li>
-                    <a href="about.html">About</a>
+                    <a href="about.html">
+                        <span class="lang-en">About</span>
+                        <span class="lang-or">ପରିଚୟ</span>
+                    </a>
                 </li>
                 <li>
-                    <a href="members.html" class="active">Members</a>
+                    <a href="members.html" class="active">
+                        <span class="lang-en">Members</span>
+                        <span class="lang-or">ସଦସ୍ୟ</span>
+                    </a>
                 </li>
                 <li>
-                    <a href="matrimony.html">Matrimony</a>
+                    <a href="matrimony.html">
+                        <span class="lang-en">Matrimony</span>
+                        <span class="lang-or">ବିବାହ</span>
+                    </a>
                 </li>
                 <li>
-                    <a href="blogs.html">Recent Blogs</a>
+                    <a href="blogs.html">
+                        <span class="lang-en">Blogs</span>
+                        <span class="lang-or">ବ୍ଲଗ</span>
+                    </a>
                 </li>
             </ul>
         </nav>
@@ -66,23 +81,34 @@
     <!-- Announcement bar -->
     <div class="announcement-bar" role="alert" aria-label="Announcements">
         <span class="announcement-icon">📢</span>
-        <span class="announcement-text">ସମାଜର ଆସନ୍ତା ସଭା ତାରିଖ ଶୀଘ୍ର ଘୋଷଣା କରାଯିବ | Next meeting date will be announced
-            soon</span>
+        <span class="announcement-text">
+            <span class="lang-or">ସମାଜର ଆସନ୍ତା ସଭା ତାରିଖ ଶୀଘ୍ର ଘୋଷଣା କରାଯିବ</span>
+            <span class="lang-en">Next meeting date will be announced soon</span>
+        </span>
     </div>
-    <!-- ─── main ────────────────────────────────────────────────── -->
+    <!-- main -->
     <main class="members-page">
         <div class="container">
-            <h1 class="page-title">Member Directory</h1>
+            <h1 class="page-title">
+                <span class="lang-or">ସଦସ୍ୟ ସୂଚି</span>
+                <span class="lang-en">Member Directory</span>
+            </h1>
 
             <div class="dropdown-row centered">
                 <select id="districtSelect">
-                    <option value="">Select District</option>
+                    <option value="">
+                        Select District
+                    </option>
                 </select>
                 <select id="talukaSelect" disabled>
-                    <option value="">Select Taluka</option>
+                    <option value="">
+                        Select Taluka
+                    </option>
                 </select>
                 <select id="panchayatSelect" disabled>
-                    <option value="">Select Panchayat</option>
+                    <option value="">
+                        Select Panchayat
+                    </option>
                 </select>
             </div>
 
@@ -104,21 +130,55 @@
                             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                         </svg>
                     </div>
-                    <p class="loader-text">ସଦସ୍ୟ ତଥ୍ୟ ଲୋଡ୍ ହେଉଛି<span class="loader-dots"></span></p>
-                    <p class="loader-subtext">Loading members...</p>
+                    <p class="loader-text">
+                        <span class="lang-or">ସଦସ୍ୟ ତଥ୍ୟ ଲୋଡ୍ ହେଉଛି</span>
+                        <span class="lang-en">Loading members</span>
+                        <span class="loader-dots"></span>
+                    </p>
+                    <p class="loader-subtext">
+                        <span class="lang-or">ଅପେକ୍ଷା କରନ୍ତୁ...</span>
+                        <span class="lang-en">Please wait...</span>
+                    </p>
                 </div>
                 <table id="memberTable" class="display" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Membership No.</th>
-                            <th>Name</th>
-                            <th>Mobile</th>
-                            <th>Male</th>
-                            <th>Female</th>
-                            <th>District</th>
-                            <th>Taluka</th>
-                            <th>Panchayat</th>
-                            <th>Village</th>
+                            <th>
+                                <span class="lang-or">ସଦସ୍ୟ ନଂ.</span>
+                                <span class="lang-en">Membership No.</span>
+                            </th>
+                            <th>
+                                <span class="lang-or">ନାମ</span>
+                                <span class="lang-en">Name</span>
+                            </th>
+                            <th>
+                                <span class="lang-or">ମୋବାଇଲ</span>
+                                <span class="lang-en">Mobile</span>
+                            </th>
+                            <th>
+                                <span class="lang-or">ପୁରୁଷ</span>
+                                <span class="lang-en">Male</span>
+                            </th>
+                            <th>
+                                <span class="lang-or">ମହିଳା</span>
+                                <span class="lang-en">Female</span>
+                            </th>
+                            <th>
+                                <span class="lang-or">ଜିଲ୍ଲା</span>
+                                <span class="lang-en">District</span>
+                            </th>
+                            <th>
+                                <span class="lang-or">ତାଳୁକା</span>
+                                <span class="lang-en">Taluka</span>
+                            </th>
+                            <th>
+                                <span class="lang-or">ପଞ୍ଚାୟତ</span>
+                                <span class="lang-en">Panchayat</span>
+                            </th>
+                            <th>
+                                <span class="lang-or">ଗ୍ରାମ</span>
+                                <span class="lang-en">Village</span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -128,7 +188,7 @@
     </main>
 
 
-    <!-- ─── scripts ─────────────────────────────────────────────── -->
+    <!-- scripts -->
     <script src="assets/js/main.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>

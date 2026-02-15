@@ -5,8 +5,58 @@ const navLinks = document.getElementById('navLinks');
 if (navToggle && navLinks) {
   navToggle.addEventListener('click', () => {
     navLinks.classList.toggle('open');
+    navToggle.classList.toggle('active');
   });
 }
+
+// ─── Language Toggle ────────────────────────────────────────────
+(function initLanguage() {
+  const LANG_KEY = 'pandaraSamaja_lang';
+  const stored = localStorage.getItem(LANG_KEY);
+  let currentLang = stored || 'or'; // default Odia
+
+  // Apply language immediately
+  document.documentElement.setAttribute('lang', currentLang);
+
+  function createLangButton() {
+    const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+
+    // Don't create if already exists
+    if (document.getElementById('langToggle')) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'lang-toggle';
+    btn.id = 'langToggle';
+    btn.setAttribute('aria-label', 'Switch language');
+    btn.title = currentLang === 'or' ? 'Switch to English' : 'ଓଡ଼ିଆ ଭାଷାକୁ ବଦଳାନ୍ତୁ';
+    btn.textContent = currentLang === 'or' ? 'EN' : 'ଓ';
+
+    btn.addEventListener('click', () => {
+      currentLang = currentLang === 'or' ? 'en' : 'or';
+      document.documentElement.setAttribute('lang', currentLang);
+      localStorage.setItem(LANG_KEY, currentLang);
+      btn.textContent = currentLang === 'or' ? 'EN' : 'ଓ';
+      btn.title = currentLang === 'or' ? 'Switch to English' : 'ଓଡ଼ିଆ ଭାଷାକୁ ବଦଳାନ୍ତୁ';
+    });
+
+    // Insert before dark mode toggle or nav-toggle
+    const darkBtn = navbar.querySelector('.dark-mode-toggle');
+    const navToggleBtn = navbar.querySelector('.nav-toggle');
+    const insertBefore = darkBtn || navToggleBtn;
+    if (insertBefore) {
+      navbar.insertBefore(btn, insertBefore);
+    } else {
+      navbar.appendChild(btn);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', createLangButton);
+  } else {
+    createLangButton();
+  }
+})();
 
 // ─── Dark Mode ──────────────────────────────────────────────────
 (function initDarkMode() {
