@@ -10,7 +10,19 @@
     <meta name="theme-color" content="#0a4a96" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Oriya:wght@400;700&display=swap" rel="stylesheet">
     <title>Nikhila Odisha Pandara Samaja | ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ</title>
-    <link rel="stylesheet" href="assets/css/main.css" />
+    <link rel="stylesheet" href="assets/css/main.css?v=2.1" />
+    <!-- Critical inline CSS: hide wrong language immediately -->
+    <style>
+        html[lang="or"] .lang-en,
+        html[lang="or"] .lang-en-block {
+            display: none !important;
+        }
+
+        html[lang="en"] .lang-or,
+        html[lang="en"] .lang-or-block {
+            display: none !important;
+        }
+    </style>
     <!-- Google tag (gtag.js) -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4522290994121690"
         crossorigin="anonymous"></script>
@@ -23,7 +35,7 @@
         gtag('js', new Date());
         gtag('config', 'G-LE9R5DCCNT');
     </script>
-    <script src="assets/js/analytics.js" defer></script>
+    <script src="assets/js/analytics.js?v=2.1" defer></script>
 </head>
 
 <body>
@@ -450,8 +462,8 @@
             grid.appendChild(card);
         });
     </script>
-    <script src="assets/js/config.js"></script>
-    <script src="assets/js/main.js"></script>
+    <script src="assets/js/config.js?v=2.1"></script>
+    <script src="assets/js/main.js?v=2.1"></script>
 
 
 </body>
