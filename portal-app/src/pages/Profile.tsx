@@ -124,6 +124,7 @@ export default function Profile() {
                 const updated = { ...member, profile_photo_url: data.photoUrl };
                 localStorage.setItem('portalMember', JSON.stringify(updated));
                 toast.success(t('profile', 'photoUploaded'), { id: toastId });
+                window.location.reload();
             }
         } catch (err) {
             console.error(err);
@@ -158,7 +159,7 @@ export default function Profile() {
                             <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 p-[3px] shadow-2xl shadow-blue-500/30">
                                 <div className="w-full h-full rounded-full bg-slate-900 border-4 border-slate-800 overflow-hidden flex items-center justify-center">
                                     {member?.profile_photo_url ? (
-                                        <img src={member.profile_photo_url} alt={member.name} className="w-full h-full object-cover" />
+                                        <img src={member.profile_photo_url} referrerPolicy="no-referrer" alt={member.name} className="w-full h-full object-cover" />
                                     ) : (
                                         <span className="text-4xl font-bold text-white">{getInitial(member?.name || '')}</span>
                                     )}

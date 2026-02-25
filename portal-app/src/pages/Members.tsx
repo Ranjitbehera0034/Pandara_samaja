@@ -133,7 +133,7 @@ export default function Members() {
                                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 p-[2px]">
                                     <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
                                         {member.profile_photo_url ? (
-                                            <img src={member.profile_photo_url} alt={member.name} className="w-full h-full object-cover" />
+                                            <img src={member.profile_photo_url} referrerPolicy="no-referrer" alt={member.name} className="w-full h-full object-cover" />
                                         ) : (
                                             <span className="font-bold text-white text-lg">{member.name.charAt(0)}</span>
                                         )}

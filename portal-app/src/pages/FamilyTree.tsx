@@ -102,7 +102,7 @@ export default function FamilyTree() {
                         <div className="flex items-center gap-4">
                             <div className="w-14 h-14 rounded-full bg-blue-900/80 border-2 border-blue-400/50 flex items-center justify-center text-2xl font-bold text-white shadow-inner">
                                 {member?.profile_photo_url ? (
-                                    <img src={member.profile_photo_url} alt={member.name} className="w-full h-full rounded-full object-cover" />
+                                    <img src={member.profile_photo_url} referrerPolicy="no-referrer" alt={member.name} className="w-full h-full rounded-full object-cover" />
                                 ) : (
                                     member?.name?.[0]?.toUpperCase() || '?'
                                 )}

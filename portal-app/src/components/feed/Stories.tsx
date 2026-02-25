@@ -133,7 +133,7 @@ export function Stories({ stories, onAddStory }: StoriesProps) {
                         className="w-16 h-16 rounded-full bg-slate-800 border-2 border-dashed border-slate-600 flex items-center justify-center relative overflow-hidden group-hover:border-blue-500 transition-colors"
                     >
                         {member?.profile_photo_url ? (
-                            <img src={member.profile_photo_url} alt="You" className="w-full h-full object-cover opacity-50" />
+                            <img src={member.profile_photo_url} referrerPolicy="no-referrer" alt="You" className="w-full h-full object-cover opacity-50" />
                         ) : (
                             <div className="w-full h-full bg-slate-700/50" />
                         )}

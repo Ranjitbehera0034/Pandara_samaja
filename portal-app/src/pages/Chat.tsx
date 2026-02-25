@@ -1253,7 +1253,7 @@ export default function Chat() {
                                                 <div className="relative shrink-0">
                                                     {m.profile_photo_url ? (
                                                         <img
-                                                            src={m.profile_photo_url}
+                                                            src={m.profile_photo_url} referrerPolicy="no-referrer"
                                                             alt={m.name}
                                                             className="w-10 h-10 rounded-full object-cover"
                                                         />
@@ -1355,7 +1355,7 @@ export default function Chat() {
                                                 {isSelected && <Check size={14} className="text-white" />}
                                             </div>
                                             {m.profile_photo_url ? (
-                                                <img src={m.profile_photo_url} alt={m.name} className="w-8 h-8 rounded-full object-cover" />
+                                                <img src={m.profile_photo_url} referrerPolicy="no-referrer" alt={m.name} className="w-8 h-8 rounded-full object-cover" />
                                             ) : (
                                                 <div className="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center text-xs font-bold text-white">
                                                     {getInitial(m.name)}
