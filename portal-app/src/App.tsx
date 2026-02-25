@@ -32,6 +32,9 @@ import Matrimony from './pages/Matrimony';
 import Announcements from './pages/Announcements';
 import { GlobalSearch } from './components/GlobalSearch';
 
+// Define API_BASE_URL if not already defined globally
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'; // Adjusted for backend port 5000
+
 // ─── Protected Layout ────────────────────────────────────────────
 function ProtectedLayout() {
   const { member, logout, isLoading } = useAuth();
@@ -42,6 +45,33 @@ function ProtectedLayout() {
     return localStorage.getItem('sidebarCollapsed') === 'true';
   });
   const location = useLocation();
+
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
+  // Search logic (omitted)
+
+  useEffect(() => {
+    if (member) {
+      const fetchUnread = async () => {
+        try {
+          const token = localStorage.getItem('portalToken');
+          const res = await fetch(`${API_BASE_URL}/api/portal/notifications/unread-count`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await res.json();
+          if (data.success) {
+            setUnreadNotifications(data.count);
+          }
+        } catch (e) {
+          console.error("Failed to fetch unread count", e);
+        }
+      };
+
+      fetchUnread();
+      const interval = setInterval(fetchUnread, 30000); // Poll every 30s
+      return () => clearInterval(interval);
+    }
+  }, [member]);
 
   // Persist collapse state
   useEffect(() => {
@@ -71,7 +101,7 @@ function ProtectedLayout() {
     { to: '/groups', icon: <UsersRound size={20} />, label: t('nav', 'groups') },
     { to: '/events', icon: <Calendar size={20} />, label: t('nav', 'events') },
     { to: '/chat', icon: <MessageSquare size={20} />, label: t('nav', 'messages') },
-    { to: '/notifications', icon: <Bell size={20} />, label: t('nav', 'notifications'), badge: 3 },
+    { to: '/notifications', icon: <Bell size={20} />, label: t('nav', 'notifications'), badge: unreadNotifications > 0 ? unreadNotifications : undefined },
     { to: '/members', icon: <Users size={20} />, label: t('nav', 'members') },
     { to: '/gallery', icon: <ImageIcon size={20} />, label: t('nav', 'gallery') },
     { to: '/profile', icon: <User size={20} />, label: t('nav', 'profile') },
@@ -248,7 +278,9 @@ function ProtectedLayout() {
 
             <Link to="/notifications" className="relative p-2 text-slate-400 hover:text-white transition-colors">
               <Bell size={20} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              {unreadNotifications > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+              )}
             </Link>
 
             {/* Language toggle */}

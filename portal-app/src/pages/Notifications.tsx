@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import {
     Heart, MessageCircle, UserPlus, AtSign, Star, Bell,
-    Check, CheckCheck, Trash2
+    Check, CheckCheck, Trash2, Loader2
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -17,16 +18,6 @@ interface Notification {
     postId?: string;
 }
 
-const MOCK_NOTIFICATIONS: Notification[] = [
-    { id: '1', type: 'like', actorName: 'Sasmita Das', message: 'liked your post', timestamp: new Date(Date.now() - 600000).toISOString(), read: false },
-    { id: '2', type: 'comment', actorName: 'Amit Kumar', message: 'commented: "Great photo!"', timestamp: new Date(Date.now() - 3600000).toISOString(), read: false },
-    { id: '3', type: 'follow', actorName: 'Rahul Singh', message: 'started following you', timestamp: new Date(Date.now() - 7200000).toISOString(), read: false },
-    { id: '4', type: 'mention', actorName: 'Priya Sharma', message: 'mentioned you in a post', timestamp: new Date(Date.now() - 86400000).toISOString(), read: true },
-    { id: '5', type: 'like', actorName: 'Deepak Behera', message: 'liked your story', timestamp: new Date(Date.now() - 172800000).toISOString(), read: true },
-    { id: '6', type: 'system', actorName: 'Pandara Samaja', message: 'Community meeting scheduled for Sunday, 3 PM', timestamp: new Date(Date.now() - 259200000).toISOString(), read: true },
-    { id: '7', type: 'comment', actorName: 'Sunita Patel', message: 'replied to your comment', timestamp: new Date(Date.now() - 345600000).toISOString(), read: true },
-];
-
 const iconMap: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
     like: { icon: <Heart size={18} />, color: 'text-rose-400', bg: 'bg-rose-500/10' },
     comment: { icon: <MessageCircle size={18} />, color: 'text-blue-400', bg: 'bg-blue-500/10' },
@@ -35,23 +26,77 @@ const iconMap: Record<string, { icon: React.ReactNode; color: string; bg: string
     system: { icon: <Star size={18} />, color: 'text-purple-400', bg: 'bg-purple-500/10' },
 };
 
+const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000' : 'https://pandara-samaja-backend.onrender.com';
+
 export default function Notifications() {
     const { t } = useLanguage();
-    const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
     const [filter, setFilter] = useState<'all' | 'unread'>('all');
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    const fetchNotifications = async () => {
+        try {
+            const token = localStorage.getItem('portalToken');
+            const res = await fetch(`${API_BASE_URL}/api/portal/notifications`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setNotifications(data.notifications);
+            }
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
-    const markAllRead = () => {
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    const markAllRead = async () => {
+        try {
+            const token = localStorage.getItem('portalToken');
+            await fetch(`${API_BASE_URL}/api/portal/notifications/read-all`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            toast.success("Marked all as read");
+        } catch (e) {
+            toast.error("Error marking all read");
+        }
     };
 
-    const markRead = (id: string) => {
-        setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    const markRead = async (id: string, currentlyRead: boolean) => {
+        if (currentlyRead) return;
+        try {
+            const token = localStorage.getItem('portalToken');
+            await fetch(`${API_BASE_URL}/api/portal/notifications/${id}/read`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+        } catch (e) {
+            console.error(e);
+        }
     };
 
-    const deleteNotification = (id: string) => {
-        setNotifications(prev => prev.filter(n => n.id !== id));
+    const deleteNotification = async (id: string) => {
+        try {
+            const token = localStorage.getItem('portalToken');
+            await fetch(`${API_BASE_URL}/api/portal/notifications/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setNotifications(prev => prev.filter(n => n.id !== id));
+            toast.success("Notification deleted");
+        } catch (e) {
+            toast.error("Failed to delete notification");
+        }
     };
 
     const filtered = filter === 'unread' ? notifications.filter(n => !n.read) : notifications;
@@ -111,7 +156,11 @@ export default function Notifications() {
 
             {/* Notification List */}
             <div className="space-y-2">
-                {filtered.length === 0 ? (
+                {loading ? (
+                    <div className="flex items-center justify-center py-20 text-blue-500">
+                        <Loader2 className="animate-spin" size={40} />
+                    </div>
+                ) : filtered.length === 0 ? (
                     <div className="text-center py-16 text-slate-500">
                         <Bell size={48} className="mx-auto mb-4 opacity-30" />
                         <p className="text-lg">{filter === 'unread' ? t('notifications', 'noUnread') : t('notifications', 'noNotifications')}</p>
@@ -125,7 +174,7 @@ export default function Notifications() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.03 }}
-                                onClick={() => markRead(notif.id)}
+                                onClick={() => markRead(notif.id, notif.read)}
                                 className={`group flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-all ${notif.read
                                     ? 'bg-slate-800/30 hover:bg-slate-800/50'
                                     : 'bg-slate-800/70 border border-blue-500/20 hover:border-blue-500/40 shadow-md'
