@@ -33,8 +33,10 @@ export default function Sidebar() {
         const root = document.documentElement;
         if (root.classList.contains('dark')) {
             root.classList.remove('dark');
+            localStorage.setItem('admin-theme', 'light');
         } else {
             root.classList.add('dark');
+            localStorage.setItem('admin-theme', 'dark');
         }
         window.dispatchEvent(new Event('themeToggle'));
     };
