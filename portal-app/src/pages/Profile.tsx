@@ -61,11 +61,17 @@ export default function Profile() {
         setSaving(true);
         try {
             const token = localStorage.getItem('portalToken');
+            const hasSelfInList = familyMembers.some(f =>
+                f.relation?.toLowerCase() === 'self' ||
+                f.relation?.toLowerCase() === 'head' ||
+                (f.name && form.name && f.name.toLowerCase() === form.name.toLowerCase())
+            );
+
             const payload = {
                 ...form,
                 family_members: familyMembers,
-                male: familyMembers.filter(f => f.gender === 'male').length + (form.head_gender === 'male' ? 1 : 0),
-                female: familyMembers.filter(f => f.gender === 'female').length + (form.head_gender === 'female' ? 1 : 0),
+                male: familyMembers.filter(f => f.gender?.toLowerCase() === 'male' || f.gender?.toLowerCase() === 'm').length + (!hasSelfInList && form.head_gender === 'male' ? 1 : 0),
+                female: familyMembers.filter(f => f.gender?.toLowerCase() === 'female' || f.gender?.toLowerCase() === 'f').length + (!hasSelfInList && form.head_gender === 'female' ? 1 : 0),
             };
 
             const response = await fetch(`${API_BASE_URL}/members/${member?._id || member?.id}`, {
@@ -131,7 +137,6 @@ export default function Profile() {
     };
 
     const getInitial = (name: string) => name ? name.charAt(0).toUpperCase() : '?';
-    const totalFamily = familyMembers.length + 1; // +1 for head
 
     return (
         <div className="max-w-3xl mx-auto pb-20">
@@ -202,7 +207,7 @@ export default function Profile() {
                             {/* Quick Stats */}
                             <div className="grid grid-cols-3 gap-4 mt-6">
                                 <div className="bg-slate-900/50 rounded-xl p-3 text-center border border-slate-700/30">
-                                    <div className="text-xl font-bold text-white">{totalFamily}</div>
+                                    <div className="text-xl font-bold text-white">{(member?.male || 0) + (member?.female || 0)}</div>
                                     <div className="text-xs text-slate-400">{t('profile', 'familyMembers')}</div>
                                 </div>
                                 <div className="bg-slate-900/50 rounded-xl p-3 text-center border border-slate-700/30">
@@ -339,7 +344,7 @@ export default function Profile() {
                                                     <div>
                                                         <label className="block text-xs text-slate-500 mb-1">{t('profile', 'gender')}</label>
                                                         <select
-                                                            value={fm.gender}
+                                                            value={fm.gender?.toLowerCase() === 'female' || fm.gender?.toLowerCase() === 'f' ? 'female' : 'male'}
                                                             onChange={(e) => updateFamilyMember(index, 'gender', e.target.value)}
                                                             className="w-full bg-slate-800 text-white px-3 py-2 rounded-lg border border-slate-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                                                         >
@@ -365,7 +370,7 @@ export default function Profile() {
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center gap-4">
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${fm.gender === 'female'
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${fm.gender?.toLowerCase() === 'female' || fm.gender?.toLowerCase() === 'f'
                                                         ? 'bg-pink-500/20 text-pink-400'
                                                         : 'bg-blue-500/20 text-blue-400'
                                                         }`}>
@@ -378,11 +383,11 @@ export default function Profile() {
                                                             {fm.age && <span className="flex items-center gap-1"><Calendar size={12} />{fm.age} yrs</span>}
                                                         </div>
                                                     </div>
-                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${fm.gender === 'female'
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${fm.gender?.toLowerCase() === 'female' || fm.gender?.toLowerCase() === 'f'
                                                         ? 'bg-pink-500/10 text-pink-400'
                                                         : 'bg-blue-500/10 text-blue-400'
                                                         }`}>
-                                                        {fm.gender === 'female' ? `♀ ${t('profile', 'female')}` : `♂ ${t('profile', 'male')}`}
+                                                        {fm.gender?.toLowerCase() === 'female' || fm.gender?.toLowerCase() === 'f' ? `♀ ${t('profile', 'female')}` : `♂ ${t('profile', 'male')}`}
                                                     </span>
                                                 </div>
                                             )}
