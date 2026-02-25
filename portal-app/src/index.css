@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --color-portal-bg: #0f172a;
+  --color-portal-card: #1e293b;
+  --color-portal-accent: #3b82f6;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-900 text-slate-100 antialiased;
+  }
+}
+
+html.light-mode {
+  filter: invert(1) hue-rotate(180deg) brightness(1.05);
+  background: white;
+}
+
+html.light-mode img,
+html.light-mode video,
+html.light-mode .no-invert {
+  filter: invert(1) hue-rotate(180deg);
+}

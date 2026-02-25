@@ -20,78 +20,81 @@ const panchayatSelect = document.getElementById('panchayatSelect');
 const leaderContainer = document.getElementById('leaderContainer');
 
 // ── Leader images ────────────────────────────────────────────
-const districtLeaderImages = {
-  "GANJAM": [
-    { "name": "Ashok Kumar Badatya", "src": "assets/img/GANJAM/Ashok Kumar Badatya.png" },
-    { "name": "Hrisikesh Badatya", "src": "assets/img/GANJAM/Hrisikesh Badatya.png" },
-    { "name": "Pramod Badatya", "src": "assets/img/GANJAM/Pramod Badatya.png" },
-    { "name": "Santosh Badatya", "src": "assets/img/GANJAM/Santosh Badatya.png" },
-    { "name": "Jagannath Badatya", "src": "assets/img/GANJAM/Jagannath Badatya.png" },
-    { "name": "BanchhaNidhi Behera", "src": "assets/img/GANJAM/BanchhaNidhi Behera.png" },
-    { "name": "Santosh", "src": "assets/img/GANJAM/Santosh.png" },
-    { "name": "Sudama Behera", "src": "assets/img/GANJAM/Sudama Behera.png" },
-    { "name": "Susanta Kumar Badatya", "src": "assets/img/GANJAM/Susanta Kumar Badatya.png" },
-    { "name": "Trilochan Badatya", "src": "assets/img/GANJAM/Trilochan Badatya.png" },
-    { "name": "Upendra Badatya", "src": "assets/img/GANJAM/Upendra Badatya.png" }
-  ],
-  "JHARSAGUDA": [
-    { "name": "RankaMani Badatya", "src": "assets/img/JHARSAGUDA/RankaMani Badatya.jpg" },
-    { "name": "Dhoba Badatya", "src": "assets/img/JHARSAGUDA/Dhoba Badatya.jpg" },
-    { "name": "Manoj Kumar Badatya", "src": "assets/img/JHARSAGUDA/Manoj Kumar Badatya.jpg" },
-    { "name": "Dillip Kumar Badatya", "src": "assets/img/JHARSAGUDA/Dillip Kumar Badatya.jpg" },
-    { "name": "Manoranjan Badatya", "src": "assets/img/JHARSAGUDA/Manoranjan Badatya.jpg" },
-    { "name": "Tuna Badatya", "src": "assets/img/JHARSAGUDA/Tuna Badatya.jpg" }
-  ],
-  "SAMBALAPUR": [
+// The hardcoded districtLeaderImages has been removed as we now fetch
+// from the backend. Leaders are cached here after fetch.
+let allLeaders = [];
 
-    { "name": "IMG-20250630-WA0003", "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0003.jpg" },
-    { "name": "IMG-20250630-WA0002", "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0002.jpg" },
-    { "name": "IMG-20250630-WA0006", "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0006.jpg" },
-    { "name": "IMG-20250630-WA0005", "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0005.jpg" },
-    { "name": "IMG-20250630-WA0001", "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0001.jpg" },
-    { "name": "IMG-20250630-WA0004", "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0004.jpg" },
-    { "name": "IMG-20250630-WA0008", "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0008.jpg" },
-    { "name": "IMG-20250630-WA0007", "src": "assets/img/SAMBALAPUR/IMG-20250630-WA0007.jpg" },
-    { "name": "IMG-20250711-WA0011", "src": "assets/img/SAMBALAPUR/IMG-20250711-WA0011.jpg" },
-    { "name": "IMG-20250711-WA0013", "src": "assets/img/SAMBALAPUR/IMG-20250711-WA0013.jpg" },
-    { "name": "IMG-20250711-WA0014", "src": "assets/img/SAMBALAPUR/IMG-20250711-WA0014.jpg" },
-    { "name": "IMG-20250711-WA0018", "src": "assets/img/SAMBALAPUR/IMG-20250711-WA0018.jpg" }
-  ]
-};
+// Fetch leaders once during init
+async function initLeaders() {
+  try {
+    const baseUrl = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://localhost:5000';
+    const response = await fetch(`${baseUrl}/api/leaders`);
+    const result = await response.json();
+    if (result.success && result.data) {
+      allLeaders = result.data;
+    }
+  } catch (err) {
+    console.error('Failed to fetch leaders:', err);
+  }
+}
 
-function showLeader(district) {
-  const leaders = districtLeaderImages[district];
-  if (!leaders || leaders.length === 0) {
-    leaderContainer.style.display = 'none';
-    return;
+function renderLeadersHTML(level, locationString) {
+  const baseUrl = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://localhost:5000';
+  const PLACEHOLDER = 'assets/img/leaders/placeholder.png';
+
+  const leaders = allLeaders.filter(l => {
+    if (l.level !== level) return false;
+    if (!l.location) return false; // If location is strictly tied to area
+    return l.location.toLowerCase().includes(locationString.toLowerCase());
+  });
+
+  if (leaders.length === 0) return '';
+
+  let html = `<h4 style="text-align:center; color:#0a4a96; margin: 1.5rem 0 1rem; font-size:1.1rem;">${locationString} ${level} Leaders</h4>`;
+  html += `<div style="display:flex;flex-wrap:wrap;gap:1.5rem;justify-content:center;padding:0.5rem; margin-bottom:2rem;">`;
+
+  leaders.forEach(leader => {
+    let src = PLACEHOLDER;
+    if (leader.image_url) {
+      if (leader.image_url.startsWith('http') || leader.image_url.startsWith('blob') || leader.image_url.startsWith('assets/')) {
+        src = leader.image_url;
+      } else {
+        src = baseUrl + (leader.image_url.startsWith('/') ? '' : '/') + leader.image_url;
+      }
+    }
+
+    html += `
+      <div style="text-align:center;max-width:140px;">
+        <img src="${src}" alt="${escHtml(leader.name)}" loading="lazy" style="height:140px;width:140px;border-radius:50%;box-shadow:0 6px 18px rgba(10,70,150,.12);object-fit:cover;" onerror="this.onerror=null;this.src='${PLACEHOLDER}';">
+        <p style="margin:0.5rem 0 0;font-size:0.85rem;font-weight:700;color:#0a4a96;">${escHtml(leader.name)}</p>
+        <p style="margin:0.2rem 0 0;font-size:0.75rem;font-weight:500;color:#555;">${escHtml(leader.role || '')}</p>
+      </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function updateDisplayedLeaders(district, taluka, panchayat) {
+  if (!leaderContainer) return;
+  leaderContainer.innerHTML = '';
+  let HTML = '';
+
+  if (panchayat) {
+    HTML += renderLeadersHTML('Panchayat', panchayat);
+  }
+  if (taluka) {
+    HTML += renderLeadersHTML('Taluka', taluka);
+  }
+  if (district) {
+    HTML += renderLeadersHTML('District', district);
   }
 
-  leaderContainer.style.display = '';
-  leaderContainer.innerHTML = '';
-
-  const galleryDiv = document.createElement('div');
-  galleryDiv.style.cssText = 'display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;padding:0.5rem;';
-  leaderContainer.appendChild(galleryDiv);
-
-  leaders.forEach((leader) => {
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'text-align:center;max-width:140px;';
-
-    const img = document.createElement('img');
-    img.src = leader.src;
-    img.alt = leader.name;
-    img.loading = 'lazy';
-    img.style.cssText = 'max-height:160px;border-radius:12px;box-shadow:0 6px 18px rgba(10,70,150,.12);width:100%;object-fit:cover;';
-    img.onerror = function () { wrapper.style.display = 'none'; };
-
-    const nameP = document.createElement('p');
-    nameP.style.cssText = 'margin:0.4rem 0 0;font-size:0.75rem;font-weight:600;color:#0a4a96;';
-    nameP.textContent = leader.name.replace(/IMG-\d+-WA\d+/i, 'Leader');
-
-    wrapper.appendChild(img);
-    wrapper.appendChild(nameP);
-    galleryDiv.appendChild(wrapper);
-  });
+  if (HTML) {
+    leaderContainer.style.display = '';
+    leaderContainer.innerHTML = HTML;
+  } else {
+    leaderContainer.style.display = 'none';
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -511,6 +514,7 @@ function addTableDataLabels() {
    ════════════════════════════════════════════════════════════════ */
 
 (async function init() {
+  await initLeaders();
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   const skeletonLoader = document.getElementById('skeletonLoader');
@@ -697,7 +701,6 @@ function getCurrentFilter() {
 
 districtSelect.addEventListener('change', () => {
   const d = districtSelect.value;
-  showLeader(d);
 
   talukaSelect.disabled = !d;
   talukaSelect.innerHTML = '<option value="">Select Taluka</option>';
@@ -710,6 +713,7 @@ districtSelect.addEventListener('change', () => {
   panchayatSelect.disabled = true;
   panchayatSelect.innerHTML = '<option value="">Select Panchayat</option>';
 
+  updateDisplayedLeaders(d, '', '');
   filterAndRender({ district: d });
 });
 
@@ -725,14 +729,20 @@ talukaSelect.addEventListener('change', () => {
       .forEach(p => { panchayatSelect.insertAdjacentHTML('beforeend', `<option value="${p}">${p}</option>`); });
   }
 
+  updateDisplayedLeaders(d, t, '');
   filterAndRender({ district: d, taluka: t });
 });
 
 panchayatSelect.addEventListener('change', () => {
+  const d = districtSelect.value;
+  const t = talukaSelect.value;
+  const p = panchayatSelect.value;
+
+  updateDisplayedLeaders(d, t, p);
   filterAndRender({
-    district: districtSelect.value,
-    taluka: talukaSelect.value,
-    panchayat: panchayatSelect.value
+    district: d,
+    taluka: t,
+    panchayat: p
   });
 });
 

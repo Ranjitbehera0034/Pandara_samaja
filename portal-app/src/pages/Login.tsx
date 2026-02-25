@@ -1,0 +1,123 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Loader2, ArrowRight, Globe } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
+import { toast } from "sonner";
+
+export default function Login() {
+    const { login, member } = useAuth();
+    const { t, lang, setLang } = useLanguage();
+    const navigate = useNavigate();
+    const [membershipNo, setMembershipNo] = useState("");
+    const [mobile, setMobile] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (member) {
+            navigate("/", { replace: true });
+        }
+    }, [member, navigate]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!membershipNo.trim() || !mobile.trim()) {
+            toast.error(t('login', 'bothRequired'));
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await login(membershipNo, mobile);
+            // Success is handled by AuthContext, redirect happens via useEffect
+        } catch (err) {
+            // Error is handled by AuthContext toast
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="flex h-screen w-full items-center justify-center bg-[#0f172a] relative overflow-hidden font-sans">
+            {/* Background Blobs */}
+            <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/20 blur-[120px]" />
+            <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-blue-600/20 blur-[100px]" />
+
+            {/* Language toggle - top right */}
+            <button
+                onClick={() => setLang(lang === 'en' ? 'od' : 'en')}
+                className="absolute top-6 right-6 z-20 flex items-center gap-2 px-3 py-1.5 bg-slate-800/60 backdrop-blur-md border border-slate-700/50 rounded-full text-slate-300 hover:text-white hover:border-blue-500/50 transition-all text-sm"
+            >
+                <Globe size={16} />
+                <span className="font-medium">{lang === 'en' ? 'ଓଡ଼ିଆ' : 'English'}</span>
+            </button>
+
+            <div className="relative z-10 w-full max-w-md p-8">
+                <div className="bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-8 transform transition-all hover:scale-[1.01] duration-500">
+                    <div className="text-center mb-10">
+                        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-2 tracking-tight">
+                            {t('login', 'title')}
+                        </h1>
+                        <p className="text-slate-400 text-sm">{t('login', 'subtitle')}</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-2">
+                            <label htmlFor="membership" className="text-sm font-medium text-slate-300 ml-1">
+                                {t('login', 'membershipNo')}
+                            </label>
+                            <input
+                                id="membership"
+                                type="text"
+                                value={membershipNo}
+                                onChange={(e) => setMembershipNo(e.target.value)}
+                                placeholder={t('login', 'membershipPlaceholder')}
+                                className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-white placeholder-slate-500 transition-all shadow-inner"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label htmlFor="mobile" className="text-sm font-medium text-slate-300 ml-1">
+                                {t('login', 'mobileNo')}
+                            </label>
+                            <input
+                                id="mobile"
+                                type="tel"
+                                value={mobile}
+                                onChange={(e) => setMobile(e.target.value)}
+                                placeholder={t('login', 'mobilePlaceholder')}
+                                className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-white placeholder-slate-500 transition-all shadow-inner"
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl transition-all transform active:scale-[0.98] shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 group mt-6"
+                        >
+                            {loading ? (
+                                <Loader2 className="animate-spin" size={20} />
+                            ) : (
+                                <>
+                                    {t('login', 'accessPortal')}
+                                    <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+                                </>
+                            )}
+                        </button>
+                    </form>
+
+                    <div className="mt-8 pt-6 border-t border-slate-700/50 text-center">
+                        <p className="text-slate-500 text-sm">
+                            {t('login', 'notMember')}{" "}
+                            <a href="#" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
+                                {t('login', 'applyMembership')}
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

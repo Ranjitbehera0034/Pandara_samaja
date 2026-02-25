@@ -91,6 +91,12 @@
                         <span class="lang-or">ବ୍ଲଗ</span>
                     </a>
                 </li>
+                <li>
+                    <a href="http://localhost:5173" target="_blank">
+                        <span class="lang-en">My Portal</span>
+                        <span class="lang-or">ମୋ ପୋର୍ଟାଲ</span>
+                    </a>
+                </li>
             </ul>
         </nav>
     </header>
@@ -442,46 +448,99 @@
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // ---- Render State Leaders ----
-        const leaders = [
-            { name: 'Bijaya Kumar Badatya', role: 'State Committee', src: 'assets/img/NOPS/Bijaya Kumar Badatya.png' },
-            { name: 'ChandrSekher Badatya', role: 'State Committee', src: 'assets/img/NOPS/ChandrSekher Badatya.png' },
-            { name: 'Madan Sekher Badatya', role: 'State Committee', src: 'assets/img/NOPS/Madan sekher Badatya.png' },
-            { name: 'Chiranjibi Badatya', role: 'State Committee', src: 'assets/img/NOPS/Chiranjibi Badatya.png' },
-            { name: 'Kishore Hari Badatya', role: 'State Committee', src: 'assets/img/NOPS/Kishore Hari Badatya.png' },
-            { name: 'Sarat Chandra Behera', role: 'State Committee', src: 'assets/img/NOPS/Sarat Chandra Behera.png' },
-            { name: 'Purna Chandra Behera', role: 'State Committee', src: 'assets/img/NOPS/Purna chandra Behera.png' },
-            { name: 'Bharata Bhusana Badatya', role: 'State Committee', src: 'assets/img/NOPS/Bharata Bhusana Badatya.png' },
-            { name: 'Bhagawan Badatya', role: 'State Committee', src: 'assets/img/NOPS/Bhagawan Badatya.png' },
-            { name: 'Rajendra Badatya', role: 'State Committee', src: 'assets/img/NOPS/Rajendra Badatya.png' },
-            { name: 'Arjuna Behera', role: 'State Committee', src: 'assets/img/NOPS/Arjuna Behera.png' },
-            { name: 'Sukanta Badatya', role: 'State Committee', src: 'assets/img/NOPS/Sukanta Badatya.png' },
-            { name: 'Ganesh Behera', role: 'State Committee', src: 'assets/img/NOPS/Ganesh Behera.png' },
-            { name: 'Chandrakanta Badatya', role: 'State Committee', src: 'assets/img/NOPS/Chandrakanta Badatya.png' },
-            { name: 'Hemant Kumar Behera', role: 'State Committee', src: 'assets/img/NOPS/Hemant Kumar Behera.png' },
-        ];
+        // ---- Render Dynamic Leaders ----
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('stateLeaders');
+            const PLACEHOLDER = 'assets/img/leaders/placeholder.png';
 
-        const grid = document.getElementById('stateLeaders');
-        const PLACEHOLDER = 'assets/img/leaders/placeholder.png';
+            try {
+                // Ensure config.js has set window.API_BASE_URL
+                const baseUrl = window.API_BASE_URL || 'http://localhost:5000';
+                const response = await fetch(baseUrl + '/api/leaders');
+                const result = await response.json();
 
-        leaders.forEach(({ name, role, src }) => {
-            const card = document.createElement('div');
-            card.className = 'leader-card';
-            card.innerHTML = `
-                <img alt="${name || 'Leader'}" src="${src}" loading="lazy">
-                <h4>${name || 'Leader'}</h4>
-                <p class="role">${role || ''}</p>
-            `;
-            const img = card.querySelector('img');
-            img.onerror = () => {
-                img.onerror = null;
-                img.src = PLACEHOLDER;
-            };
-            grid.appendChild(card);
+                if (result.success && result.data && result.data.length > 0) {
+                    container.innerHTML = ''; // clear any loading text
+                    container.className = ''; // remove grid class from container itself
+
+                    // Group by level (only displaying 'State' leaders on the home page)
+                    const levels = ['State'];
+                    const grouped = {};
+                    result.data.forEach(leader => {
+                        const lvl = leader.level || 'State';
+                        if (!grouped[lvl]) grouped[lvl] = [];
+                        grouped[lvl].push(leader);
+                    });
+
+                    levels.forEach(lvl => {
+                        if (grouped[lvl] && grouped[lvl].length > 0) {
+                            const levelTitle = document.createElement('h3');
+                            levelTitle.style.textAlign = 'center';
+                            levelTitle.style.marginBottom = '2rem';
+                            if (lvl !== 'State') levelTitle.style.marginTop = '2rem';
+                            levelTitle.style.fontSize = '1.5rem';
+                            levelTitle.style.color = 'var(--blue-900)';
+
+                            const langMap = {
+                                'State': '<span class="lang-en">State Level</span><span class="lang-or">ରାଜ୍ୟ ସ୍ତର</span>',
+                                'District': '<span class="lang-en">District Level</span><span class="lang-or">ଜିଲ୍ଲା ସ୍ତର</span>',
+                                'Taluka': '<span class="lang-en">Taluka Level</span><span class="lang-or">ତାଳୁକା ସ୍ତର</span>',
+                                'Panchayat': '<span class="lang-en">Panchayat Level</span><span class="lang-or">ପଞ୍ଚାୟତ ସ୍ତର</span>'
+                            };
+                            levelTitle.innerHTML = langMap[lvl] || lvl;
+                            container.appendChild(levelTitle);
+
+                            const grid = document.createElement('div');
+                            grid.className = 'leader-grid';
+                            grid.style.marginBottom = '3rem';
+
+                            grouped[lvl].forEach(({ name, name_or, role, role_or, image_url, location }) => {
+                                const card = document.createElement('div');
+                                card.className = 'leader-card';
+
+                                let src = PLACEHOLDER;
+                                if (image_url) {
+                                    if (image_url.startsWith('http') || image_url.startsWith('blob') || image_url.startsWith('assets/')) {
+                                        src = image_url;
+                                    } else {
+                                        src = baseUrl + (image_url.startsWith('/') ? '' : '/') + image_url;
+                                    }
+                                }
+
+                                const nameHtml = name_or ? `<span class="lang-en">${name}</span><span class="lang-or">${name_or}</span>` : `<span class="lang-en">${name}</span><span class="lang-or">${name}</span>`;
+                                const roleHtml = role_or ? `<span class="lang-en">${role}</span><span class="lang-or">${role_or}</span>` : `<span class="lang-en">${role}</span><span class="lang-or">${role}</span>`;
+
+                                card.innerHTML = `
+                                    <img alt="${name || 'Leader'}" src="${src}" loading="lazy">
+                                    <h4>${nameHtml}</h4>
+                                    <p class="role">${roleHtml}</p>
+                                    ${location ? '<p style="font-size:0.85rem; color: #555; margin-top:5px;">' + location + '</p>' : ''}
+                                `;
+                                const img = card.querySelector('img');
+                                img.onerror = () => {
+                                    img.onerror = null;
+                                    img.src = PLACEHOLDER;
+                                };
+                                grid.appendChild(card);
+                            });
+                            container.appendChild(grid);
+                        }
+                    });
+                } else {
+                    container.innerHTML = '<p style="text-align:center; color:#666; padding: 2rem;">No leaders found.</p>';
+                    container.className = '';
+                }
+            } catch (error) {
+                console.error('Failed to fetch leaders:', error);
+
+                // Fallback to empty if it fails
+                container.innerHTML = '<p style="text-align:center; padding: 2rem; color: #666;">Unable to load leadership details at this moment.</p>';
+                container.className = '';
+            }
         });
     </script>
-    <script src="assets/js/config.js?v=2.1"></script>
-    <script src="assets/js/main.js?v=2.1"></script>
+    <script src="assets/js/config.js?v=2.3"></script>
+    <script src="assets/js/main.js?v=2.3"></script>
 
     <!-- ═══ Developer Credit ═══ -->
     <footer class="dev-credit">
