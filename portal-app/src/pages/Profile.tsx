@@ -61,17 +61,12 @@ export default function Profile() {
         setSaving(true);
         try {
             const token = localStorage.getItem('portalToken');
-            const hasSelfInList = familyMembers.some(f =>
-                f.relation?.toLowerCase() === 'self' ||
-                f.relation?.toLowerCase() === 'head' ||
-                (f.name && form.name && f.name.toLowerCase() === form.name.toLowerCase())
-            );
-
+            const statsToSave = calculateStats();
             const payload = {
                 ...form,
                 family_members: familyMembers,
-                male: familyMembers.filter(f => f.gender?.toLowerCase() === 'male' || f.gender?.toLowerCase() === 'm').length + (!hasSelfInList && form.head_gender === 'male' ? 1 : 0),
-                female: familyMembers.filter(f => f.gender?.toLowerCase() === 'female' || f.gender?.toLowerCase() === 'f').length + (!hasSelfInList && form.head_gender === 'female' ? 1 : 0),
+                male: statsToSave.male,
+                female: statsToSave.female,
             };
 
             const response = await fetch(`${API_BASE_URL}/profile`, {
@@ -146,6 +141,22 @@ export default function Profile() {
         }
         return url;
     };
+
+    const calculateStats = () => {
+        const hasSelfInList = familyMembers.some(f =>
+            f.relation?.toLowerCase() === 'self' ||
+            f.relation?.toLowerCase() === 'head' ||
+            (f.name && form.name && f.name.toLowerCase() === form.name.toLowerCase())
+        );
+
+        const femaleCount = familyMembers.filter(f => f.gender?.toLowerCase() === 'female' || f.gender?.toLowerCase() === 'f').length + (!hasSelfInList && (form.head_gender?.toLowerCase() === 'female' || form.head_gender?.toLowerCase() === 'f') ? 1 : 0);
+        // Safely force all unknown/corrupt gender formats to Male to match fallback UI renderer
+        const maleCount = familyMembers.filter(f => !(f.gender?.toLowerCase() === 'female' || f.gender?.toLowerCase() === 'f')).length + (!hasSelfInList && !(form.head_gender?.toLowerCase() === 'female' || form.head_gender?.toLowerCase() === 'f') ? 1 : 0);
+
+        return { male: maleCount, female: femaleCount, total: maleCount + femaleCount };
+    };
+
+    const stats = calculateStats();
 
     return (
         <div className="max-w-3xl mx-auto pb-20">
@@ -245,15 +256,15 @@ export default function Profile() {
                             {/* Quick Stats */}
                             <div className="grid grid-cols-3 gap-4 mt-6">
                                 <div className="bg-slate-900/50 rounded-xl p-3 text-center border border-slate-700/30">
-                                    <div className="text-xl font-bold text-white">{(member?.male || 0) + (member?.female || 0)}</div>
+                                    <div className="text-xl font-bold text-white">{stats.total}</div>
                                     <div className="text-xs text-slate-400">{t('profile', 'familyMembers')}</div>
                                 </div>
                                 <div className="bg-slate-900/50 rounded-xl p-3 text-center border border-slate-700/30">
-                                    <div className="text-xl font-bold text-white">{member?.male || 0}</div>
+                                    <div className="text-xl font-bold text-white">{stats.male}</div>
                                     <div className="text-xs text-slate-400">{t('profile', 'male')}</div>
                                 </div>
                                 <div className="bg-slate-900/50 rounded-xl p-3 text-center border border-slate-700/30">
-                                    <div className="text-xl font-bold text-white">{member?.female || 0}</div>
+                                    <div className="text-xl font-bold text-white">{stats.female}</div>
                                     <div className="text-xs text-slate-400">{t('profile', 'female')}</div>
                                 </div>
                             </div>
