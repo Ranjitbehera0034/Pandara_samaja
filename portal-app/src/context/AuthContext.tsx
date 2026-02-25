@@ -5,7 +5,8 @@ import type { Member } from "../types";
 interface AuthContextType {
     member: Member | null;
     isLoading: boolean;
-    login: (membershipNo: string, mobile: string) => Promise<void>;
+    requestOtp: (membershipNo: string, mobile: string) => Promise<string | undefined>;
+    login: (membershipNo: string, mobile: string, otp: string) => Promise<void>;
     logout: () => void;
 }
 
@@ -30,15 +31,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoading(false);
     }, []);
 
-    const login = async (membershipNo: string, mobile: string) => {
+    const requestOtp = async (membershipNo: string, mobile: string) => {
         setIsLoading(true);
         try {
             const response = await fetch(`${API_BASE_URL}/api/portal/login`, {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ membership_no: membershipNo, mobile }),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || "Failed to request OTP");
+
+            if (data.success && data.requireOtp) {
+                toast.success(data.message || "OTP sent to your mobile");
+                return data._devOtp; // Returning mock OTP for dev usage
+            }
+            throw new Error(data.message || "Invalid response from server");
+        } catch (err: any) {
+            console.error("OTP request error:", err);
+            toast.error(err.message || "OTP request failed");
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const login = async (membershipNo: string, mobile: string, otp: string) => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/portal/login/verify-otp`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ membership_no: membershipNo, mobile }),
+                body: JSON.stringify({ membership_no: membershipNo, mobile, otp }),
             });
 
             const data = await response.json();
@@ -48,10 +74,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
 
             if (data.success && data.token) {
+                // If matchedUser comes back from verify-otp, set it
+                const loggedInIdentity = data.loggedInUser ? data.loggedInUser.name : data.member.name;
+
                 setMember(data.member);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data.member));
                 localStorage.setItem("portalToken", data.token); // Store JWT
-                toast.success(`Welcome back, ${data.member.name}!`);
+                toast.success(`Welcome back, ${loggedInIdentity}!`);
             } else {
                 throw new Error(data.message || "Invalid response from server");
             }
@@ -73,7 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     return (
-        <AuthContext.Provider value={{ member, isLoading, login, logout }}>
+        <AuthContext.Provider value={{ member, isLoading, requestOtp, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

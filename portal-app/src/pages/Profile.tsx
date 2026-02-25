@@ -373,7 +373,7 @@ export default function Profile() {
                                             className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-4"
                                         >
                                             {isEditing ? (
-                                                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+                                                <div className="grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
                                                     <div>
                                                         <label className="block text-xs text-slate-500 mb-1">{t('profile', 'name')}</label>
                                                         <input
@@ -410,6 +410,16 @@ export default function Profile() {
                                                             className="w-full bg-slate-800 text-white px-3 py-2 rounded-lg border border-slate-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                                                         />
                                                     </div>
+                                                    <div>
+                                                        <label className="block text-xs text-slate-500 mb-1">Mobile</label>
+                                                        <input
+                                                            type="tel"
+                                                            placeholder="10 digits"
+                                                            value={fm.mobile || ''}
+                                                            onChange={(e) => updateFamilyMember(index, 'mobile', e.target.value)}
+                                                            className="w-full bg-slate-800 text-white px-3 py-2 rounded-lg border border-slate-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                        />
+                                                    </div>
                                                     <button
                                                         onClick={() => removeFamilyMember(index)}
                                                         className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors self-end"
@@ -427,9 +437,10 @@ export default function Profile() {
                                                     </div>
                                                     <div className="flex-1">
                                                         <div className="font-semibold text-white">{fm.name || 'Unnamed'}</div>
-                                                        <div className="text-sm text-slate-400 flex items-center gap-3">
+                                                        <div className="text-sm text-slate-400 flex flex-wrap items-center gap-3">
                                                             <span className="flex items-center gap-1"><Heart size={12} />{fm.relation || 'N/A'}</span>
                                                             {fm.age && <span className="flex items-center gap-1"><Calendar size={12} />{fm.age} yrs</span>}
+                                                            {fm.mobile && <span className="flex items-center gap-1"><Phone size={12} />{fm.mobile}</span>}
                                                         </div>
                                                     </div>
                                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${fm.gender?.toLowerCase() === 'female' || fm.gender?.toLowerCase() === 'f'

@@ -32,6 +32,7 @@ export interface FamilyMember {
     relation: string;
     gender: string;
     age?: number;
+    mobile?: string;
 }
 
 // ─── Reaction system (Phase 1) ──────────────────────
