@@ -139,6 +139,14 @@ export default function Profile() {
 
     const getInitial = (name: string) => name ? name.charAt(0).toUpperCase() : '?';
 
+    const getCleanImageUrl = (url?: string | null) => {
+        if (!url) return undefined;
+        if (url.includes('drive.google.com/uc?id=')) {
+            return url.replace('drive.google.com/uc?id=', 'lh3.googleusercontent.com/d/');
+        }
+        return url;
+    };
+
     return (
         <div className="max-w-3xl mx-auto pb-20">
             {/* Cover Photo */}
@@ -159,7 +167,7 @@ export default function Profile() {
                             <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 p-[3px] shadow-2xl shadow-blue-500/30">
                                 <div className="w-full h-full rounded-full bg-slate-900 border-4 border-slate-800 overflow-hidden flex items-center justify-center">
                                     {member?.profile_photo_url ? (
-                                        <img src={member.profile_photo_url} referrerPolicy="no-referrer" alt={member.name} className="w-full h-full object-cover" />
+                                        <img src={getCleanImageUrl(member.profile_photo_url)} referrerPolicy="no-referrer" alt={member.name} className="w-full h-full object-cover" />
                                     ) : (
                                         <span className="text-4xl font-bold text-white">{getInitial(member?.name || '')}</span>
                                     )}
