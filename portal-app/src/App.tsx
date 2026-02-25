@@ -310,7 +310,7 @@ function ProtectedLayout() {
 // ─── App ─────────────────────────────────────────────────────────
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/portal">
       <AuthProvider>
         <SettingsProvider>
           <LanguageProvider>

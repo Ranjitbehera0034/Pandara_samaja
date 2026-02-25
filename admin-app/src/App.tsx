@@ -41,7 +41,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 export default function App() {
   return (
     <AdminAuthProvider>
-      <Router>
+      <Router basename="/admin">
         <Toaster position="top-right" closeButton richColors />
         <Routes>
           <Route path="/login" element={<Login />} />
