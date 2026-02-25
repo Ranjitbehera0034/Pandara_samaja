@@ -74,7 +74,7 @@ export default function Profile() {
                 female: familyMembers.filter(f => f.gender?.toLowerCase() === 'female' || f.gender?.toLowerCase() === 'f').length + (!hasSelfInList && form.head_gender === 'female' ? 1 : 0),
             };
 
-            const response = await fetch(`${API_BASE_URL}/members/${member?.membership_no || member?._id || member?.id}`, {
+            const response = await fetch(`${API_BASE_URL}/profile`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -111,7 +111,7 @@ export default function Profile() {
             const formData = new FormData();
             formData.append('photo', file);
 
-            const response = await fetch(`${API_BASE_URL}/members/${member?.membership_no || member?._id || member?.id}/photo`, {
+            const response = await fetch(`${API_BASE_URL}/profile/photo`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
@@ -170,7 +170,7 @@ export default function Profile() {
                                         onClick={async () => {
                                             const token = localStorage.getItem('portalToken');
                                             try {
-                                                const res = await fetch(`${API_BASE_URL}/members/${member?.membership_no || member?._id || member?.id}/photo`, {
+                                                const res = await fetch(`${API_BASE_URL}/profile/photo`, {
                                                     method: 'DELETE',
                                                     headers: { 'Authorization': `Bearer ${token}` }
                                                 });
