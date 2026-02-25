@@ -16,7 +16,7 @@ let currentIndex = -1;
 function imageURL(raw) {
   if (!raw) return '';
   const m = raw.match(/id=([^&]+)/);
-  return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000` : raw;
+  return m ? `https://lh3.googleusercontent.com/d/${m[1]}=w1000` : raw;
 }
 
 /* ─── Stats Counter Animation ─── */

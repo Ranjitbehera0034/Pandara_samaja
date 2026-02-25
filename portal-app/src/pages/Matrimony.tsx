@@ -154,7 +154,16 @@ export default function Matrimony() {
                         >
                             <div className="h-64 sm:h-72 w-full relative bg-slate-900 overflow-hidden object-top">
                                 {c.photo ? (
-                                    <img src={c.photo} alt={c.name} className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />
+                                    <img
+                                        src={(() => {
+                                            const raw = c.photo;
+                                            if (!raw) return '';
+                                            const m = raw.match(/id=([^&]+)/);
+                                            return m ? `https://lh3.googleusercontent.com/d/${m[1]}=w1000` : raw;
+                                        })()}
+                                        alt={c.name}
+                                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                                    />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-slate-800">
                                         <User size={64} className="text-slate-600" />

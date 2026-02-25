@@ -57,6 +57,12 @@ export default function Matrimony() {
         return matchesSearch && matchesStatus;
     });
 
+    const getImageUrl = (raw: string | null) => {
+        if (!raw) return '';
+        const m = raw.match(/id=([^&]+)/);
+        return m ? `https://lh3.googleusercontent.com/d/${m[1]}=w1000` : raw;
+    };
+
     return (
         <div className="p-8 pb-32 max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
@@ -114,7 +120,7 @@ export default function Matrimony() {
                             {/* Profile Image & Status Badge */}
                             <div className="relative h-48 bg-slate-100 flex items-center justify-center border-b border-slate-200 shrink-0">
                                 {candidate.photo ? (
-                                    <img src={candidate.photo} alt={candidate.name} className="w-full h-full object-cover" />
+                                    <img src={getImageUrl(candidate.photo)} alt={candidate.name} className="w-full h-full object-cover" />
                                 ) : (
                                     <Heart size={48} className="text-slate-300" />
                                 )}
