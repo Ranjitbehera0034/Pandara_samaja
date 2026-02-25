@@ -164,12 +164,39 @@ export default function Profile() {
                                     )}
                                 </div>
                             </div>
-                            <button
-                                onClick={() => photoInputRef.current?.click()}
-                                className="absolute bottom-1 right-1 p-2 bg-blue-600 hover:bg-blue-500 rounded-full text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                                <Camera size={16} />
-                            </button>
+                            <div className="absolute bottom-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {member?.profile_photo_url && (
+                                    <button
+                                        onClick={async () => {
+                                            const token = localStorage.getItem('portalToken');
+                                            try {
+                                                const res = await fetch(`${API_BASE_URL}/members/${member?.membership_no || member?._id || member?.id}/photo`, {
+                                                    method: 'DELETE',
+                                                    headers: { 'Authorization': `Bearer ${token}` }
+                                                });
+                                                if (res.ok) {
+                                                    const updated = { ...member, profile_photo_url: undefined };
+                                                    localStorage.setItem('portalMember', JSON.stringify(updated));
+                                                    toast.success('Profile photo removed');
+                                                    // Force a page turn or component reload by manipulating state indirectly via member context refresh
+                                                    window.location.reload();
+                                                }
+                                            } catch (e) { }
+                                        }}
+                                        className="p-2 bg-red-600 hover:bg-red-500 rounded-full text-white shadow-lg"
+                                        title="Remove photo"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => photoInputRef.current?.click()}
+                                    className="p-2 bg-blue-600 hover:bg-blue-500 rounded-full text-white shadow-lg"
+                                    title="Upload photo"
+                                >
+                                    <Camera size={16} />
+                                </button>
+                            </div>
                             <input type="file" ref={photoInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
                         </div>
 
