@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import {
   Home, Users, Image as ImageIcon, MessageSquare, Menu, Bell, Loader2, LogOut,
   User, Search, Compass, Settings, X, ChevronsLeft, ChevronsRight, Globe,
@@ -310,7 +310,7 @@ function ProtectedLayout() {
 // ─── App ─────────────────────────────────────────────────────────
 function App() {
   return (
-    <BrowserRouter basename="/portal">
+    <HashRouter>
       <AuthProvider>
         <SettingsProvider>
           <LanguageProvider>
@@ -322,7 +322,7 @@ function App() {
           </LanguageProvider>
         </SettingsProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
