@@ -77,8 +77,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // If matchedUser comes back from verify-otp, set it
                 const loggedInIdentity = data.loggedInUser ? data.loggedInUser.name : data.member.name;
 
-                setMember(data.member);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data.member));
+                const effectiveMember = {
+                    ...data.member,
+                    name: loggedInIdentity // Replace the root name to support correct display locally
+                };
+
+                setMember(effectiveMember);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(effectiveMember));
                 localStorage.setItem("portalToken", data.token); // Store JWT
                 toast.success(`Welcome back, ${loggedInIdentity}!`);
             } else {
