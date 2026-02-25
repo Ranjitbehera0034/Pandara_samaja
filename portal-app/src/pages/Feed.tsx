@@ -78,8 +78,8 @@ export default function Feed() {
                 content: newPost.text_content || "",
                 images: newPost.images || [],
                 media: (newPost.media || []).map((m: any) => ({ url: m.url, type: m.type || 'image' })),
-                likes: newPost.likes_count || 0,
-                reactions: { like: newPost.likes_count || 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
+                likes: Number(newPost.likes_count) || 0,
+                reactions: { like: Number(newPost.likes_count) || 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
                 comments: (newPost.comments || []).map((c: any) => ({
                     id: c.id.toString(),
                     authorId: c.member_id,
@@ -96,7 +96,7 @@ export default function Feed() {
 
         socket.on('like_updated', (data: { postId: string, likes: number }) => {
             setPosts(prev => prev.map(p =>
-                p.id === data.postId ? { ...p, likes: data.likes } : p
+                p.id === data.postId ? { ...p, likes: Number(data.likes) } : p
             ));
         });
 
@@ -140,8 +140,8 @@ export default function Feed() {
                     content: p.text_content || "",
                     images: p.images || [],
                     media: (p.media || []).map((m: any) => ({ url: m.url, type: m.type || 'image' })),
-                    likes: p.likes_count || 0,
-                    reactions: { like: p.likes_count || 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
+                    likes: Number(p.likes_count) || 0,
+                    reactions: { like: Number(p.likes_count) || 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
                     comments: (p.comments || []).map((c: any) => ({
                         id: c.id.toString(),
                         authorId: c.member_id,
@@ -280,7 +280,7 @@ export default function Feed() {
     // ─── Reactions ───────────────────────────────────
     const handleLike = async (id: string) => {
         setPosts(posts.map(p =>
-            p.id === id ? { ...p, likes: p.isLiked ? p.likes - 1 : p.likes + 1, isLiked: !p.isLiked } : p
+            p.id === id ? { ...p, likes: p.isLiked ? Math.max(0, p.likes - 1) : p.likes + 1, isLiked: !p.isLiked } : p
         ));
         try {
             const token = getToken();

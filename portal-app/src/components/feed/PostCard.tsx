@@ -261,8 +261,13 @@ export function PostCard({
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(post.content);
     const [bookmarked, setBookmarked] = useState(post.isBookmarked || false);
-    const [myReaction, setMyReaction] = useState<ReactionType | null>(post.myReaction || null);
+    const [myReaction, setMyReaction] = useState<ReactionType | null>(post.myReaction || (post.isLiked ? 'like' : null));
     const [localReactions, setLocalReactions] = useState(post.reactions || { like: post.likes, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 });
+
+    useEffect(() => {
+        setLocalReactions(prev => ({ ...prev, like: post.likes }));
+        setMyReaction(post.myReaction || (post.isLiked ? 'like' : null));
+    }, [post.likes, post.isLiked, post.myReaction]);
     const menuRef = useRef<HTMLDivElement>(null);
     const reactionRef = useRef<HTMLDivElement>(null);
     const reactionTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
