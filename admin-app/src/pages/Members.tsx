@@ -249,13 +249,13 @@ export default function Members() {
     );
 
     return (
-        <div className="p-8 max-w-7xl mx-auto h-full flex flex-col relative">
-            <div className="flex items-center justify-between mb-8">
+        <div className="p-4 sm:p-8 max-w-7xl mx-auto h-full flex flex-col relative">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{t('member_management')}</h1>
-                    <p className="text-slate-500 mt-1">View, add, and manage community members and their families.</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{t('member_management')}</h1>
+                    <p className="text-slate-500 mt-1 text-sm sm:text-base">View, add, and manage community members and their families.</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
                     <input
                         type="file"
                         ref={fileInputRef}
@@ -266,22 +266,24 @@ export default function Members() {
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50"
+                        className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50 text-sm sm:text-base"
                     >
                         <Upload size={18} />
-                        {uploading ? 'Uploading...' : t('bulk_upload')}
+                        <span className="hidden sm:inline">{uploading ? 'Uploading...' : t('bulk_upload')}</span>
+                        <span className="sm:hidden">{uploading ? '...' : 'Upload'}</span>
                     </button>
                     <button
                         onClick={openCreateModal}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
+                        className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20 text-sm sm:text-base"
                     >
                         <Plus size={18} />
-                        {t('add_member')}
+                        <span className="hidden sm:inline">{t('add_member')}</span>
+                        <span className="sm:hidden">Add</span>
                     </button>
                 </div>
             </div>
 
-            <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 mb-6">
+            <div className="flex overflow-x-auto gap-2 border-b border-slate-200 dark:border-slate-800 mb-6 scrollbar-hide shrink-0">
                 <button
                     onClick={() => setActiveTab('all')}
                     className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 ${activeTab === 'all' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
@@ -311,7 +313,7 @@ export default function Members() {
                 </div>
 
                 <div className="overflow-x-auto flex-1">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full min-w-[800px] text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200 sticky top-0 z-10">
                                 <th className="px-6 py-4">Membership No.</th>
@@ -406,10 +408,10 @@ export default function Members() {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl w-full max-w-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                            <h2 className="text-xl font-bold text-slate-900">{isEditing ? 'Edit Member' : 'Add New Member'}</h2>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl w-full max-w-2xl shadow-xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+                        <div className="px-4 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                            <h2 className="text-lg sm:text-xl font-bold text-slate-900">{isEditing ? 'Edit Member' : 'Add New Member'}</h2>
                             <button onClick={closeModal} className="text-slate-400 hover:text-slate-600 p-1">
                                 <X size={20} />
                             </button>

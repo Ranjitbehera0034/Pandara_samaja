@@ -109,15 +109,15 @@ export default function Posts() {
     };
 
     return (
-        <div className="p-8 max-w-7xl mx-auto h-full flex flex-col relative">
-            <div className="flex items-center justify-between mb-8">
+        <div className="p-4 sm:p-8 max-w-7xl mx-auto h-full flex flex-col relative">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Blog Posts</h1>
-                    <p className="text-slate-500 mt-1">Manage announcements and articles for the community.</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Blog Posts</h1>
+                    <p className="text-slate-500 mt-1 text-sm sm:text-base">Manage announcements and articles for the community.</p>
                 </div>
                 <button
                     onClick={openCreateModal}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
+                    className="flex w-full sm:w-auto justify-center items-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
                 >
                     <Plus size={18} />
                     New Post
@@ -126,7 +126,7 @@ export default function Posts() {
 
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex-1 flex flex-col">
                 <div className="overflow-x-auto flex-1">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full min-w-[600px] text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200 sticky top-0 z-10">
                                 <th className="px-6 py-4">Title</th>
@@ -174,10 +174,10 @@ export default function Posts() {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl w-full max-w-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                            <h2 className="text-xl font-bold text-slate-900">{isEditing ? 'Edit Post' : 'Create New Post'}</h2>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl w-full max-w-2xl shadow-xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+                        <div className="px-4 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                            <h2 className="text-lg sm:text-xl font-bold text-slate-900">{isEditing ? 'Edit Post' : 'Create New Post'}</h2>
                             <button onClick={closeModal} className="text-slate-400 hover:text-slate-600 p-1">
                                 <X size={20} />
                             </button>

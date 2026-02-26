@@ -45,14 +45,14 @@ export default function AuditLog() {
     );
 
     return (
-        <div className="p-8 pb-32 max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div className="p-4 sm:p-8 pb-32 max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 sm:mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                         <Shield className="text-indigo-600" size={32} />
                         Audit Log
                     </h1>
-                    <p className="text-slate-500 mt-1">Immutable record of all administrative actions taken on the platform.</p>
+                    <p className="text-slate-500 mt-1 text-sm sm:text-base">Immutable record of all administrative actions taken on the platform.</p>
                 </div>
             </div>
 
@@ -71,7 +71,7 @@ export default function AuditLog() {
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full min-w-[700px] text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
                                 <th className="px-6 py-4">Timestamp</th>

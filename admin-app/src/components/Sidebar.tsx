@@ -2,9 +2,14 @@ import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { useTranslation } from 'react-i18next';
-import { LogOut, LayoutDashboard, Users, Heart, Megaphone, ShieldAlert, Calendar, UsersRound, BellRing, Settings, FileClock, Languages, Moon, Sun } from 'lucide-react';
+import { LogOut, LayoutDashboard, Users, Heart, Megaphone, ShieldAlert, Calendar, UsersRound, BellRing, Settings, FileClock, Languages, Moon, Sun, X } from 'lucide-react';
 
-export default function Sidebar() {
+interface SidebarProps {
+    isMobileOpen?: boolean;
+    setIsMobileOpen?: (open: boolean) => void;
+}
+
+export default function Sidebar({ isMobileOpen = false, setIsMobileOpen }: SidebarProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
 
@@ -15,7 +20,7 @@ export default function Sidebar() {
         window.addEventListener('themeToggle', handleThemeChange);
         return () => window.removeEventListener('themeToggle', handleThemeChange);
     }, []);
-    const { logout } = useAdminAuth();
+    const { logout, user } = useAdminAuth();
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
 
@@ -41,6 +46,18 @@ export default function Sidebar() {
         window.dispatchEvent(new Event('themeToggle'));
     };
 
+    const sidebarClasses = `
+        fixed left-0 top-0 bottom-0 z-50 flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 ease-in-out shadow-lg
+        ${isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full sm:translate-x-0'}
+        ${!isMobileOpen && !isExpanded ? 'sm:w-20' : 'sm:w-64'}
+        flex flex-col overflow-hidden
+    `;
+
+    // Handle clicks on links in mobile mode -> close the drawer
+    const handleLinkClick = () => {
+        if (setIsMobileOpen) setIsMobileOpen(false);
+    };
+
     const linkClasses = ({ isActive }: { isActive: boolean }) =>
         `flex items-center gap-3 px-4 py-3.5 transition-colors text-sm font-medium whitespace-nowrap overflow-hidden ${isActive
             ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 border-r-4 border-blue-600'
@@ -51,92 +68,112 @@ export default function Sidebar() {
         <aside
             onMouseEnter={() => setIsExpanded(true)}
             onMouseLeave={() => setIsExpanded(false)}
-            className={`${isExpanded ? 'w-64' : 'w-20'} hidden sm:flex fixed left-0 top-0 bottom-0 transition-all duration-300 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col z-50 overflow-hidden shadow-2xl shadow-slate-200/50 dark:shadow-none`}
+            className={sidebarClasses}
         >
-            <div className={`p-6 border-b border-slate-100 dark:border-slate-800 mb-4 flex items-center ${isExpanded ? '' : 'justify-center px-0'}`}>
-                <div className="flex items-center gap-3 whitespace-nowrap">
+            <div className={`p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 h-[73px]`}>
+                <div className={`flex items-center gap-3 whitespace-nowrap ${!isExpanded && !isMobileOpen ? 'justify-center w-full max-w-[32px] overflow-hidden' : ''}`}>
                     <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20 shrink-0">
                         P
                     </div>
-                    {isExpanded && <h2 className="text-xl text-slate-900 dark:text-white font-bold tracking-tight">Admin<span className="text-blue-600">Panel</span></h2>}
+                    <div className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>
+                        <h2 className="text-xl text-slate-900 dark:text-white font-bold tracking-tight">Admin<span className="text-blue-600">Panel</span></h2>
+                    </div>
                 </div>
+                {/* Mobile close button */}
+                {(isMobileOpen && setIsMobileOpen) && (
+                    <button
+                        onClick={() => setIsMobileOpen(false)}
+                        className="sm:hidden p-1.5 -mr-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    >
+                        <X size={20} />
+                    </button>
+                )}
             </div>
 
-            <nav className="flex-1 space-y-1">
-                <NavLink to="/" end className={linkClasses}>
-                    <div className="shrink-0 pl-1"><LayoutDashboard size={20} /></div>
-                    <span className={`transition-opacity duration-300 ${isExpanded ? 'opacity-100 block' : 'opacity-0 hidden'}`}>{t('dashboard')}</span>
-                </NavLink>
-                <NavLink to="/members" className={linkClasses}>
-                    <div className="shrink-0 pl-1"><Users size={20} /></div>
-                    <span className={`transition-opacity duration-300 ${isExpanded ? 'opacity-100 block' : 'opacity-0 hidden'}`}>{t('members')}</span>
-                </NavLink>
-                <NavLink to="/leaders" className={linkClasses}>
-                    <div className="shrink-0 pl-1"><UsersRound size={20} /></div>
-                    <span className={`transition-opacity duration-300 ${isExpanded ? 'opacity-100 block' : 'opacity-0 hidden'}`}>{t('leaders')}</span>
-                </NavLink>
-                <NavLink to="/content" className={linkClasses}>
-                    <div className="shrink-0 pl-1"><ShieldAlert size={20} /></div>
-                    <span className={`transition-opacity duration-300 ${isExpanded ? 'opacity-100 block' : 'opacity-0 hidden'}`}>{t('content_moderation')}</span>
-                </NavLink>
-                <NavLink to="/matrimony" className={linkClasses}>
-                    <div className="shrink-0 pl-1"><Heart size={20} /></div>
-                    <span className={`transition-opacity duration-300 ${isExpanded ? 'opacity-100 block' : 'opacity-0 hidden'}`}>{t('matrimony')}</span>
-                </NavLink>
-                <NavLink to="/announcements" className={linkClasses}>
-                    <div className="shrink-0 pl-1"><Megaphone size={20} /></div>
-                    <span className={`transition-opacity duration-300 ${isExpanded ? 'opacity-100 block' : 'opacity-0 hidden'}`}>{t('announcements')}</span>
-                </NavLink>
-                <NavLink to="/events" className={linkClasses}>
-                    <div className="shrink-0 pl-1"><Calendar size={20} /></div>
-                    <span className={`transition-opacity duration-300 ${isExpanded ? 'opacity-100 block' : 'opacity-0 hidden'}`}>{t('events')}</span>
-                </NavLink>
-                <NavLink to="/groups" className={linkClasses}>
-                    <div className="shrink-0 pl-1"><UsersRound size={20} /></div>
-                    <span className={`transition-opacity duration-300 ${isExpanded ? 'opacity-100 block' : 'opacity-0 hidden'}`}>{t('groups')}</span>
-                </NavLink>
-                <NavLink to="/notifications" className={linkClasses}>
-                    <div className="shrink-0 pl-1"><BellRing size={20} /></div>
-                    <span className={`transition-opacity duration-300 ${isExpanded ? 'opacity-100 block' : 'opacity-0 hidden'}`}>{t('notifications')}</span>
-                </NavLink>
-                <div className="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
-                    <NavLink to="/settings" className={linkClasses}>
-                        <div className="shrink-0 pl-1"><Settings size={20} /></div>
-                        <span className={`transition-opacity duration-300 ${isExpanded ? 'opacity-100 block' : 'opacity-0 hidden'}`}>{t('settings')}</span>
+            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
+                <nav className="flex flex-col py-4 space-y-1">
+                    <NavLink to="/" end className={linkClasses} onClick={handleLinkClick}>
+                        <div className="shrink-0 px-2 flex justify-center w-10"><LayoutDashboard size={20} /></div>
+                        <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('dashboard')}</span>
                     </NavLink>
-                    <NavLink to="/audit-log" className={linkClasses}>
-                        <div className="shrink-0 pl-1"><FileClock size={20} /></div>
-                        <span className={`transition-opacity duration-300 ${isExpanded ? 'opacity-100 block' : 'opacity-0 hidden'}`}>{t('audit_log')}</span>
+                    <NavLink to="/members" className={linkClasses} onClick={handleLinkClick}>
+                        <div className="shrink-0 px-2 flex justify-center w-10"><Users size={20} /></div>
+                        <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('members')}</span>
                     </NavLink>
-                </div>
-            </nav>
-
-            <div className={`p-4 border-t border-slate-100 dark:border-slate-800 space-y-2 flex flex-col ${isExpanded ? '' : 'items-center'}`}>
+                    <NavLink to="/leaders" className={linkClasses} onClick={handleLinkClick}>
+                        <div className="shrink-0 px-2 flex justify-center w-10"><UsersRound size={20} /></div>
+                        <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('leaders')}</span>
+                    </NavLink>
+                    <NavLink to="/content" className={linkClasses} onClick={handleLinkClick}>
+                        <div className="shrink-0 px-2 flex justify-center w-10"><ShieldAlert size={20} /></div>
+                        <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('content_moderation')}</span>
+                    </NavLink>
+                    <NavLink to="/matrimony" className={linkClasses} onClick={handleLinkClick}>
+                        <div className="shrink-0 px-2 flex justify-center w-10"><Heart size={20} /></div>
+                        <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('matrimony')}</span>
+                    </NavLink>
+                    <NavLink to="/announcements" className={linkClasses} onClick={handleLinkClick}>
+                        <div className="shrink-0 px-2 flex justify-center w-10"><Megaphone size={20} /></div>
+                        <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('announcements')}</span>
+                    </NavLink>
+                    <NavLink to="/events" className={linkClasses} onClick={handleLinkClick}>
+                        <div className="shrink-0 px-2 flex justify-center w-10"><Calendar size={20} /></div>
+                        <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('events')}</span>
+                    </NavLink>
+                    <NavLink to="/groups" className={linkClasses} onClick={handleLinkClick}>
+                        <div className="shrink-0 px-2 flex justify-center w-10"><UsersRound size={20} /></div>
+                        <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('groups')}</span>
+                    </NavLink>
+                    <NavLink to="/notifications" className={linkClasses} onClick={handleLinkClick}>
+                        <div className="shrink-0 px-2 flex justify-center w-10"><BellRing size={20} /></div>
+                        <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('notifications')}</span>
+                    </NavLink>
+                    <div className="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
+                        <NavLink to="/settings" className={linkClasses} onClick={handleLinkClick}>
+                            <div className="shrink-0 px-2 flex justify-center w-10"><Settings size={20} /></div>
+                            <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('settings')}</span>
+                        </NavLink>
+                        {user?.role === 'super_admin' && (
+                            <>
+                                <NavLink to="/maker-checker" className={linkClasses} onClick={handleLinkClick}>
+                                    <div className="shrink-0 px-2 flex justify-center w-10"><FileClock size={20} /></div>
+                                    <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Approvals</span>
+                                </NavLink>
+                                <NavLink to="/audit" className={linkClasses} onClick={handleLinkClick}>
+                                    <div className="shrink-0 px-2 flex justify-center w-10"><FileClock size={20} /></div>
+                                    <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('audit_log')}</span>
+                                </NavLink>
+                            </>
+                        )}
+                    </div>
+                </nav>
+            </div>
+            <div className={`p-4 border-t border-slate-100 dark:border-slate-800 space-y-2 flex flex-col ${(isExpanded || isMobileOpen) ? '' : 'items-center'}`}>
                 <button
                     onClick={toggleDarkMode}
-                    className={`flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-xl transition-colors ${isExpanded ? 'px-4 w-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'w-10 h-10 px-0 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+                    className={`flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-xl transition-colors ${(isExpanded || isMobileOpen) ? 'px-4 w-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'w-10 h-10 px-0 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
                     title="Toggle Dark Mode"
                 >
                     {isDark ? <Sun size={18} /> : <Moon size={18} />}
-                    {isExpanded && <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>}
+                    {(isExpanded || isMobileOpen) && <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>}
                 </button>
                 <button
                     onClick={toggleLanguage}
-                    className={`flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-xl transition-colors ${isExpanded ? 'px-4 w-full' : 'w-10 h-10 px-0'}`}
+                    className={`flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-xl transition-colors ${(isExpanded || isMobileOpen) ? 'px-4 w-full' : 'w-10 h-10 px-0'}`}
                     title="Toggle Language"
                 >
                     <Languages size={18} />
-                    {isExpanded && <span>{i18n.language === 'en' ? 'ଓଡ଼ିଆ' : 'English'}</span>}
+                    {(isExpanded || isMobileOpen) && <span>{i18n.language === 'en' ? 'ଓଡ଼ିଆ' : 'English'}</span>}
                 </button>
                 <button
                     onClick={handleLogout}
-                    className={`flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-xl transition-colors ${isExpanded ? 'px-4 w-full' : 'w-10 h-10 px-0'}`}
+                    className={`flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-xl transition-colors ${(isExpanded || isMobileOpen) ? 'px-4 w-full' : 'w-10 h-10 px-0'}`}
                     title="Sign Out"
                 >
                     <LogOut size={18} />
-                    {isExpanded && <span>Sign Out</span>}
+                    {(isExpanded || isMobileOpen) && <span>Sign Out</span>}
                 </button>
             </div>
-        </aside>
+        </aside >
     );
 }

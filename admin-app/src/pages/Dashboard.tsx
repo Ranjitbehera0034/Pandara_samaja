@@ -41,17 +41,17 @@ export default function Dashboard() {
 
     if (loading) {
         return (
-            <div className="p-8 pb-32 max-w-7xl mx-auto flex items-center justify-center h-64">
+            <div className="p-4 sm:p-8 pb-32 max-w-7xl mx-auto flex items-center justify-center h-64">
                 <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
             </div>
         );
     }
 
     return (
-        <div className="p-8 pb-32 max-w-7xl mx-auto">
-            <h1 className="text-3xl font-bold text-slate-900 mb-8 tracking-tight">{t('welcome_back')}</h1>
+        <div className="p-4 sm:p-8 pb-32 max-w-7xl mx-auto">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8 tracking-tight">{t('welcome_back')}</h1>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
                 {cards.map((card, i) => (
                     <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between">
@@ -67,16 +67,16 @@ export default function Dashboard() {
                 ))}
             </div>
 
-            <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm">
+            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-100 shadow-sm">
                 <h2 className="text-xl font-bold text-slate-900 mb-4">Welcome to the Admin Architecture</h2>
-                <p className="text-slate-600 mb-6 leading-relaxed">
+                <p className="text-slate-600 mb-6 leading-relaxed text-sm sm:text-base">
                     You have complete command over the Portal App ecosystem. Manage members, moderate feed content, approve matrimony candidates, publish announcements, and broadcast push notifications completely securely from this dashboard.
                 </p>
-                <div className="flex gap-4">
-                    <button className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium shadow-sm shadow-blue-500/20 transition-colors">
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <button className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium shadow-sm shadow-blue-500/20 transition-colors w-full sm:w-auto">
                         Review Pending Matrimony
                     </button>
-                    <button className="px-5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-medium transition-colors">
+                    <button className="px-5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-medium transition-colors w-full sm:w-auto">
                         Clear Moderation Queue
                     </button>
                 </div>
