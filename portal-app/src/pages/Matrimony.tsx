@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, Briefcase, GraduationCap, X, Plus, Upload, Heart, User, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 
-const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api' : 'https://pandara-samaja-backend.onrender.com/api';
+const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/v1' : 'https://pandara-samaja-backend.onrender.com/api/v1';
 
 type Candidate = {
     id: number;

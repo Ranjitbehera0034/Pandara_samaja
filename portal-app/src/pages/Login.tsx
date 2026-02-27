@@ -6,7 +6,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { toast } from "sonner";
 
 export default function Login() {
-    const { login, requestOtp, member } = useAuth();
+    const { login, requestOtp, loginOtpless, member } = useAuth();
     const { t, lang, setLang } = useLanguage();
     const navigate = useNavigate();
     const [membershipNo, setMembershipNo] = useState("");
@@ -21,6 +21,28 @@ export default function Login() {
             navigate("/", { replace: true });
         }
     }, [member, navigate]);
+
+    // Handle OTPless callback
+    useEffect(() => {
+        // @ts-ignore
+        window.otpless = async (otplessUser: any) => {
+            console.log("OTPless User:", otplessUser);
+            if (otplessUser && otplessUser.token) {
+                if (!membershipNo.trim() || !mobile.trim()) {
+                    toast.error("Please enter Membership No and Mobile before using One-Tap");
+                    return;
+                }
+                setLoading(true);
+                try {
+                    await loginOtpless(otplessUser.token, membershipNo, mobile);
+                } catch (err) {
+                    console.error("OTPless Login failed", err);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+    }, [loginOtpless, membershipNo, mobile]);
 
     const handleRequestOtp = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -83,50 +105,69 @@ export default function Login() {
                     </div>
 
                     {step === 1 ? (
-                        <form onSubmit={handleRequestOtp} className="space-y-6">
-                            <div className="space-y-2">
-                                <label htmlFor="membership" className="text-sm font-medium text-slate-300 ml-1">
-                                    {t('login', 'membershipNo')}
-                                </label>
-                                <input
-                                    id="membership"
-                                    type="text"
-                                    value={membershipNo}
-                                    onChange={(e) => setMembershipNo(e.target.value)}
-                                    placeholder={t('login', 'membershipPlaceholder')}
-                                    className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-white placeholder-slate-500 transition-all shadow-inner"
-                                />
+                        <>
+                            <form onSubmit={handleRequestOtp} className="space-y-6">
+                                <div className="space-y-2">
+                                    <label htmlFor="membership" className="text-sm font-medium text-slate-300 ml-1">
+                                        {t('login', 'membershipNo')}
+                                    </label>
+                                    <input
+                                        id="membership"
+                                        type="text"
+                                        value={membershipNo}
+                                        onChange={(e) => setMembershipNo(e.target.value)}
+                                        placeholder={t('login', 'membershipPlaceholder')}
+                                        className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-white placeholder-slate-500 transition-all shadow-inner"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label htmlFor="mobile" className="text-sm font-medium text-slate-300 ml-1">
+                                        {t('login', 'mobileNo')}
+                                    </label>
+                                    <input
+                                        id="mobile"
+                                        type="tel"
+                                        value={mobile}
+                                        onChange={(e) => setMobile(e.target.value)}
+                                        placeholder={t('login', 'mobilePlaceholder')}
+                                        className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-white placeholder-slate-500 transition-all shadow-inner"
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-semibold rounded-xl transition-all transform active:scale-[0.98] shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 group mt-6"
+                                >
+                                    {loading ? (
+                                        <Loader2 className="animate-spin" size={20} />
+                                    ) : (
+                                        <>
+                                            Get WhatsApp OTP
+                                            <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+                                        </>
+                                    )}
+                                </button>
+                            </form>
+
+                            <div className="my-6 flex items-center gap-4">
+                                <div className="flex-1 h-px bg-slate-700/50" />
+                                <span className="text-slate-500 text-xs font-medium uppercase tracking-widest">OR</span>
+                                <div className="flex-1 h-px bg-slate-700/50" />
                             </div>
 
-                            <div className="space-y-2">
-                                <label htmlFor="mobile" className="text-sm font-medium text-slate-300 ml-1">
-                                    {t('login', 'mobileNo')}
-                                </label>
-                                <input
-                                    id="mobile"
-                                    type="tel"
-                                    value={mobile}
-                                    onChange={(e) => setMobile(e.target.value)}
-                                    placeholder={t('login', 'mobilePlaceholder')}
-                                    className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-white placeholder-slate-500 transition-all shadow-inner"
-                                />
+                            <div id="otpless-login-container" className="flex justify-center">
+                                <button
+                                    id="otpless-btn"
+                                    disabled={loading}
+                                    className="w-full py-3.5 bg-white text-slate-900 font-bold rounded-xl flex items-center justify-center gap-3 active:scale-[0.97] transition-all hover:bg-slate-100 border border-slate-200"
+                                >
+                                    <img src="https://otpless.com/favicon.ico" width="20" height="20" alt="OTPless" />
+                                    <span>Verify via WhatsApp One-Tap</span>
+                                </button>
                             </div>
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl transition-all transform active:scale-[0.98] shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 group mt-6"
-                            >
-                                {loading ? (
-                                    <Loader2 className="animate-spin" size={20} />
-                                ) : (
-                                    <>
-                                        Get OTP
-                                        <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
-                                    </>
-                                )}
-                            </button>
-                        </form>
+                        </>
                     ) : (
                         <form onSubmit={handleVerifyOtp} className="space-y-6">
                             <div className="space-y-2">
@@ -138,18 +179,18 @@ export default function Login() {
                                     type="text"
                                     value={otp}
                                     onChange={(e) => setOtp(e.target.value)}
-                                    placeholder="e.g. 123456"
-                                    className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-white tracking-widest text-center text-lg placeholder-slate-500 transition-all shadow-inner"
+                                    placeholder="••••••"
+                                    className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-white tracking-[0.8em] text-center text-2xl placeholder-slate-500 transition-all shadow-inner font-bold"
                                 />
                                 <p className="text-xs text-slate-400 mt-2 text-center">
-                                    For MVP testing, default OTP is <strong className="text-blue-400">123456</strong>
+                                    Check your <strong className="text-green-400">WhatsApp</strong> for the 6-digit verification code.
                                 </p>
                             </div>
 
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold rounded-xl transition-all transform active:scale-[0.98] shadow-lg shadow-green-500/25 flex items-center justify-center gap-2 group mt-6"
+                                className="w-full py-4 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-semibold rounded-xl transition-all transform active:scale-[0.98] shadow-lg shadow-green-500/25 flex items-center justify-center gap-2 group mt-6"
                             >
                                 {loading ? (
                                     <Loader2 className="animate-spin" size={20} />
@@ -166,7 +207,7 @@ export default function Login() {
                                 onClick={() => setStep(1)}
                                 className="w-full py-2 text-sm text-slate-400 hover:text-white transition-colors"
                             >
-                                ← Back
+                                ← Back to Login
                             </button>
                         </form>
                     )}

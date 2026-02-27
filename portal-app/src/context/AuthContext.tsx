@@ -7,6 +7,7 @@ interface AuthContextType {
     isLoading: boolean;
     requestOtp: (membershipNo: string, mobile: string) => Promise<string | undefined>;
     login: (membershipNo: string, mobile: string, otp: string) => Promise<void>;
+    loginOtpless: (otplessToken: string, membershipNo: string, mobile: string) => Promise<void>;
     logout: () => void;
 }
 
@@ -17,7 +18,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isLoading, setIsLoading] = useState(true);
 
     const STORAGE_KEY = "portalMember";
-    const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000' : 'https://pandara-samaja-backend.onrender.com'; // Should be env var in production
+    const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+        ? 'http://localhost:5000/api/v1'
+        : 'https://pandara-samaja-backend.onrender.com/api/v1';
 
     useEffect(() => {
         const savedMember = localStorage.getItem(STORAGE_KEY);
@@ -34,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const requestOtp = async (membershipNo: string, mobile: string) => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/portal/login`, {
+            const response = await fetch(`${API_BASE_URL}/portal/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ membership_no: membershipNo, mobile }),
@@ -42,11 +45,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || "Failed to request OTP");
 
-            if (data.success && data.requireOtp) {
-                toast.success(data.message || "OTP sent to your mobile");
-                return data._devOtp; // Returning mock OTP for dev usage
-            }
-            throw new Error(data.message || "Invalid response from server");
+            toast.success(data.message || "OTP sent to your WhatsApp");
+            return data.message;
         } catch (err: any) {
             console.error("OTP request error:", err);
             toast.error(err.message || "OTP request failed");
@@ -59,11 +59,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const login = async (membershipNo: string, mobile: string, otp: string) => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/portal/login/verify-otp`, {
+            const response = await fetch(`${API_BASE_URL}/portal/verify`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ membership_no: membershipNo, mobile, otp }),
             });
 
@@ -74,18 +72,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
 
             if (data.success && data.token) {
-                // If matchedUser comes back from verify-otp, set it
-                const loggedInIdentity = data.loggedInUser ? data.loggedInUser.name : data.member.name;
-
-                const effectiveMember = {
-                    ...data.member,
-                    name: loggedInIdentity // Replace the root name to support correct display locally
-                };
-
-                setMember(effectiveMember);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(effectiveMember));
-                localStorage.setItem("portalToken", data.token); // Store JWT
-                toast.success(`Welcome back, ${loggedInIdentity}!`);
+                const memberData = data.member;
+                setMember(memberData);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(memberData));
+                localStorage.setItem("portalToken", data.token);
+                toast.success(`Welcome back, ${memberData.name}!`);
             } else {
                 throw new Error(data.message || "Invalid response from server");
             }
@@ -93,6 +84,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (err: any) {
             console.error("Login error:", err);
             toast.error(err.message || "Login failed");
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const loginOtpless = async (otplessToken: string, membershipNo: string, mobile: string) => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/portal/verify-otpless`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    otpless_token: otplessToken,
+                    membership_no: membershipNo,
+                    mobile
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) throw new Error(data.message || "OTPless login failed");
+
+            if (data.success && data.token) {
+                const memberData = data.member;
+                setMember(memberData);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(memberData));
+                localStorage.setItem("portalToken", data.token);
+                toast.success(`Welcome back, ${memberData.name}!`);
+            }
+        } catch (err: any) {
+            toast.error(err.message || "OTPless login failed");
             throw err;
         } finally {
             setIsLoading(false);
@@ -107,7 +130,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     return (
-        <AuthContext.Provider value={{ member, isLoading, requestOtp, login, logout }}>
+        <AuthContext.Provider value={{ member, isLoading, requestOtp, login, loginOtpless, logout }}>
             {children}
         </AuthContext.Provider>
     );

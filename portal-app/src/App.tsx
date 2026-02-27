@@ -33,7 +33,7 @@ import Announcements from './pages/Announcements';
 import { GlobalSearch } from './components/GlobalSearch';
 
 // Define API_BASE_URL if not already defined globally
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'; // Adjusted for backend port 5000
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
 
 // ─── Protected Layout ────────────────────────────────────────────
 function ProtectedLayout() {
@@ -55,7 +55,7 @@ function ProtectedLayout() {
       const fetchUnread = async () => {
         try {
           const token = localStorage.getItem('portalToken');
-          const res = await fetch(`${API_BASE_URL}/api/portal/notifications/unread-count`, {
+          const res = await fetch(`${API_BASE_URL}/portal/notifications/unread-count`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await res.json();
