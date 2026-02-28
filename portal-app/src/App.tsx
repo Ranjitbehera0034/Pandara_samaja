@@ -90,8 +90,8 @@ function ProtectedLayout() {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  const getInitial = (name: string) => name ? name.charAt(0).toUpperCase() : '?';
-  const displayName = user?.name || member?.name || '';
+  const getInitial = (name?: string | null) => name ? name.charAt(0).toUpperCase() : '?';
+  const displayName = user?.name || member?.name || t('nav', 'profile');
 
   const navLinks = [
     { to: '/', icon: <Home size={20} />, label: t('nav', 'home') },
@@ -234,8 +234,8 @@ function ProtectedLayout() {
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1 overflow-hidden">
-                <div className="text-sm font-semibold text-white truncate">{displayName}</div>
-                <div className="text-[10px] text-slate-500">#{member?.membership_no}</div>
+                <div className="text-sm font-semibold text-white truncate" title={displayName}>{displayName}</div>
+                <div className="text-[10px] text-slate-500">#{member?.membership_no} {user?.relation ? `• ${user.relation}` : ''}</div>
               </div>
             )}
           </Link>

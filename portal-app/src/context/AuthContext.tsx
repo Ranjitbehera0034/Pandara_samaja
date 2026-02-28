@@ -18,37 +18,68 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const STORAGE_KEY = "portalMember";
+const USER_STORAGE_KEY = "portalUser";
+const TOKEN_KEY = "portalToken";
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [member, setMember] = useState<Member | null>(null);
     const [user, setUser] = useState<LoggedUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
-    const STORAGE_KEY = "portalMember";
-    const USER_STORAGE_KEY = "portalUser";
     const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
         ? 'http://localhost:5000/api/v1'
         : 'https://pandara-samaja-backend.onrender.com/api/v1';
 
     useEffect(() => {
-        const savedMember = localStorage.getItem(STORAGE_KEY);
-        const savedUser = localStorage.getItem(USER_STORAGE_KEY);
-        if (savedMember) {
-            try {
-                setMember(JSON.parse(savedMember));
-            } catch (err) {
-                console.error("Failed to parse stored member", err);
+        const loadStoredAuth = () => {
+            const savedMember = localStorage.getItem(STORAGE_KEY);
+            const savedUser = localStorage.getItem(USER_STORAGE_KEY);
+
+            console.log("[AUTH] Loading stored auth:", {
+                hasMember: !!savedMember,
+                hasUser: !!savedUser
+            });
+
+            if (savedMember) {
+                try {
+                    const parsed = JSON.parse(savedMember);
+                    setMember(parsed);
+                } catch (err) {
+                    console.error("Failed to parse stored member", err);
+                }
             }
-        }
-        if (savedUser) {
-            try {
-                setUser(JSON.parse(savedUser));
-            } catch (err) {
-                console.error("Failed to parse stored user", err);
+            if (savedUser) {
+                try {
+                    const parsed = JSON.parse(savedUser);
+                    setUser(parsed);
+                    console.log("[AUTH] Set user from storage:", parsed.name);
+                } catch (err) {
+                    console.error("Failed to parse stored user", err);
+                }
             }
-        }
-        setIsLoading(false);
+            setIsLoading(false);
+        };
+
+        loadStoredAuth();
     }, []);
+
+    const handleLoginSuccess = (data: any) => {
+        const memberData = data.member;
+        const userData = data.loggedInUser || { name: memberData.name, relation: 'Head' };
+
+        console.log("[AUTH] Login Success. Setting User:", userData.name);
+
+        setMember(memberData);
+        setUser(userData);
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(memberData));
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+        localStorage.setItem(TOKEN_KEY, data.token);
+
+        toast.success(`Welcome back, ${userData.name}!`);
+    };
 
     const requestOtp = async (membershipNo: string, mobile: string) => {
         setIsLoading(true);
@@ -88,14 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
 
             if (data.success && data.token) {
-                const memberData = data.member;
-                const userData = data.loggedInUser || { name: memberData.name, relation: 'Head' };
-                setMember(memberData);
-                setUser(userData);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(memberData));
-                localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
-                localStorage.setItem("portalToken", data.token);
-                toast.success(`Welcome back, ${userData.name}!`);
+                handleLoginSuccess(data);
             } else {
                 throw new Error(data.message || "Invalid response from server");
             }
@@ -127,14 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!response.ok) throw new Error(data.message || "OTPless login failed");
 
             if (data.success && data.token) {
-                const memberData = data.member;
-                const userData = data.loggedInUser || { name: memberData.name, relation: 'Head' };
-                setMember(memberData);
-                setUser(userData);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(memberData));
-                localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
-                localStorage.setItem("portalToken", data.token);
-                toast.success(`Welcome back, ${userData.name}!`);
+                handleLoginSuccess(data);
             }
         } catch (err: any) {
             toast.error(err.message || "OTPless login failed");
@@ -193,14 +210,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!response.ok) throw new Error(data.message || "Firebase login failed");
 
             if (data.success && data.token) {
-                const memberData = data.member;
-                const userData = data.loggedInUser || { name: memberData.name, relation: 'Head' };
-                setMember(memberData);
-                setUser(userData);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(memberData));
-                localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
-                localStorage.setItem("portalToken", data.token);
-                toast.success(`Welcome back, ${userData.name}!`);
+                handleLoginSuccess(data);
             }
         } catch (err: any) {
             console.error("Firebase login error:", err);
@@ -216,7 +226,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(USER_STORAGE_KEY);
-        localStorage.removeItem("portalToken");
+        localStorage.removeItem(TOKEN_KEY);
         toast.info("Logged out successfully");
     };
 
