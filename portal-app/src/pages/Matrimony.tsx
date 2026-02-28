@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, Briefcase, GraduationCap, X, Plus, Upload, Heart, User, Download, Eye, Phone, Info, Filter, ArrowUpDown, Bookmark, Star } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '../context/LanguageContext';
 
 const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/v1' : 'https://pandara-samaja-backend.onrender.com/api/v1';
 
@@ -28,6 +29,7 @@ type Candidate = {
 };
 
 export default function Matrimony() {
+    const { t, lang } = useLanguage();
     const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -60,7 +62,7 @@ export default function Matrimony() {
             // Backend already filters by approved status and is_matched=false
             setCandidates(data);
         } catch {
-            toast.error('Could not load matrimony profiles');
+            toast.error(t('matrimony', 'failedLoad') || 'Could not load matrimony profiles');
         } finally {
             setLoading(false);
         }
@@ -155,13 +157,13 @@ export default function Matrimony() {
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-pink-500/10 text-pink-500 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border border-pink-500/20">
                                 <Heart size={14} fill="currentColor" />
-                                Find Your Forever
+                                {t('matrimony', 'subtitle')}
                             </div>
                             <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
-                                Community <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-red-500">Matrimony</span>
+                                {lang === 'en' ? 'Community' : 'ସମାଜ'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-red-500">{t('matrimony', 'title').replace('Community ', '').replace('ସମାଜ ', '')}</span>
                             </h1>
                             <p className="text-lg text-slate-400 max-w-2xl leading-relaxed">
-                                A dedicated space for members of our community to find meaningful connections and lifelong partnerships.
+                                {t('matrimony', 'tagline')}
                             </p>
                         </motion.div>
                         <div className="flex items-center gap-4 shrink-0">
@@ -174,14 +176,14 @@ export default function Matrimony() {
                                 <div className="p-1.5 bg-slate-900 rounded-lg group-hover:bg-slate-800 transition-colors">
                                     <Download size={16} />
                                 </div>
-                                Get Form
+                                {t('matrimony', 'getForm')}
                             </motion.a>
                             <motion.button
                                 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
                                 onClick={() => setIsAddModalOpen(true)}
                                 className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-pink-600 to-red-600 text-white rounded-2xl font-bold shadow-2xl shadow-pink-500/20 hover:shadow-pink-500/40 transition-all border border-pink-400/20"
                             >
-                                <Plus size={20} /> Add My Profile
+                                <Plus size={20} /> {t('matrimony', 'addProfile')}
                             </motion.button>
                         </div>
                     </div>
@@ -194,7 +196,7 @@ export default function Matrimony() {
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-pink-500 transition-colors" size={20} />
                             <input
                                 type="text"
-                                placeholder="Search by name, education, or location..."
+                                placeholder={t('matrimony', 'searchPlaceholder')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-pink-500/50 text-white placeholder-slate-500 transition-all text-sm font-medium"
@@ -247,13 +249,13 @@ export default function Matrimony() {
                         <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
                             <Search size={32} className="text-slate-600" />
                         </div>
-                        <h3 className="text-2xl font-bold text-white mb-2">No matching profiles</h3>
+                        <h3 className="text-2xl font-bold text-white mb-2">{t('matrimony', 'noProfiles')}</h3>
                         <p className="text-slate-500 max-w-md mx-auto">Try adjusting your filters or search terms to find more community members.</p>
                         <button
                             onClick={() => { setSearchQuery(''); setGenderFilter('All'); }}
                             className="mt-6 text-pink-500 font-bold hover:underline"
                         >
-                            Reset all filters
+                            {t('matrimony', 'resetFilters')}
                         </button>
                     </motion.div>
                 ) : (
@@ -292,7 +294,7 @@ export default function Matrimony() {
                                             </span>
                                             {calculateAge(c.date_of_birth || c.dob) && (
                                                 <span className="px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/10">
-                                                    {calculateAge(c.date_of_birth || c.dob)} YRS
+                                                    {calculateAge(c.date_of_birth || c.dob)} {t('matrimony', 'years')}
                                                 </span>
                                             )}
                                         </div>
@@ -311,7 +313,7 @@ export default function Matrimony() {
                                         <div className="flex items-center gap-4 flex-wrap">
                                             <span className="flex items-center gap-1.5 text-slate-300 text-xs font-bold drop-shadow">
                                                 <Star size={14} className="text-yellow-500" />
-                                                Verified Member
+                                                {t('matrimony', 'verifiedMember')}
                                             </span>
                                             {c.height && (
                                                 <span className="px-2 py-0.5 bg-white/10 backdrop-blur-md rounded text-[10px] text-white font-bold border border-white/5">
@@ -368,7 +370,7 @@ export default function Matrimony() {
                                             onClick={() => setSelectedCandidate(c)}
                                             className="px-6 py-3.5 bg-white/5 hover:bg-white/10 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white border border-white/10 transition-all flex-1"
                                         >
-                                            View Full details
+                                            {t('matrimony', 'fullDetails')}
                                         </button>
                                         <a
                                             href={`tel:${c.mobile || c.phone}`}
@@ -408,8 +410,8 @@ export default function Matrimony() {
                                 <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10">
                                     <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-2 uppercase tracking-tighter shadow-sm">{selectedCandidate.name}</h2>
                                     <div className="flex gap-2">
-                                        <span className="px-4 py-1.5 bg-pink-500 rounded-lg text-[10px] font-black text-white uppercase tracking-widest">{selectedCandidate.gender}</span>
-                                        <span className="px-4 py-1.5 bg-slate-800 rounded-lg text-[10px] font-black text-white uppercase tracking-widest">{calculateAge(selectedCandidate.date_of_birth || selectedCandidate.dob)} YEARS</span>
+                                        <span className="px-4 py-1.5 bg-pink-500 rounded-lg text-[10px] font-black text-white uppercase tracking-widest">{selectedCandidate.gender === 'Male' ? t('matrimony', 'male') : t('matrimony', 'female')}</span>
+                                        <span className="px-4 py-1.5 bg-slate-800 rounded-lg text-[10px] font-black text-white uppercase tracking-widest">{calculateAge(selectedCandidate.date_of_birth || selectedCandidate.dob)} {t('matrimony', 'years')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -417,7 +419,7 @@ export default function Matrimony() {
                             <div className="md:w-7/12 flex flex-col overflow-y-auto custom-scrollbar">
                                 <div className="p-6 md:p-10 space-y-8">
                                     <div className="flex justify-between items-center">
-                                        <p className="text-xs font-black text-pink-500 uppercase tracking-[4px]">Candidate Portfolio</p>
+                                        <p className="text-xs font-black text-pink-500 uppercase tracking-[4px]">{t('matrimony', 'candidatePortfolio')}</p>
                                         <button
                                             onClick={() => setSelectedCandidate(null)}
                                             className="p-2 hover:bg-white/5 rounded-full transition-colors text-slate-400"
@@ -427,14 +429,14 @@ export default function Matrimony() {
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                                        <DetailItem icon={<GraduationCap size={18} />} label="Education" value={selectedCandidate.education} />
-                                        <DetailItem icon={<Briefcase size={18} />} label="Occupation" value={selectedCandidate.occupation} />
-                                        <DetailItem icon={<MapPin size={18} />} label="Current Address" value={selectedCandidate.address} />
-                                        <DetailItem icon={<User size={18} />} label="Father Name" value={selectedCandidate.father_name || selectedCandidate.father} />
+                                        <DetailItem icon={<GraduationCap size={18} />} label={t('matrimony', 'education')} value={selectedCandidate.education} />
+                                        <DetailItem icon={<Briefcase size={18} />} label={t('matrimony', 'occupation')} value={selectedCandidate.occupation} />
+                                        <DetailItem icon={<MapPin size={18} />} label={t('matrimony', 'address')} value={selectedCandidate.address} />
+                                        <DetailItem icon={<User size={18} />} label={t('matrimony', 'fatherName')} value={selectedCandidate.father_name || selectedCandidate.father} />
                                         <DetailItem icon={<Star size={18} />} label="Gotra" value={selectedCandidate.gotra || 'Not Specified'} />
-                                        <DetailItem icon={<ArrowUpDown size={18} />} label="Height" value={selectedCandidate.height || 'Not Specified'} />
-                                        <DetailItem icon={<Star size={18} />} label="Income" value={selectedCandidate.income || 'Not Specified'} />
-                                        <DetailItem icon={<Phone size={18} />} label="Contact" value={selectedCandidate.mobile || selectedCandidate.phone} />
+                                        <DetailItem icon={<ArrowUpDown size={18} />} label={t('matrimony', 'income').split(' / ')[1] || 'Height'} value={selectedCandidate.height || 'Not Specified'} />
+                                        <DetailItem icon={<Star size={18} />} label={t('matrimony', 'income').split(' / ')[0] || 'Income'} value={selectedCandidate.income || 'Not Specified'} />
+                                        <DetailItem icon={<Phone size={18} />} label={t('matrimony', 'mobileNumber')} value={selectedCandidate.mobile || selectedCandidate.phone} />
                                     </div>
 
                                     {selectedCandidate.expectations && (
@@ -443,7 +445,7 @@ export default function Matrimony() {
                                                 <div className="w-8 h-8 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-500">
                                                     <Star size={16} fill="currentColor" />
                                                 </div>
-                                                <p className="text-xs font-black text-slate-200 uppercase tracking-widest">Partner Expectations</p>
+                                                <p className="text-xs font-black text-slate-200 uppercase tracking-widest">{t('matrimony', 'partnerExpectations')}</p>
                                             </div>
                                             <p className="text-slate-400 text-sm italic leading-relaxed">
                                                 "{selectedCandidate.expectations}"
@@ -457,13 +459,13 @@ export default function Matrimony() {
                                         className={`flex-1 h-16 rounded-2xl text-sm font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${shortlisted.includes(selectedCandidate.id) ? 'bg-pink-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
                                     >
                                         <Bookmark size={20} fill={shortlisted.includes(selectedCandidate.id) ? "currentColor" : "none"} />
-                                        {shortlisted.includes(selectedCandidate.id) ? 'Shortlisted' : 'Shortlist'}
+                                        {shortlisted.includes(selectedCandidate.id) ? t('matrimony', 'shortlisted') : t('matrimony', 'shortlist')}
                                     </button>
                                     <a
                                         href={`tel:${selectedCandidate.mobile || selectedCandidate.phone}`}
                                         className="h-16 px-10 bg-gradient-to-r from-green-600 to-emerald-600 hover:opacity-90 rounded-2xl text-white text-sm font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
                                     >
-                                        <Phone size={20} /> Connect Now
+                                        <Phone size={20} /> {t('matrimony', 'connectNow')}
                                     </a>
                                 </div>
                             </div>
@@ -521,14 +523,14 @@ export default function Matrimony() {
                             <form onSubmit={handleAddSubmit} className="flex-1 overflow-y-auto p-10 text-sm custom-scrollbar">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-slate-200">
                                     <div className="md:col-span-2">
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[3px] mb-3">Upload Your Profile Photograph *</label>
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[3px] mb-3">{t('matrimony', 'uploadPhoto')} *</label>
                                         <div className="relative group">
                                             <label className="flex flex-col items-center justify-center w-full h-44 bg-white/5 border-2 border-dashed border-white/10 hover:border-pink-500/50 rounded-[32px] cursor-pointer transition-all group-hover:bg-white/10 group-active:scale-[0.98]">
                                                 <div className="flex flex-col items-center justify-center pt-5 pb-6 text-slate-400 group-hover:text-pink-400">
                                                     <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-pink-500/10 transition-colors">
                                                         <Upload size={28} />
                                                     </div>
-                                                    <p className="text-sm font-black uppercase tracking-widest">Select Image File</p>
+                                                    <p className="text-sm font-black uppercase tracking-widest">{t('matrimony', 'selectFile')}</p>
                                                     <p className="text-[10px] mt-2 opacity-50 tracking-wider font-bold">PNG, JPG or JPEG • Max 5MB</p>
                                                 </div>
                                                 <input type="file" name="photo" className="hidden" accept="image/*" required />
@@ -536,36 +538,52 @@ export default function Matrimony() {
                                         </div>
                                     </div>
 
-                                    <FormInput label="Full Name" name="name" required />
+                                    {/* Manual Form Upload */}
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[3px] mb-3">{t('matrimony', 'uploadForm')}</label>
+                                        <div className="relative group">
+                                            <label className="flex flex-col items-center justify-center w-full h-32 bg-white/5 border-2 border-dashed border-white/10 hover:border-pink-500/50 rounded-[32px] cursor-pointer transition-all group-hover:bg-white/10 group-active:scale-[0.98]">
+                                                <div className="flex flex-col items-center justify-center p-4 text-slate-400 group-hover:text-pink-400">
+                                                    <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center mb-2 group-hover:bg-pink-500/10 transition-colors">
+                                                        <Upload size={20} />
+                                                    </div>
+                                                    <p className="text-[10px] font-black uppercase tracking-widest">{t('matrimony', 'selectFile')}</p>
+                                                </div>
+                                                <input type="file" name="manual_form" className="hidden" accept="image/*" />
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <FormInput label={t('matrimony', 'fullName')} name="name" required />
                                     <div className="space-y-2">
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">Gender</label>
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">{t('matrimony', 'gender')}</label>
                                         <select name="gender" required className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-pink-500/50 focus:outline-none text-slate-200 text-sm font-bold transition-all appearance-none">
-                                            <option value="" className="bg-slate-900">Select Gender</option>
-                                            <option value="Male" className="bg-slate-900">Male</option>
-                                            <option value="Female" className="bg-slate-900">Female</option>
+                                            <option value="" className="bg-slate-900">{t('matrimony', 'all')}</option>
+                                            <option value="Male" className="bg-slate-900">{t('matrimony', 'male')}</option>
+                                            <option value="Female" className="bg-slate-900">{t('matrimony', 'female')}</option>
                                         </select>
                                     </div>
-                                    <FormInput label="Date of Birth" name="date_of_birth" type="date" required />
-                                    <FormInput label="Education" name="education" placeholder="e.g. M.Tech, IIT-B" required />
-                                    <FormInput label="Occupation" name="occupation" placeholder="e.g. Architect" required />
-                                    <FormInput label="Income / Height" name="income" placeholder="e.g. 5.11' • 15 LPA" />
-                                    <FormInput label="Father's Name" name="father_name" required />
-                                    <FormInput label="Mobile Number" name="mobile" type="tel" required />
+                                    <FormInput label={t('matrimony', 'dob')} name="date_of_birth" type="date" required />
+                                    <FormInput label={t('matrimony', 'education')} name="education" placeholder="e.g. M.Tech, IIT-B" required />
+                                    <FormInput label={t('matrimony', 'occupation')} name="occupation" placeholder="e.g. Architect" required />
+                                    <FormInput label={t('matrimony', 'income')} name="income" placeholder="e.g. 5.11' • 15 LPA" />
+                                    <FormInput label={t('matrimony', 'fatherName')} name="father_name" required />
+                                    <FormInput label={t('matrimony', 'mobileNumber')} name="mobile" type="tel" required />
 
                                     <div className="md:col-span-2 space-y-2">
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">Permanent Address</label>
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">{t('matrimony', 'address')}</label>
                                         <textarea name="address" required rows={3} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-pink-500/50 focus:outline-none resize-none transition-all text-sm font-bold"></textarea>
                                     </div>
 
                                     <div className="md:col-span-2 space-y-2">
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">Partner Expectations</label>
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">{t('matrimony', 'partnerExpectations')}</label>
                                         <textarea name="expectations" placeholder="Tell us about the partner you are looking for..." rows={3} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-pink-500/50 focus:outline-none resize-none transition-all text-sm font-bold"></textarea>
                                     </div>
                                 </div>
                             </form>
                             <div className="p-10 border-t border-white/5 bg-white/2 shrink-0 flex justify-end gap-4">
                                 <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-8 py-3.5 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">
-                                    Cancel
+                                    {t('common', 'cancel')}
                                 </button>
                                 <button onClick={(e) => {
                                     e.preventDefault();
@@ -574,7 +592,7 @@ export default function Matrimony() {
                                         form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
                                     }
                                 }} disabled={submitting} className="px-10 py-4 bg-gradient-to-r from-pink-600 to-red-600 hover:opacity-90 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-pink-500/20 flex items-center gap-3">
-                                    {submitting ? 'Processing...' : 'Submit Profile'}
+                                    {submitting ? t('common', 'loading') : t('matrimony', 'submitProfile')}
                                 </button>
                             </div>
                         </motion.div>

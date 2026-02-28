@@ -336,6 +336,47 @@ export const translations = {
         // Footer
         version: { en: 'Pandara Samaja Portal v2.0 • Made with ❤️ for the community', od: 'ପନ୍ଦରା ସମାଜ ପୋର୍ଟାଲ v2.0 • ସମାଜ ପାଇଁ ❤️ ସହ ନିର୍ମିତ' },
     },
+
+    // ═══════════════════════════════════════════
+    //  MATRIMONY PAGE
+    // ═══════════════════════════════════════════
+    matrimony: {
+        title: { en: 'Community Matrimony', od: 'ସମାଜ ବୈବାହିକ' },
+        subtitle: { en: 'Find your forever', od: 'ଆପଣଙ୍କ ଜୀବନସାଥୀ ପାଆନ୍ତୁ' },
+        tagline: { en: 'A dedicated space for members of our community to find meaningful connections and lifelong partnerships.', od: 'ଆମ ସମାଜର ସଦସ୍ୟମାନଙ୍କ ପାଇଁ ଅର୍ଥପୂର୍ଣ୍ଣ ସଂଯୋଗ ଏବଂ ଚିରସ୍ଥାୟୀ ସମ୍ପର୍କ ଖୋଜିବା ପାଇଁ ଏକ ସମର୍ପିତ ସ୍ଥାନ ।' },
+        addProfile: { en: 'Add My Profile', od: 'ମୋ ପ୍ରୋଫାଇଲ୍ ଯୋଗ କରନ୍ତୁ' },
+        getForm: { en: 'Get Form', od: 'ଫର୍ମ ପାଆନ୍ତୁ' },
+        searchPlaceholder: { en: 'Search by name, education, or location...', od: 'ନାମ, ଶିକ୍ଷା ବା ସ୍ଥାନ ସନ୍ଧାନ...' },
+        noProfiles: { en: 'No matching profiles', od: 'କୌଣସି ପ୍ରୋଫାଇଲ୍ ମିଳିଲା ନାହିଁ' },
+        resetFilters: { en: 'Reset all filters', od: 'ସବୁ ଫିଲ୍ଟର ରିସେଟ୍' },
+        verifiedMember: { en: 'Verified Member', od: 'ଯାଞ୍ଚ ହୋଇଥିବା ସଦସ୍ୟ' },
+        fullDetails: { en: 'View Full Details', od: 'ସମ୍ପୂର୍ଣ୍ଣ ବିବରଣୀ' },
+        partnerExpectations: { en: 'Partner Expectations', od: 'ଜୀବନସାଥୀ ଆଶା' },
+        connectNow: { en: 'Connect Now', od: 'ଏବେ ସଂଯୋଗ କରନ୍ତୁ' },
+        registerProfile: { en: 'Register Profile', od: 'ପ୍ରୋଫାଇଲ୍ ପଞ୍ଜିକରଣ' },
+        uploadPhoto: { en: 'Upload Profile Photograph', od: 'ପ୍ରୋଫାଇଲ୍ ଫଟୋ ଅପଲୋଡ୍ କରନ୍ତୁ' },
+        uploadForm: { en: 'Upload Filled Form (Optional)', od: 'ପୂରଣ ହୋଇଥିବା ଫର୍ମ ଅପଲୋଡ୍ କରନ୍ତୁ (ବୈକଳ୍ପିକ)' },
+        selectFile: { en: 'Select Image File', od: 'ଇମେଜ୍ ଫାଇଲ୍ ଚୟନ କରନ୍ତୁ' },
+        fullName: { en: 'Full Name', od: 'ପୂରା ନାମ' },
+        gender: { en: 'Gender', od: 'ଲିଙ୍ଗ' },
+        dob: { en: 'Date of Birth', od: 'ଜନ୍ମ ତାରିଖ' },
+        education: { en: 'Education', od: 'ଶିକ୍ଷା' },
+        occupation: { en: 'Occupation', od: 'ପେଶା' },
+        income: { en: 'Income / Height', od: 'ଆୟ / ଉଚ୍ଚତା' },
+        fatherName: { en: "Father's Name", od: 'ପିତାଙ୍କ ନାମ' },
+        mobileNumber: { en: 'Mobile Number', od: 'ମୋବାଇଲ୍ ନମ୍ବର' },
+        address: { en: 'Permanent Address', od: 'ସ୍ଥାୟୀ ଠିକଣା' },
+        expectations: { en: 'Partner Expectations', od: 'ଜୀବନସାଥୀ ଆଶା' },
+        submitProfile: { en: 'Submit Profile', od: 'ପ୍ରୋଫାଇଲ୍ ଦାଖଲ' },
+        all: { en: 'All', od: 'ସବୁ' },
+        male: { en: 'Male', od: 'ପୁରୁଷ' },
+        female: { en: 'Female', od: 'ମହିଳା' },
+        age: { en: 'Age', od: 'ବୟସ' },
+        years: { en: 'YEARS', od: 'ବର୍ଷ' },
+        shortlist: { en: 'Shortlist', od: 'ପସନ୍ଦ' },
+        shortlisted: { en: 'Shortlisted', od: 'ପସନ୍ଦ କରାଯାଇଛି' },
+        candidatePortfolio: { en: 'Candidate Portfolio', od: 'ପ୍ରାର୍ଥୀ ପୋର୍ଟଫୋଲିଓ' },
+    },
 } as const;
 
 // ─── Helper type for getting a translation value ─────

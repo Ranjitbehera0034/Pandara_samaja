@@ -123,7 +123,7 @@ export default function ContentModeration() {
                         <Shield className="text-red-500" size={32} />
                         {t('content_moderation')}
                     </h1>
-                    <p className="text-slate-500 mt-1">Review reported posts, comments, stories, and polls.</p>
+                    <p className="text-slate-500 mt-1">{t('moderation_description')}</p>
                 </div>
             </div>
 
@@ -156,8 +156,8 @@ export default function ContentModeration() {
             ) : activeTab === 'reported' && reports.length === 0 ? (
                 <div className="bg-white border text-center border-slate-200 py-20 rounded-2xl border-dashed">
                     <AlertTriangle className="text-slate-300 mx-auto mb-4" size={48} />
-                    <h3 className="text-lg font-medium text-slate-900">Moderation Queue is Clear</h3>
-                    <p className="text-slate-500 mt-1">There are no reported items needing your attention right now.</p>
+                    <h3 className="text-lg font-medium text-slate-900">{t('queue_clear')}</h3>
+                    <p className="text-slate-500 mt-1">{t('queue_clear_description')}</p>
                 </div>
             ) : activeTab === 'all' && posts.length === 0 ? (
                 <div className="bg-white border text-center border-slate-200 py-20 rounded-2xl border-dashed">
@@ -167,25 +167,25 @@ export default function ContentModeration() {
                 </div>
             ) : activeTab === 'banned' ? (
                 <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">Banned Words Filter</h3>
-                    <p className="text-sm text-slate-500 mb-6">Any post or comment containing these words will be automatically blocked from being published.</p>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">{t('banned_words_filter')}</h3>
+                    <p className="text-sm text-slate-500 mb-6">{t('banned_words_description')}</p>
 
                     <form onSubmit={handleAddBannedWord} className="flex gap-4 mb-8">
                         <input
                             type="text"
                             value={newWord}
                             onChange={(e) => setNewWord(e.target.value)}
-                            placeholder="Enter a word to block..."
-                            className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                            placeholder={t('enter_word_placeholder')}
+                            className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-900"
                         />
                         <button type="submit" className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
-                            Add Word
+                            {t('add_word')}
                         </button>
                     </form>
 
                     {bannedWords.length === 0 ? (
                         <div className="text-center py-10 text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                            No banned words defined yet.
+                            {t('no_banned_words')}
                         </div>
                     ) : (
                         <div className="flex flex-wrap gap-3">
@@ -214,10 +214,10 @@ export default function ContentModeration() {
                                     <div>
                                         <div className="flex items-center gap-2 text-red-700 font-semibold mb-1">
                                             <AlertTriangle size={18} />
-                                            Reported by {item.reporter_name || item.reporter_membership_no}
+                                            {t('reported_by')} {item.reporter_name || item.reporter_membership_no}
                                         </div>
                                         <div className="text-red-600 text-sm">
-                                            <span className="font-medium mr-2">Reason:</span>"{item.reason}"
+                                            <span className="font-medium mr-2">{t('reason')}:</span>"{item.reason}"
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3 shrink-0">
@@ -225,13 +225,13 @@ export default function ContentModeration() {
                                             onClick={() => handleDismissReport(item.report_id)}
                                             className="px-4 py-2 bg-white text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-xl font-medium text-sm transition-colors flex items-center gap-2"
                                         >
-                                            <CheckCircle size={16} className="text-green-500" /> Dismiss
+                                            <CheckCircle size={16} className="text-green-500" /> {t('dismiss')}
                                         </button>
                                         <button
                                             onClick={() => handleDeletePost(item.post_id)}
                                             className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors shadow-sm shadow-red-500/20 flex items-center gap-2"
                                         >
-                                            <Trash2 size={16} /> Delete Post
+                                            <Trash2 size={16} /> {t('delete_post')}
                                         </button>
                                     </div>
                                 </div>

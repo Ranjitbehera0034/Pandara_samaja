@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Heart, Search, CheckCircle, XCircle, Trash2, MapPin, Briefcase, GraduationCap } from 'lucide-react';
+import { Heart, Search, CheckCircle, XCircle, Trash2, MapPin, Briefcase, GraduationCap, Download } from 'lucide-react';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -87,7 +87,7 @@ export default function Matrimony() {
                     />
                 </div>
                 <div className="flex gap-2">
-                    {['all', 'pending', 'approved', 'rejected'].map(status => (
+                    {['all', 'pending', 'verified', 'approved', 'rejected'].map(status => (
                         <button
                             key={status}
                             onClick={() => setStatusFilter(status as any)}
@@ -151,6 +151,18 @@ export default function Matrimony() {
                                         <MapPin size={16} className="text-slate-400 mt-0.5 shrink-0" />
                                         <span className="line-clamp-2">{candidate.address || 'N/A'}</span>
                                     </div>
+                                    {candidate.manual_form && (
+                                        <div className="pt-2">
+                                            <a
+                                                href={getImageUrl(candidate.manual_form)}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="text-xs font-bold text-pink-600 hover:text-pink-700 flex items-center gap-1 bg-pink-50 px-3 py-1.5 rounded-lg w-max"
+                                            >
+                                                <Download size={12} /> View Manual Form
+                                            </a>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between gap-2">

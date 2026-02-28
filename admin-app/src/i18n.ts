@@ -62,7 +62,18 @@ const resources = {
             "new_accounts_pending": "New accounts are placed into a pending queue and require admin verification before access.",
             "security_zone": "Security Zone",
             "global_system_lockdown": "Global System Lockdown",
-            "engage_lockdown": "Engage Lockdown"
+            "engage_lockdown": "Engage Lockdown",
+            "banned_words_description": "Any post or comment containing these words will be automatically blocked from being published.",
+            "add_word": "Add Word",
+            "enter_word_placeholder": "Enter a word to block...",
+            "no_banned_words": "No banned words defined yet.",
+            "reason": "Reason",
+            "dismiss": "Dismiss",
+            "delete_post": "Delete Post",
+            "reported_by": "Reported by",
+            "queue_clear": "Moderation Queue is Clear",
+            "queue_clear_description": "There are no reported items needing your attention right now.",
+            "moderation_description": "Review reported posts, comments, stories, and polls."
         }
     },
     or: {
@@ -124,7 +135,18 @@ const resources = {
             "new_accounts_pending": "ନୂତନ ଆକାଉଣ୍ଟଗୁଡିକ ଆଡମିନ୍ ଅନୁମୋଦନ ଦରକାର କରେ |",
             "security_zone": "ସୁରକ୍ଷା ଜୋନ୍",
             "global_system_lockdown": "ଗ୍ଲୋବାଲ୍ ସିଷ୍ଟମ୍ ଲକଡାଉନ୍",
-            "engage_lockdown": "ଲକଡାଉନ୍ ଆରମ୍ଭ କରନ୍ତୁ"
+            "engage_lockdown": "ଲକଡାଉନ୍ ଆରମ୍ଭ କରନ୍ତୁ",
+            "banned_words_description": "ଏହି ତାଲିକାରେ ଥିବା କୌଣସି ଶବ୍ଦ ପୋଷ୍ଟ କିମ୍ବା କମେଣ୍ଟରେ ଥିଲେ ତାହା ଆପେ ଆପେ ବନ୍ଦ ହୋଇଯିବ |",
+            "add_word": "ଶବ୍ଦ ଯୋଗ କରନ୍ତୁ",
+            "enter_word_placeholder": "ବ୍ଲକ୍ କରିବାକୁ ଥିବା ଶବ୍ଦ ଲେଖନ୍ତୁ...",
+            "no_banned_words": "କୌଣସି ନିଷିଦ୍ଧ ଶବ୍ଦ ସେଟ୍ ହୋଇନାହିଁ |",
+            "reason": "କାରଣ",
+            "dismiss": "ଖାରଜ କରନ୍ତୁ",
+            "delete_post": "ପୋଷ୍ଟ ଡିଲିଟ୍ କରନ୍ତୁ",
+            "reported_by": "ରିପୋର୍ଟ କରିଛନ୍ତି",
+            "queue_clear": "ମଡେରେସନ କ୍ୟୁ ଖାଲି ଅଛି",
+            "queue_clear_description": "ବର୍ତ୍ତମାନ କୌଣସି ଆଇଟମ୍ ସମୀକ୍ଷା ପାଇଁ ବାକି ନାହିଁ |",
+            "moderation_description": "ରିପୋର୍ଟ ହୋଇଥିବା ପୋଷ୍ଟ, କମେଣ୍ଟ ଏବଂ ସମସ୍ତ ବିଷୟବସ୍ତୁକୁ ଯାଞ୍ଚ କରନ୍ତୁ |"
         }
     }
 };
