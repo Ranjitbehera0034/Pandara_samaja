@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+Pandara_samaja_backend/node_modules/
+
+# environments / secrets
+.env
+.env.local
+firebase-service-account.json
+
+# specific requests
+Pandara_samaja_backend/package-lock.json
+
+# macOS
+.DS_Store
+android/.DS_Store
+assets/.DS_Store
+assets/img/.DS_Store

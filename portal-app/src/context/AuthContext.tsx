@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 import type { Member } from "../types";
+import { auth } from "../config/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 
 interface AuthContextType {
     member: Member | null;
@@ -8,6 +10,8 @@ interface AuthContextType {
     requestOtp: (membershipNo: string, mobile: string) => Promise<string | undefined>;
     login: (membershipNo: string, mobile: string, otp: string) => Promise<void>;
     loginOtpless: (otplessToken: string, membershipNo: string, mobile: string) => Promise<void>;
+    sendFirebaseOtp: (mobile: string, recaptchaContainerId: string) => Promise<void>;
+    verifyFirebaseOtp: (otp: string, membershipNo: string, mobile: string) => Promise<void>;
     logout: () => void;
 }
 
@@ -16,6 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [member, setMember] = useState<Member | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
     const STORAGE_KEY = "portalMember";
     const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
@@ -122,6 +127,70 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
+    const sendFirebaseOtp = async (mobile: string, recaptchaContainerId: string) => {
+        setIsLoading(true);
+        try {
+            // Format mobile number with +91 if not present
+            const formattedMobile = mobile.startsWith('+') ? mobile : `+91${mobile}`;
+
+            const recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerId, {
+                size: 'invisible',
+            });
+
+            const result = await signInWithPhoneNumber(auth, formattedMobile, recaptchaVerifier);
+            setConfirmationResult(result);
+            toast.success("OTP sent to your mobile via SMS");
+        } catch (err: any) {
+            console.error("Firebase OTP request error:", err);
+            toast.error(err.message || "Failed to send SMS OTP");
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const verifyFirebaseOtp = async (otp: string, membershipNo: string, mobile: string) => {
+        if (!confirmationResult) {
+            toast.error("Please request OTP first");
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const userCredential = await confirmationResult.confirm(otp);
+            const idToken = await userCredential.user.getIdToken();
+
+            // Send idToken to backend
+            const response = await fetch(`${API_BASE_URL}/portal/login/firebase`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    idToken,
+                    membership_no: membershipNo,
+                    mobile
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) throw new Error(data.message || "Firebase login failed");
+
+            if (data.success && data.token) {
+                const memberData = data.member;
+                setMember(memberData);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(memberData));
+                localStorage.setItem("portalToken", data.token);
+                toast.success(`Welcome back, ${memberData.name}!`);
+            }
+        } catch (err: any) {
+            console.error("Firebase login error:", err);
+            toast.error(err.message || "Invalid OTP or login failed");
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const logout = () => {
         setMember(null);
         localStorage.removeItem(STORAGE_KEY);
@@ -130,7 +199,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     return (
-        <AuthContext.Provider value={{ member, isLoading, requestOtp, login, loginOtpless, logout }}>
+        <AuthContext.Provider value={{
+            member,
+            isLoading,
+            requestOtp,
+            login,
+            loginOtpless,
+            sendFirebaseOtp,
+            verifyFirebaseOtp,
+            logout
+        }}>
             {children}
         </AuthContext.Provider>
     );

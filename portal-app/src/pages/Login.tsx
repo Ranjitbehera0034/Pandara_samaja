@@ -6,7 +6,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { toast } from "sonner";
 
 export default function Login() {
-    const { login, requestOtp, loginOtpless, member } = useAuth();
+    const { login, requestOtp, loginOtpless, sendFirebaseOtp, verifyFirebaseOtp, member } = useAuth();
     const { t, lang, setLang } = useLanguage();
     const navigate = useNavigate();
     const [membershipNo, setMembershipNo] = useState("");
@@ -14,6 +14,7 @@ export default function Login() {
     const [otp, setOtp] = useState("");
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [loginMethod, setLoginMethod] = useState<'whatsapp' | 'firebase'>('whatsapp');
 
     // Redirect if already logged in
     useEffect(() => {
@@ -53,7 +54,11 @@ export default function Login() {
 
         setLoading(true);
         try {
-            await requestOtp(membershipNo, mobile);
+            if (loginMethod === 'whatsapp') {
+                await requestOtp(membershipNo, mobile);
+            } else {
+                await sendFirebaseOtp(mobile, 'recaptcha-container');
+            }
             setStep(2);
         } catch (err) {
             // Handled by context
@@ -71,7 +76,11 @@ export default function Login() {
 
         setLoading(true);
         try {
-            await login(membershipNo, mobile, otp);
+            if (loginMethod === 'whatsapp') {
+                await login(membershipNo, mobile, otp);
+            } else {
+                await verifyFirebaseOtp(otp, membershipNo, mobile);
+            }
             // navigate will be handled by useEffect redirect
         } catch (err) {
             // Handled by context
@@ -135,20 +144,38 @@ export default function Login() {
                                     />
                                 </div>
 
+                                <div className="flex gap-4 mb-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setLoginMethod('whatsapp')}
+                                        className={`flex-1 py-2 text-xs font-medium rounded-lg transition-all ${loginMethod === 'whatsapp' ? 'bg-green-600/20 text-green-400 border border-green-500/30' : 'bg-slate-800/40 text-slate-500 border border-slate-700/50'}`}
+                                    >
+                                        WhatsApp OTP
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setLoginMethod('firebase')}
+                                        className={`flex-1 py-2 text-xs font-medium rounded-lg transition-all ${loginMethod === 'firebase' ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'bg-slate-800/40 text-slate-500 border border-slate-700/50'}`}
+                                    >
+                                        SMS OTP
+                                    </button>
+                                </div>
+
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-semibold rounded-xl transition-all transform active:scale-[0.98] shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 group mt-6"
+                                    className={`w-full py-4 bg-gradient-to-r ${loginMethod === 'firebase' ? 'from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-500/25' : 'from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 shadow-green-500/25'} text-white font-semibold rounded-xl transition-all transform active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 group mt-6`}
                                 >
                                     {loading ? (
                                         <Loader2 className="animate-spin" size={20} />
                                     ) : (
                                         <>
-                                            Get WhatsApp OTP
+                                            {loginMethod === 'whatsapp' ? 'Get WhatsApp OTP' : 'Get SMS OTP'}
                                             <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
                                         </>
                                     )}
                                 </button>
+                                <div id="recaptcha-container"></div>
                             </form>
 
                             <div className="my-6 flex items-center gap-4">
@@ -183,7 +210,9 @@ export default function Login() {
                                     className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-white tracking-[0.8em] text-center text-2xl placeholder-slate-500 transition-all shadow-inner font-bold"
                                 />
                                 <p className="text-xs text-slate-400 mt-2 text-center">
-                                    Check your <strong className="text-green-400">WhatsApp</strong> for the 6-digit verification code.
+                                    Check your <strong className={loginMethod === 'whatsapp' ? "text-green-400" : "text-blue-400"}>
+                                        {loginMethod === 'whatsapp' ? "WhatsApp" : "Messages"}
+                                    </strong> for the 6-digit verification code.
                                 </p>
                             </div>
 
