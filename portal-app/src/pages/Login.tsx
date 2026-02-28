@@ -90,7 +90,7 @@ export default function Login() {
     };
 
     return (
-        <div className="flex h-screen w-full items-center justify-center bg-[#0f172a] relative overflow-hidden font-sans">
+        <div className="flex h-screen w-full items-center justify-center bg-slate-50 dark:bg-[#0f172a] relative overflow-hidden font-sans transition-colors duration-500">
             {/* Background Blobs */}
             <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/20 blur-[120px]" />
             <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-blue-600/20 blur-[100px]" />
@@ -105,7 +105,7 @@ export default function Login() {
             </button>
 
             <div className="relative z-10 w-full max-w-md p-8">
-                <div className="bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-8 transform transition-all hover:scale-[1.01] duration-500">
+                <div className="bg-white/70 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl shadow-2xl p-8 transform transition-all hover:scale-[1.01] duration-500">
                     <div className="text-center mb-10">
                         <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-2 tracking-tight">
                             {t('login', 'title')}
@@ -117,7 +117,7 @@ export default function Login() {
                         <>
                             <form onSubmit={handleRequestOtp} className="space-y-6">
                                 <div className="space-y-2">
-                                    <label htmlFor="membership" className="text-sm font-medium text-slate-300 ml-1">
+                                    <label htmlFor="membership" className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
                                         {t('login', 'membershipNo')}
                                     </label>
                                     <input
@@ -126,12 +126,12 @@ export default function Login() {
                                         value={membershipNo}
                                         onChange={(e) => setMembershipNo(e.target.value)}
                                         placeholder={t('login', 'membershipPlaceholder')}
-                                        className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-white placeholder-slate-500 transition-all shadow-inner"
+                                        className="w-full px-5 py-3.5 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-sm"
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label htmlFor="mobile" className="text-sm font-medium text-slate-300 ml-1">
+                                    <label htmlFor="mobile" className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
                                         {t('login', 'mobileNo')}
                                     </label>
                                     <input
@@ -140,7 +140,7 @@ export default function Login() {
                                         value={mobile}
                                         onChange={(e) => setMobile(e.target.value)}
                                         placeholder={t('login', 'mobilePlaceholder')}
-                                        className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-white placeholder-slate-500 transition-all shadow-inner"
+                                        className="w-full px-5 py-3.5 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-sm"
                                     />
                                 </div>
 
@@ -207,7 +207,7 @@ export default function Login() {
                                     value={otp}
                                     onChange={(e) => setOtp(e.target.value)}
                                     placeholder="••••••"
-                                    className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-white tracking-[0.8em] text-center text-2xl placeholder-slate-500 transition-all shadow-inner font-bold"
+                                    className="w-full px-5 py-3.5 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-slate-900 dark:text-white tracking-[0.8em] text-center text-2xl placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-sm font-bold"
                                 />
                                 <p className="text-xs text-slate-400 mt-2 text-center">
                                     Check your <strong className={loginMethod === 'whatsapp' ? "text-green-400" : "text-blue-400"}>

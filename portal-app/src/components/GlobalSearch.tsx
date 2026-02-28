@@ -62,7 +62,7 @@ export function GlobalSearch() {
                     }}
                     onFocus={() => setIsOpen(true)}
                     placeholder={t('nav', 'searchPlaceholder')}
-                    className="w-full bg-slate-700/40 text-white text-sm pl-9 pr-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 placeholder-slate-500 border border-slate-700/50 focus:border-blue-500/50 transition-colors"
+                    className="w-full bg-slate-100 dark:bg-slate-700/40 text-slate-900 dark:text-white text-sm pl-9 pr-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 placeholder-slate-400 dark:placeholder-slate-500 border border-slate-200 dark:border-slate-700/50 focus:border-blue-500/50 transition-colors"
                 />
             </div>
 

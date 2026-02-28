@@ -33,6 +33,7 @@ export interface FamilyMember {
     gender: string;
     age?: number;
     mobile?: string;
+    profile_photo_url?: string;
 }
 
 export interface LoggedUser {

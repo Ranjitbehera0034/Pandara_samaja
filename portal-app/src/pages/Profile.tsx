@@ -429,11 +429,15 @@ export default function Profile() {
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center gap-4">
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${fm.gender?.toLowerCase() === 'female' || fm.gender?.toLowerCase() === 'f'
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm overflow-hidden ${fm.gender?.toLowerCase() === 'female' || fm.gender?.toLowerCase() === 'f'
                                                         ? 'bg-pink-500/20 text-pink-400'
                                                         : 'bg-blue-500/20 text-blue-400'
                                                         }`}>
-                                                        {fm.name?.[0]?.toUpperCase() || '?'}
+                                                        {fm.profile_photo_url ? (
+                                                            <img src={getCleanImageUrl(fm.profile_photo_url)} alt={fm.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            fm.name?.[0]?.toUpperCase() || '?'
+                                                        )}
                                                     </div>
                                                     <div className="flex-1">
                                                         <div className="font-semibold text-white">{fm.name || 'Unnamed'}</div>

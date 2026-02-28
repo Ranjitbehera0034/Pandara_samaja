@@ -446,7 +446,7 @@ export default function Members() {
                                         <select
                                             value={headGender}
                                             onChange={(e) => setHeadGender(e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white"
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white dark:bg-slate-900"
                                         >
                                             <option value="">Select Gender</option>
                                             <option value="Male">Male</option>
@@ -519,7 +519,7 @@ export default function Members() {
                                                 value={name}
                                                 onChange={(e) => setName(e.target.value)}
                                                 placeholder="Head Name"
-                                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white"
+                                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white dark:bg-slate-900"
                                             />
                                         </div>
                                         <div className="col-span-6 md:col-span-3">
@@ -534,7 +534,7 @@ export default function Members() {
                                             <select
                                                 value={headGender}
                                                 onChange={(e) => setHeadGender(e.target.value)}
-                                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white"
+                                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white dark:bg-slate-900"
                                             >
                                                 <option value="">Gender</option>
                                                 <option value="Male">Male</option>
@@ -547,7 +547,7 @@ export default function Members() {
                                                 placeholder="Age"
                                                 value={headAge}
                                                 onChange={(e) => setHeadAge(e.target.value)}
-                                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white"
+                                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white dark:bg-slate-900"
                                             />
                                         </div>
                                         <div className="col-span-2 md:col-span-1 text-right">
@@ -579,7 +579,7 @@ export default function Members() {
                                                 <select
                                                     value={fm.gender}
                                                     onChange={(e) => updateFamilyMember(fm.id, 'gender', e.target.value)}
-                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white"
+                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white dark:bg-slate-900"
                                                 >
                                                     <option value="">Gender</option>
                                                     <option value="Male">Male</option>

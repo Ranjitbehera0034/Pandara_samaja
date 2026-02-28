@@ -112,7 +112,7 @@ function ProtectedLayout() {
   const closeMobileSidebar = () => setSidebarOpen(false);
 
   return (
-    <div className={`flex h-screen bg-slate-900 text-white overflow-hidden font-sans ${settings.compactMode ? 'text-[13px]' : ''}`}>
+    <div className={`flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white overflow-hidden font-sans ${settings.compactMode ? 'text-[13px]' : ''}`}>
       {/* Mobile overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -130,7 +130,7 @@ function ProtectedLayout() {
       <aside
         className={`
                     fixed md:static z-30 h-full
-                    bg-slate-800 border-r border-slate-700/80
+                    bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700/80
                     flex flex-col
                     transition-all duration-300 ease-in-out
                     ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -139,7 +139,7 @@ function ProtectedLayout() {
                 `}
       >
         {/* Logo row */}
-        <div className={`flex items-center border-b border-slate-700/50 shrink-0 ${collapsed ? 'justify-center p-3' : 'justify-between p-4'}`}>
+        <div className={`flex items-center border-b border-slate-100 dark:border-slate-700/50 shrink-0 ${collapsed ? 'justify-center p-3' : 'justify-between p-4'}`}>
           {collapsed ? (
             <Link to="/" className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-900/30" onClick={closeMobileSidebar}>
               P
@@ -222,19 +222,19 @@ function ProtectedLayout() {
         </div>
 
         {/* User card */}
-        <div className={`border-t border-slate-700/50 ${collapsed ? 'p-2' : 'p-3'}`}>
+        <div className={`border-t border-slate-100 dark:border-slate-700/50 ${collapsed ? 'p-2' : 'p-3'}`}>
           <Link
             to="/profile"
             onClick={closeMobileSidebar}
-            className={`flex items-center rounded-xl hover:bg-slate-700/50 transition-colors ${collapsed ? 'justify-center p-2' : 'gap-2.5 px-2.5 py-2'}`}
+            className={`flex items-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors ${collapsed ? 'justify-center p-2' : 'gap-2.5 px-2.5 py-2'}`}
             title={collapsed ? displayName : undefined}
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-sm font-bold shrink-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-sm font-bold shrink-0 text-white">
               {getInitial(displayName)}
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1 overflow-hidden">
-                <div className="text-sm font-semibold text-white truncate" title={displayName}>{displayName}</div>
+                <div className="text-sm font-semibold text-slate-900 dark:text-white truncate" title={displayName}>{displayName}</div>
                 <div className="text-[10px] text-slate-500">#{member?.membership_no} {user?.relation ? `• ${user.relation}` : ''}</div>
               </div>
             )}
@@ -242,7 +242,7 @@ function ProtectedLayout() {
           {!collapsed && (
             <button
               onClick={logout}
-              className="flex items-center gap-2.5 w-full px-3 py-2 mt-1 rounded-xl hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-colors"
+              className="flex items-center gap-2.5 w-full px-3 py-2 mt-1 rounded-xl hover:bg-red-500/10 text-slate-500 dark:text-slate-400 hover:text-red-400 transition-colors"
             >
               <LogOut size={16} />
               <span className="text-xs font-medium">{t('common', 'logout')}</span>
@@ -251,7 +251,7 @@ function ProtectedLayout() {
           {collapsed && (
             <button
               onClick={logout}
-              className="flex justify-center w-full p-2 mt-1 rounded-xl hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-colors"
+              className="flex justify-center w-full p-2 mt-1 rounded-xl hover:bg-red-500/10 text-slate-500 dark:text-slate-400 hover:text-red-400 transition-colors"
               title={t('common', 'logout')}
             >
               <LogOut size={16} />
@@ -263,7 +263,7 @@ function ProtectedLayout() {
       {/* ─── Main content ─── */}
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full">
         {/* Header */}
-        <header className="h-14 bg-slate-800/60 backdrop-blur-md border-b border-slate-700/80 flex items-center px-4 md:px-6 z-10 shrink-0">
+        <header className="h-14 bg-white/70 dark:bg-slate-800/60 backdrop-blur-md border-b border-slate-200 dark:border-slate-700/80 flex items-center px-4 md:px-6 z-10 shrink-0 transition-colors">
           <button className="md:hidden p-2 -ml-1 text-slate-400 hover:text-white mr-3" onClick={() => setSidebarOpen(true)}>
             <Menu size={22} />
           </button>
@@ -309,7 +309,7 @@ function ProtectedLayout() {
         </header>
 
         {/* Page */}
-        <main className={`flex-1 overflow-y-auto bg-slate-900 scroll-smooth ${settings.compactMode ? 'text-sm' : ''}`}>
+        <main className={`flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900 scroll-smooth ${settings.compactMode ? 'text-sm' : ''}`}>
           <div className={`max-w-5xl mx-auto px-4 ${settings.compactMode ? 'py-3' : 'py-6'}`}>
             <Routes>
               <Route path="/" element={<Feed />} />

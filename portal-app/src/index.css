@@ -12,13 +12,38 @@
   }
 }
 
+/* Proper Light Mode implementation using classes */
+.light-mode {
+  --portal-bg: #f8fafc;
+  --portal-card: #ffffff;
+  --portal-text: #0f172a;
+  --portal-text-muted: #64748b;
+  --portal-border: #e2e8f0;
+}
+
+.light-mode body {
+  @apply bg-slate-50 text-slate-900;
+}
+
+/* Ensure inputs are ALWAYS visible */
+input,
+select,
+textarea {
+  @apply focus:outline-none transition-all;
+}
+
+/* Fix for font visibility in both modes */
+.light-mode input,
+.light-mode select,
+.light-mode textarea {
+  @apply bg-white text-slate-900 border-slate-200 placeholder-slate-400;
+}
+
+/* Inversion hack removal - replaced with proper classes above */
+/* keeping for reference if needed but commented out */
+/* 
 html.light-mode {
   filter: invert(1) hue-rotate(180deg) brightness(1.05);
   background: white;
 }
-
-html.light-mode img,
-html.light-mode video,
-html.light-mode .no-invert {
-  filter: invert(1) hue-rotate(180deg);
-}
+*/
