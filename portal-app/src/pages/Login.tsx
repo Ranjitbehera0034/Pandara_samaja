@@ -6,7 +6,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { toast } from "sonner";
 
 export default function Login() {
-    const { login, requestOtp, loginOtpless, sendFirebaseOtp, verifyFirebaseOtp, member } = useAuth();
+    const { sendFirebaseOtp, verifyFirebaseOtp, member } = useAuth();
     const { t, lang, setLang } = useLanguage();
     const navigate = useNavigate();
     const [membershipNo, setMembershipNo] = useState("");
@@ -14,7 +14,6 @@ export default function Login() {
     const [otp, setOtp] = useState("");
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [loginMethod, setLoginMethod] = useState<'whatsapp' | 'firebase'>('whatsapp');
 
     // Redirect if already logged in
     useEffect(() => {
@@ -22,28 +21,6 @@ export default function Login() {
             navigate("/", { replace: true });
         }
     }, [member, navigate]);
-
-    // Handle OTPless callback
-    useEffect(() => {
-        // @ts-ignore
-        window.otpless = async (otplessUser: any) => {
-            console.log("OTPless User:", otplessUser);
-            if (otplessUser && otplessUser.token) {
-                if (!membershipNo.trim() || !mobile.trim()) {
-                    toast.error("Please enter Membership No and Mobile before using One-Tap");
-                    return;
-                }
-                setLoading(true);
-                try {
-                    await loginOtpless(otplessUser.token, membershipNo, mobile);
-                } catch (err) {
-                    console.error("OTPless Login failed", err);
-                } finally {
-                    setLoading(false);
-                }
-            }
-        };
-    }, [loginOtpless, membershipNo, mobile]);
 
     const handleRequestOtp = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -54,11 +31,7 @@ export default function Login() {
 
         setLoading(true);
         try {
-            if (loginMethod === 'whatsapp') {
-                await requestOtp(membershipNo, mobile);
-            } else {
-                await sendFirebaseOtp(mobile, 'recaptcha-container');
-            }
+            await sendFirebaseOtp(mobile, 'recaptcha-container');
             setStep(2);
         } catch (err) {
             // Handled by context
@@ -76,11 +49,7 @@ export default function Login() {
 
         setLoading(true);
         try {
-            if (loginMethod === 'whatsapp') {
-                await login(membershipNo, mobile, otp);
-            } else {
-                await verifyFirebaseOtp(otp, membershipNo, mobile);
-            }
+            await verifyFirebaseOtp(otp, membershipNo, mobile);
             // navigate will be handled by useEffect redirect
         } catch (err) {
             // Handled by context
@@ -114,87 +83,51 @@ export default function Login() {
                     </div>
 
                     {step === 1 ? (
-                        <>
-                            <form onSubmit={handleRequestOtp} className="space-y-6">
-                                <div className="space-y-2">
-                                    <label htmlFor="membership" className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
-                                        {t('login', 'membershipNo')}
-                                    </label>
-                                    <input
-                                        id="membership"
-                                        type="text"
-                                        value={membershipNo}
-                                        onChange={(e) => setMembershipNo(e.target.value)}
-                                        placeholder={t('login', 'membershipPlaceholder')}
-                                        className="w-full px-5 py-3.5 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-sm"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label htmlFor="mobile" className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
-                                        {t('login', 'mobileNo')}
-                                    </label>
-                                    <input
-                                        id="mobile"
-                                        type="tel"
-                                        value={mobile}
-                                        onChange={(e) => setMobile(e.target.value)}
-                                        placeholder={t('login', 'mobilePlaceholder')}
-                                        className="w-full px-5 py-3.5 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-sm"
-                                    />
-                                </div>
-
-                                <div className="flex gap-4 mb-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setLoginMethod('whatsapp')}
-                                        className={`flex-1 py-2 text-xs font-medium rounded-lg transition-all ${loginMethod === 'whatsapp' ? 'bg-green-600/20 text-green-400 border border-green-500/30' : 'bg-slate-800/40 text-slate-500 border border-slate-700/50'}`}
-                                    >
-                                        WhatsApp OTP
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setLoginMethod('firebase')}
-                                        className={`flex-1 py-2 text-xs font-medium rounded-lg transition-all ${loginMethod === 'firebase' ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'bg-slate-800/40 text-slate-500 border border-slate-700/50'}`}
-                                    >
-                                        SMS OTP
-                                    </button>
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className={`w-full py-4 bg-gradient-to-r ${loginMethod === 'firebase' ? 'from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-500/25' : 'from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 shadow-green-500/25'} text-white font-semibold rounded-xl transition-all transform active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 group mt-6`}
-                                >
-                                    {loading ? (
-                                        <Loader2 className="animate-spin" size={20} />
-                                    ) : (
-                                        <>
-                                            {loginMethod === 'whatsapp' ? 'Get WhatsApp OTP' : 'Get SMS OTP'}
-                                            <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
-                                        </>
-                                    )}
-                                </button>
-                                <div id="recaptcha-container"></div>
-                            </form>
-
-                            <div className="my-6 flex items-center gap-4">
-                                <div className="flex-1 h-px bg-slate-700/50" />
-                                <span className="text-slate-500 text-xs font-medium uppercase tracking-widest">OR</span>
-                                <div className="flex-1 h-px bg-slate-700/50" />
+                        <form onSubmit={handleRequestOtp} className="space-y-6">
+                            <div className="space-y-2">
+                                <label htmlFor="membership" className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+                                    {t('login', 'membershipNo')}
+                                </label>
+                                <input
+                                    id="membership"
+                                    type="text"
+                                    value={membershipNo}
+                                    onChange={(e) => setMembershipNo(e.target.value)}
+                                    placeholder={t('login', 'membershipPlaceholder')}
+                                    className="w-full px-5 py-3.5 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-sm"
+                                />
                             </div>
 
-                            <div id="otpless-login-container" className="flex justify-center">
-                                <button
-                                    id="otpless-btn"
-                                    disabled={loading}
-                                    className="w-full py-3.5 bg-white text-slate-900 font-bold rounded-xl flex items-center justify-center gap-3 active:scale-[0.97] transition-all hover:bg-slate-100 border border-slate-200"
-                                >
-                                    <img src="https://otpless.com/favicon.ico" width="20" height="20" alt="OTPless" />
-                                    <span>Verify via WhatsApp One-Tap</span>
-                                </button>
+                            <div className="space-y-2">
+                                <label htmlFor="mobile" className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+                                    {t('login', 'mobileNo')}
+                                </label>
+                                <input
+                                    id="mobile"
+                                    type="tel"
+                                    value={mobile}
+                                    onChange={(e) => setMobile(e.target.value)}
+                                    placeholder={t('login', 'mobilePlaceholder')}
+                                    className="w-full px-5 py-3.5 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-sm"
+                                />
                             </div>
-                        </>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl transition-all transform active:scale-[0.98] shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 group mt-6"
+                            >
+                                {loading ? (
+                                    <Loader2 className="animate-spin" size={20} />
+                                ) : (
+                                    <>
+                                        Get SMS OTP
+                                        <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+                                    </>
+                                )}
+                            </button>
+                            <div id="recaptcha-container"></div>
+                        </form>
                     ) : (
                         <form onSubmit={handleVerifyOtp} className="space-y-6">
                             <div className="space-y-2">
@@ -210,8 +143,8 @@ export default function Login() {
                                     className="w-full px-5 py-3.5 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-slate-900 dark:text-white tracking-[0.8em] text-center text-2xl placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-sm font-bold"
                                 />
                                 <p className="text-xs text-slate-400 mt-2 text-center">
-                                    Check your <strong className={loginMethod === 'whatsapp' ? "text-green-400" : "text-blue-400"}>
-                                        {loginMethod === 'whatsapp' ? "WhatsApp" : "Messages"}
+                                    Check your <strong className="text-blue-400">
+                                        Messages
                                     </strong> for the 6-digit verification code.
                                 </p>
                             </div>

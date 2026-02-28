@@ -11,8 +11,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { io, Socket } from 'socket.io-client';
 
-const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? ((typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal') + '' : 'https://pandara-samaja-backend.onrender.com/api/portal';
-const SOCKET_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000' : 'https://pandara-samaja-backend.onrender.com';
+const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+    ? 'http://localhost:5000/api/v1/portal'
+    : 'https://pandara-samaja-backend.onrender.com/api/v1/portal';
+const SOCKET_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+    ? 'http://localhost:5000'
+    : 'https://pandara-samaja-backend.onrender.com';
 
 // ─── Types ───────────────────────────────────────────
 interface ChatContact {

@@ -66,7 +66,7 @@ export function StatusBar({ statuses, onAddStatus }: StatusBarProps) {
                                 {status.emoji}
                             </div>
                             <span className="text-[10px] text-slate-400 font-medium truncate w-14 text-center">
-                                {status.authorName.split(' ')[0]}
+                                {(status.authorName || 'User').split(' ')[0]}
                             </span>
                         </button>
                     ))}
@@ -106,9 +106,9 @@ export function StatusBar({ statuses, onAddStatus }: StatusBarProps) {
                                 )}
                                 <div className="absolute bottom-3 left-4 flex items-center gap-1.5 text-white/40 text-xs">
                                     <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">
-                                        {member?.name?.[0]}
+                                        {(member?.name || '?')[0].toUpperCase()}
                                     </div>
-                                    <span>{member?.name?.split(' ')[0]}</span>
+                                    <span>{(member?.name || 'User').split(' ')[0]}</span>
                                 </div>
                             </div>
 
@@ -196,7 +196,7 @@ export function StatusBar({ statuses, onAddStatus }: StatusBarProps) {
                             <p className="text-white text-center text-xl font-bold leading-relaxed">{viewingStatus.text}</p>
                             <div className="absolute bottom-4 left-5 flex items-center gap-2 text-white/60 text-sm">
                                 <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
-                                    {viewingStatus.authorName[0]}
+                                    {(viewingStatus.authorName || '?')[0].toUpperCase()}
                                 </div>
                                 <span>{viewingStatus.authorName}</span>
                             </div>

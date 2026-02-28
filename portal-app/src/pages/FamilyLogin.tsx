@@ -21,6 +21,10 @@ interface FamilyAccount {
 
 
 
+const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+    ? 'http://localhost:5000/api/v1/portal'
+    : 'https://pandara-samaja-backend.onrender.com/api/v1/portal';
+
 export default function FamilyLogin() {
     const { member } = useAuth();
     const [accounts, setAccounts] = useState<FamilyAccount[]>([]);
@@ -41,7 +45,7 @@ export default function FamilyLogin() {
 
     const fetchAccounts = async () => {
         try {
-            const res = await fetch(((typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal') + '/family/accounts', {
+            const res = await fetch(`${API_BASE_URL}/family/accounts`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` }
             });
             const data = await res.json();
@@ -71,7 +75,7 @@ export default function FamilyLogin() {
         }
 
         try {
-            const res = await fetch(((typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal') + '/family/accounts', {
+            const res = await fetch(`${API_BASE_URL}/family/accounts`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -96,7 +100,7 @@ export default function FamilyLogin() {
     const toggleActive = async (accountId: string) => {
         const acc = accounts.find(a => a.id === accountId);
         try {
-            const res = await fetch(`${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal'}//family/accounts/${accountId}/status`, {
+            const res = await fetch(`${API_BASE_URL}/family/accounts/${accountId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -116,7 +120,7 @@ export default function FamilyLogin() {
     const deleteAccount = async (accountId: string) => {
         if (!confirm('Are you sure you want to delete this account?')) return;
         try {
-            const res = await fetch(`${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal'}//family/accounts/${accountId}`, {
+            const res = await fetch(`${API_BASE_URL}/family/accounts/${accountId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` }
             });
@@ -198,7 +202,7 @@ export default function FamilyLogin() {
                                     ? 'bg-gradient-to-br from-emerald-500 to-teal-500 text-white'
                                     : 'bg-slate-700 text-slate-400'
                                     }`}>
-                                    {account.name[0]?.toUpperCase()}
+                                    {(account.name || '?')[0]?.toUpperCase()}
                                 </div>
 
                                 {/* Info */}

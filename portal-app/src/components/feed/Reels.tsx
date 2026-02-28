@@ -175,7 +175,7 @@ function ReelItem({
                         {reel.authorAvatar ? (
                             <img src={reel.authorAvatar} className="w-full h-full object-cover" />
                         ) : (
-                            <span className="text-white font-bold text-sm">{reel.authorName[0]}</span>
+                            <span className="text-white font-bold text-sm">{(reel.authorName || '?')[0].toUpperCase()}</span>
                         )}
                     </div>
                     <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-blue-500 rounded-full w-5 h-5 flex items-center justify-center text-white text-xs font-bold border border-black">

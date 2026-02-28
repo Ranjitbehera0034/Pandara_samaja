@@ -12,7 +12,9 @@ import {
 } from 'lucide-react';
 import type { FamilyMember } from '../types';
 
-const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? ((typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal') + '' : 'https://pandara-samaja-backend.onrender.com/api/portal';
+const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+    ? 'http://localhost:5000/api/v1/portal'
+    : 'https://pandara-samaja-backend.onrender.com/api/v1/portal';
 
 export default function Profile() {
     const { member } = useAuth();

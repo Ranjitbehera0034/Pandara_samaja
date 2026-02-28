@@ -143,7 +143,7 @@ function CommentItem({
                     {comment.authorAvatar ? (
                         <img src={comment.authorAvatar} alt="" className="w-full h-full rounded-full object-cover" />
                     ) : (
-                        comment.authorName[0]
+                        (comment.authorName || '?')[0].toUpperCase()
                     )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -424,7 +424,7 @@ export function PostCard({
                             {post.authorAvatar ? (
                                 <img src={post.authorAvatar} alt={post.authorName} className="w-full h-full object-cover" />
                             ) : (
-                                <span className="font-bold text-white text-sm">{post.authorName[0]}</span>
+                                <span className="font-bold text-white text-sm">{(post.authorName || '?')[0].toUpperCase()}</span>
                             )}
                         </div>
                     </div>

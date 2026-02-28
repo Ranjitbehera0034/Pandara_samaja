@@ -170,13 +170,13 @@ export function Stories({ stories, onAddStory }: StoriesProps) {
                                         <img src={latestStory.authorAvatar} alt={latestStory.authorName} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center font-bold text-slate-400 bg-slate-700">
-                                            {latestStory.authorName[0]}
+                                            {(latestStory.authorName || '?')[0].toUpperCase()}
                                         </div>
                                     )}
                                 </div>
                             </div>
                             <span className="text-xs font-medium text-slate-300 w-16 truncate text-center">
-                                {latestStory.authorName.split(' ')[0]}
+                                {(latestStory.authorName || 'User').split(' ')[0]}
                             </span>
                         </div>
                     );
@@ -256,8 +256,8 @@ export function Stories({ stories, onAddStory }: StoriesProps) {
                                                         key={pos}
                                                         onClick={() => setTextPosition(pos)}
                                                         className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${textPosition === pos
-                                                                ? 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/50'
-                                                                : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50'
+                                                            ? 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/50'
+                                                            : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50'
                                                             }`}
                                                     >
                                                         {pos.charAt(0).toUpperCase() + pos.slice(1)}
@@ -336,7 +336,7 @@ export function Stories({ stories, onAddStory }: StoriesProps) {
                                             <img src={activeStoryGroup[selectedStoryIndex].authorAvatar} className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center font-bold text-xs text-white">
-                                                {activeStoryGroup[selectedStoryIndex].authorName[0]}
+                                                {(activeStoryGroup[selectedStoryIndex].authorName || '?')[0].toUpperCase()}
                                             </div>
                                         )}
                                     </div>
