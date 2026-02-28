@@ -37,7 +37,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000
 
 // ─── Protected Layout ────────────────────────────────────────────
 function ProtectedLayout() {
-  const { member, logout, isLoading } = useAuth();
+  const { member, user, logout, isLoading } = useAuth();
   const { settings } = useSettings();
   const { t, lang, setLang } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false); // mobile
@@ -91,6 +91,7 @@ function ProtectedLayout() {
   }
 
   const getInitial = (name: string) => name ? name.charAt(0).toUpperCase() : '?';
+  const displayName = user?.name || member?.name || '';
 
   const navLinks = [
     { to: '/', icon: <Home size={20} />, label: t('nav', 'home') },
@@ -226,14 +227,14 @@ function ProtectedLayout() {
             to="/profile"
             onClick={closeMobileSidebar}
             className={`flex items-center rounded-xl hover:bg-slate-700/50 transition-colors ${collapsed ? 'justify-center p-2' : 'gap-2.5 px-2.5 py-2'}`}
-            title={collapsed ? member?.name : undefined}
+            title={collapsed ? displayName : undefined}
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-sm font-bold shrink-0">
-              {getInitial(member?.name || '')}
+              {getInitial(displayName)}
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1 overflow-hidden">
-                <div className="text-sm font-semibold text-white truncate">{member?.name}</div>
+                <div className="text-sm font-semibold text-white truncate">{displayName}</div>
                 <div className="text-[10px] text-slate-500">#{member?.membership_no}</div>
               </div>
             )}
@@ -297,11 +298,11 @@ function ProtectedLayout() {
 
             <Link to="/profile" className="flex items-center gap-2.5">
               <div className="hidden sm:block text-right">
-                <div className="text-sm font-semibold text-white leading-tight">{member?.name}</div>
+                <div className="text-sm font-semibold text-white leading-tight">{displayName}</div>
                 <div className="text-[11px] text-slate-500">#{member?.membership_no}</div>
               </div>
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-400 border-2 border-slate-700 flex items-center justify-center font-bold text-xs">
-                {getInitial(member?.name || '')}
+                {getInitial(displayName)}
               </div>
             </Link>
           </div>

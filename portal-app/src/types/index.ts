@@ -35,6 +35,11 @@ export interface FamilyMember {
     mobile?: string;
 }
 
+export interface LoggedUser {
+    name: string;
+    relation: string;
+}
+
 // ─── Reaction system (Phase 1) ──────────────────────
 export type ReactionType = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry';
 
