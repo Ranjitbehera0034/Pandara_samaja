@@ -1,21 +1,75 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
+/* Global Styles */
 @layer base {
   body {
-    @apply bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100;
+    @apply bg-slate-50 text-slate-900 antialiased;
   }
 
-  /* Global fix for input visibility across themes */
+  :where(.dark) body {
+    @apply bg-slate-950 text-slate-100;
+  }
+
+  /* Universal form field styling */
   input,
   select,
   textarea {
-    @apply bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-blue-500/50;
+    @apply bg-white border border-slate-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none rounded-xl text-slate-900;
   }
 
-  /* Placeholder colors for better UI */
+  :where(.dark) input,
+  :where(.dark) select,
+  :where(.dark) textarea {
+    @apply bg-slate-900 border-slate-800 text-slate-100;
+  }
+
   ::placeholder {
-    @apply text-slate-400 dark:text-slate-500;
+    @apply text-slate-400;
+  }
+
+  :where(.dark) ::placeholder {
+    @apply text-slate-600;
+  }
+
+  /* Custom slim scrollbars */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 rounded-full;
+  }
+
+  :where(.dark) .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-800;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-2xl;
+  }
+
+  :where(.dark) .glass-card {
+    @apply bg-slate-900/70 border-slate-800;
+  }
+
+  /* Primary action button */
+  .premium-btn-primary {
+    @apply px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 hover:scale-[1.02] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20;
+  }
+
+  /* Secondary muted button */
+  .premium-btn-secondary {
+    @apply px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 hover:scale-[1.02] flex items-center justify-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200;
+  }
+
+  :where(.dark) .premium-btn-secondary {
+    @apply bg-slate-800 text-slate-300 hover:bg-slate-700;
   }
 }
