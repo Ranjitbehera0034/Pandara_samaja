@@ -56,7 +56,14 @@ function renderLeadersHTML(level, locationString) {
   leaders.forEach(leader => {
     let src = PLACEHOLDER;
     if (leader.image_url) {
-      if (leader.image_url.startsWith('http') || leader.image_url.startsWith('blob') || leader.image_url.startsWith('assets/')) {
+      if (leader.image_url.includes('drive.google.com') || leader.image_url.includes('lh3.googleusercontent.com')) {
+        const driveIdMatch = leader.image_url.match(/([a-zA-Z0-9_-]{25,})/);
+        if (driveIdMatch && driveIdMatch[1]) {
+          src = baseUrl + '/api/image-proxy/' + driveIdMatch[1];
+        } else {
+          src = leader.image_url;
+        }
+      } else if (leader.image_url.startsWith('http') || leader.image_url.startsWith('blob') || leader.image_url.startsWith('assets/')) {
         src = leader.image_url;
       } else {
         src = baseUrl + (leader.image_url.startsWith('/') ? '' : '/') + leader.image_url;
