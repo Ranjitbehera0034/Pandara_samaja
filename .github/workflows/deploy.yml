@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - develop # Only deploy on push to develop branch (match your main branch if needed)
+      - main
   workflow_dispatch:
 
 permissions:
@@ -26,19 +26,35 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build applications
-        run: npm run build
-
-      - name: Clean up for deployment (remove source and unnecessary folders)
+      - name: Build Admin App
+        working-directory: admin-app
         run: |
-          rm .gitignore
-          rm -rf node_modules admin-app portal-app android www .git .github
-          # Keep only: admin/, portal/, assets/, index.html, members.html, about.html, blogs.html, CNAME, package.json (optional)
+          npm ci
+          npm run build
+
+      - name: Build Portal App
+        working-directory: portal-app
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare deployment directory
+        run: |
+          mkdir -p _site
+
+          # Copy static HTML pages
+          cp -f index.html about.html blogs.html matrimony.html members.html _site/ 2>/dev/null || true
+
+          # Copy CNAME for custom domain
+          cp -f CNAME _site/ 2>/dev/null || true
+
+          # Copy static assets (CSS, JS, images)
+          cp -r assets _site/ 2>/dev/null || true
+
+          # Copy built React apps
+          cp -r admin _site/admin
+          cp -r portal _site/portal
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -46,8 +62,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Deploy the entire root directory (which now contains built admin/ and portal/)
-          path: "."
+          path: "_site"
 
   deploy:
     environment:
