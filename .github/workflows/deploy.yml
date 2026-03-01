@@ -27,21 +27,13 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: |
-            admin-app/package-lock.json
-            portal-app/package-lock.json
 
-      - name: Build Admin App
-        working-directory: admin-app
-        run: |
-          npm ci
-          npm run build
+      - name: Install dependencies (Monorepo)
+        run: npm install --legacy-peer-deps
 
-      - name: Build Portal App
-        working-directory: portal-app
+      - name: Build All Applications
         run: |
-          npm ci
-          npm run build
+          npm run build --workspaces
 
       - name: Prepare deployment directory
         run: |
