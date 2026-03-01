@@ -12,6 +12,30 @@ Pandara_samaja_backend/package-lock.json
 
 # macOS
 .DS_Store
-android/.DS_Store
-assets/.DS_Store
-assets/img/.DS_Store
+**/.DS_Store
+
+# Large raw images — must never be committed raw. Optimize to JPEG (<100KB) first.
+*.PNG
+*.bmp
+*.tiff
+*.tif
+*.raw
+*.psd
+
+# Personal photos at repo root — should never be here
+/*.jpeg
+/*.jpg
+/*.png
+
+# Debug / temp scripts
+debug-*.js
+reset-*.js
+change-*.js
+test_*.js
+test_*.sh
+test-*.js
+test-*.html
+replace_urls.js
+update_portal_links.js
+create-google-form.js
+test-drive-urls.js
