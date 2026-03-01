@@ -22,6 +22,7 @@ Pandara_samaja_backend/package-lock.json
 
 # Large Raw Images — must never be committed raw.
 # Optimize to JPEG (<100KB) first.
+# Large raw images — must never be committed raw. Optimize to JPEG (<100KB) first.
 *.PNG
 *.bmp
 *.tiff
@@ -30,11 +31,13 @@ Pandara_samaja_backend/package-lock.json
 *.psd
 
 # Personal Photos at Repo Root — should never be here
+# Personal photos at repo root — should never be here
 /*.jpeg
 /*.jpg
 /*.png
 
 # Debug / Temp Scripts
+# Debug / temp scripts
 debug-*.js
 reset-*.js
 change-*.js
