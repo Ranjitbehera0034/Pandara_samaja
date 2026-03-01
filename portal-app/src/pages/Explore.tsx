@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { Compass, TrendingUp, Users, Hash } from 'lucide-react';
+import { PORTAL_API_URL } from '../config/apiConfig';
 
 export default function Explore() {
     const { t } = useLanguage();
@@ -13,7 +14,7 @@ export default function Explore() {
 
     const fetchStats = async () => {
         try {
-            const res = await fetch(((typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal') + '/explore/stats', {
+            const res = await fetch(`${PORTAL_API_URL}/explore/stats`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` }
             });
             const data = await res.json();

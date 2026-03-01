@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { auth } from "../config/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 import type { Member, LoggedUser } from "../types";
+import { PORTAL_API_URL } from "../config/apiConfig";
 
 interface AuthContextType {
     member: Member | null;
@@ -25,9 +26,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isLoading, setIsLoading] = useState(true);
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
-    const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
-        ? 'http://localhost:5000/api/v1'
-        : 'https://pandara-samaja-backend.onrender.com/api/v1';
 
     useEffect(() => {
         const loadStoredAuth = () => {
@@ -112,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const idToken = await userCredential.user.getIdToken();
 
             // Send idToken to backend
-            const response = await fetch(`${API_BASE_URL}/portal/login/firebase`, {
+            const response = await fetch(`${PORTAL_API_URL}/login/firebase`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

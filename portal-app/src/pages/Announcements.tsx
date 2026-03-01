@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Calendar, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 
-const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api' : 'https://pandara-samaja-backend.onrender.com/api';
+import { PORTAL_API_URL } from '../config/apiConfig';
 
 export default function Announcements() {
     const [posts, setPosts] = useState<any[]>([]);
@@ -18,7 +18,7 @@ export default function Announcements() {
     const fetchPosts = async () => {
         try {
             const token = getToken();
-            const response = await fetch(`${API_BASE_URL}/posts`, {
+            const response = await fetch(`${PORTAL_API_URL}/posts`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Failed to fetch announcements');

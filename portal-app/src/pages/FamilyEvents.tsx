@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { PORTAL_API_URL } from '../config/apiConfig';
 
 // ─── Types ───────────────────────────────────────────
 interface FamilyEvent {
@@ -47,7 +48,7 @@ export default function FamilyEvents() {
 
     const fetchEvents = async () => {
         try {
-            const res = await fetch(((typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal') + '/family/events', {
+            const res = await fetch(`${PORTAL_API_URL}/family/events`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` }
             });
             const data = await res.json();
@@ -72,7 +73,7 @@ export default function FamilyEvents() {
     const handleCreate = async () => {
         if (!form.title.trim() || !form.date) { toast.error('Title and date are required'); return; }
         try {
-            const res = await fetch(((typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal') + '/family/events', {
+            const res = await fetch(`${PORTAL_API_URL}/family/events`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ export default function FamilyEvents() {
 
     const handleRSVP = async (eventId: string) => {
         try {
-            const res = await fetch(`${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal'}//family/events/${eventId}/rsvp`, {
+            const res = await fetch(`${PORTAL_API_URL}/family/events/${eventId}/rsvp`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -114,7 +115,7 @@ export default function FamilyEvents() {
     const handleDelete = async (eventId: string) => {
         if (!confirm('Delete this event?')) return;
         try {
-            const res = await fetch(`${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal'}//family/events/${eventId}`, {
+            const res = await fetch(`${PORTAL_API_URL}/family/events/${eventId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` }
             });

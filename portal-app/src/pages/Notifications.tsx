@@ -26,7 +26,7 @@ const iconMap: Record<string, { icon: React.ReactNode; color: string; bg: string
     system: { icon: <Star size={18} />, color: 'text-purple-400', bg: 'bg-purple-500/10' },
 };
 
-const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000' : 'https://pandara-samaja-backend.onrender.com';
+import { PORTAL_API_URL } from '../config/apiConfig';
 
 export default function Notifications() {
     const { t } = useLanguage();
@@ -41,7 +41,7 @@ export default function Notifications() {
     const fetchNotifications = async () => {
         try {
             const token = localStorage.getItem('portalToken');
-            const res = await fetch(`${API_BASE_URL}/api/portal/notifications`, {
+            const res = await fetch(`${PORTAL_API_URL}/notifications`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -60,7 +60,7 @@ export default function Notifications() {
     const markAllRead = async () => {
         try {
             const token = localStorage.getItem('portalToken');
-            await fetch(`${API_BASE_URL}/api/portal/notifications/read-all`, {
+            await fetch(`${PORTAL_API_URL}/notifications/read-all`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -75,7 +75,7 @@ export default function Notifications() {
         if (currentlyRead) return;
         try {
             const token = localStorage.getItem('portalToken');
-            await fetch(`${API_BASE_URL}/api/portal/notifications/${id}/read`, {
+            await fetch(`${PORTAL_API_URL}/notifications/${id}/read`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -88,7 +88,7 @@ export default function Notifications() {
     const deleteNotification = async (id: string) => {
         try {
             const token = localStorage.getItem('portalToken');
-            await fetch(`${API_BASE_URL}/api/portal/notifications/${id}`, {
+            await fetch(`${PORTAL_API_URL}/notifications/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

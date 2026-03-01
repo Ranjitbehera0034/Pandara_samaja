@@ -5,7 +5,7 @@ import { Loader2, Search, UserCheck, UserPlus, MapPin, Users, MessageSquare, Bad
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
 
-const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/v1/portal' : 'https://pandara-samaja-backend.onrender.com/api/v1/portal';
+import { PORTAL_API_URL } from '../config/apiConfig';
 
 export default function Members() {
     const navigate = useNavigate();
@@ -37,7 +37,7 @@ export default function Members() {
             const token = getToken();
             if (!token) return;
 
-            const response = await fetch(`${API_BASE_URL}/members`, {
+            const response = await fetch(`${PORTAL_API_URL}/members`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -64,7 +64,7 @@ export default function Members() {
 
             setSubscribing(memberId);
 
-            const response = await fetch(`${API_BASE_URL}/subscribe/${memberId}`, {
+            const response = await fetch(`${PORTAL_API_URL}/subscribe/${memberId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

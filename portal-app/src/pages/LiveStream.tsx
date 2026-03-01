@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { User, MessageSquare, Heart, Share2, VideoOff, Video, MicOff, Mic, X, Cast } from 'lucide-react';
+import { PORTAL_API_URL } from '../config/apiConfig';
 
 export default function LiveStream() {
     const { member } = useAuth();
@@ -18,7 +19,7 @@ export default function LiveStream() {
     useEffect(() => {
         const fetchStreams = async () => {
             try {
-                const res = await fetch(((typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal') + '/live/streams', {
+                const res = await fetch(`${PORTAL_API_URL}/live/streams`, {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` }
                 });
                 const data = await res.json();

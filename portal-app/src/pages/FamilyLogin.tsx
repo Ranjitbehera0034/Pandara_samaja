@@ -21,9 +21,7 @@ interface FamilyAccount {
 
 
 
-const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
-    ? 'http://localhost:5000/api/v1/portal'
-    : 'https://pandara-samaja-backend.onrender.com/api/v1/portal';
+import { PORTAL_API_URL } from '../config/apiConfig';
 
 export default function FamilyLogin() {
     const { member } = useAuth();
@@ -45,7 +43,7 @@ export default function FamilyLogin() {
 
     const fetchAccounts = async () => {
         try {
-            const res = await fetch(`${API_BASE_URL}/family/accounts`, {
+            const res = await fetch(`${PORTAL_API_URL}/family/accounts`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` }
             });
             const data = await res.json();
@@ -75,7 +73,7 @@ export default function FamilyLogin() {
         }
 
         try {
-            const res = await fetch(`${API_BASE_URL}/family/accounts`, {
+            const res = await fetch(`${PORTAL_API_URL}/family/accounts`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -100,7 +98,7 @@ export default function FamilyLogin() {
     const toggleActive = async (accountId: string) => {
         const acc = accounts.find(a => a.id === accountId);
         try {
-            const res = await fetch(`${API_BASE_URL}/family/accounts/${accountId}/status`, {
+            const res = await fetch(`${PORTAL_API_URL}/family/accounts/${accountId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -120,7 +118,7 @@ export default function FamilyLogin() {
     const deleteAccount = async (accountId: string) => {
         if (!confirm('Are you sure you want to delete this account?')) return;
         try {
-            const res = await fetch(`${API_BASE_URL}/family/accounts/${accountId}`, {
+            const res = await fetch(`${PORTAL_API_URL}/family/accounts/${accountId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` }
             });

@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { toast } from 'sonner';
 import { Calendar as CalendarIcon, MapPin, Clock, Users, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { PORTAL_API_URL, API_BASE_URL } from '../config/apiConfig';
 
 export default function Events() {
     const { t } = useLanguage();
@@ -15,7 +16,7 @@ export default function Events() {
 
     const fetchEvents = async () => {
         try {
-            const res = await fetch(((typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal') + '/events', {
+            const res = await fetch(`${PORTAL_API_URL}/events`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` }
             });
             const data = await res.json();
@@ -29,7 +30,7 @@ export default function Events() {
                     time: 'TBA',
                     location: e.location,
                     attendees: parseInt(e.attendees_count) || 0,
-                    image: e.image_url ? `${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000' : 'https://pandara-samaja-backend.onrender.com'}/${e.image_url}` : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'
+                    image: e.image_url ? `${API_BASE_URL}/${e.image_url}` : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'
                 })));
             }
         } catch (e) {
@@ -39,7 +40,7 @@ export default function Events() {
 
     const handleRSVP = async (eventId: number) => {
         try {
-            const res = await fetch(`${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal'}//events/${eventId}/register`, {
+            const res = await fetch(`${PORTAL_API_URL}/events/${eventId}/register`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` }
             });

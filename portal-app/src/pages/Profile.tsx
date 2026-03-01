@@ -12,9 +12,7 @@ import {
 } from 'lucide-react';
 import type { FamilyMember } from '../types';
 
-const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
-    ? 'http://localhost:5000/api/v1/portal'
-    : 'https://pandara-samaja-backend.onrender.com/api/v1/portal';
+import { PORTAL_API_URL } from '../config/apiConfig';
 
 export default function Profile() {
     const { member } = useAuth();
@@ -71,7 +69,7 @@ export default function Profile() {
                 female: statsToSave.female,
             };
 
-            const response = await fetch(`${API_BASE_URL}/profile`, {
+            const response = await fetch(`${PORTAL_API_URL}/profile`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -108,7 +106,7 @@ export default function Profile() {
             const formData = new FormData();
             formData.append('photo', file);
 
-            const response = await fetch(`${API_BASE_URL}/profile/photo`, {
+            const response = await fetch(`${PORTAL_API_URL}/profile/photo`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
@@ -193,7 +191,7 @@ export default function Profile() {
                                             onClick={async () => {
                                                 const token = localStorage.getItem('portalToken');
                                                 try {
-                                                    const res = await fetch(`${API_BASE_URL}/profile/photo`, {
+                                                    const res = await fetch(`${PORTAL_API_URL}/profile/photo`, {
                                                         method: 'DELETE',
                                                         headers: { 'Authorization': `Bearer ${token}` }
                                                     });

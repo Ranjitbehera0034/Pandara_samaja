@@ -32,10 +32,7 @@ import Matrimony from './pages/Matrimony';
 import Announcements from './pages/Announcements';
 import { GlobalSearch } from './components/GlobalSearch';
 
-// Define API_BASE_URL if not already defined globally
-const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
-  ? 'http://localhost:5000/api/v1'
-  : 'https://pandara-samaja-backend.onrender.com/api/v1';
+import { PORTAL_API_URL } from './config/apiConfig';
 
 // ─── Protected Layout ────────────────────────────────────────────
 function ProtectedLayout() {
@@ -57,7 +54,7 @@ function ProtectedLayout() {
       const fetchUnread = async () => {
         try {
           const token = localStorage.getItem('portalToken');
-          const res = await fetch(`${API_BASE_URL}/portal/notifications/unread-count`, {
+          const res = await fetch(`${PORTAL_API_URL}/notifications/unread-count`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await res.json();

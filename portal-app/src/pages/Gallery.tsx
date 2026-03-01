@@ -4,7 +4,7 @@ import { Loader2, Upload, Trash2, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
 
-const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? ((typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal') + '' : 'https://pandara-samaja-backend.onrender.com/api/portal';
+import { PORTAL_API_URL } from '../config/apiConfig';
 
 export default function Gallery() {
     const { t } = useLanguage();
@@ -26,7 +26,7 @@ export default function Gallery() {
             const token = getToken();
             if (!token) return;
 
-            const response = await fetch(`${API_BASE_URL}/photos`, {
+            const response = await fetch(`${PORTAL_API_URL}/photos`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -85,7 +85,7 @@ export default function Gallery() {
         });
 
         try {
-            const response = await fetch(`${API_BASE_URL}/photos`, {
+            const response = await fetch(`${PORTAL_API_URL}/photos`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -121,7 +121,7 @@ export default function Gallery() {
         setDeleteLoading(photoId);
 
         try {
-            const response = await fetch(`${API_BASE_URL}/photos/${photoId}`, {
+            const response = await fetch(`${PORTAL_API_URL}/photos/${photoId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

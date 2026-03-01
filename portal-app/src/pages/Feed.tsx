@@ -12,8 +12,7 @@ import { toast } from 'sonner';
 import { io } from 'socket.io-client';
 import { Film } from 'lucide-react';
 
-const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/v1/portal' : 'https://pandara-samaja-backend.onrender.com/api/v1/portal';
-const SOCKET_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000' : 'https://pandara-samaja-backend.onrender.com';
+import { PORTAL_API_URL, SOCKET_URL } from '../config/apiConfig';
 
 const MOCK_STORIES: Story[] = [
     {
@@ -62,7 +61,12 @@ export default function Feed() {
     useEffect(() => {
         fetchPosts();
 
-        const socket = io(SOCKET_URL);
+        const token = getToken();
+        if (!token) return;
+
+        const socket = io(SOCKET_URL, {
+            auth: { token }
+        });
 
         socket.on('connect', () => {
             console.log('Connected to socket server');
@@ -123,7 +127,7 @@ export default function Feed() {
             const token = getToken();
             if (!token) { setLoading(false); return; }
 
-            const response = await fetch(`${API_BASE_URL}/posts`, {
+            const response = await fetch(`${PORTAL_API_URL}/posts`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -210,7 +214,7 @@ export default function Feed() {
                 formData.append('location', location);
             }
 
-            const response = await fetch(`${API_BASE_URL}/posts`, {
+            const response = await fetch(`${PORTAL_API_URL}/posts`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
@@ -284,7 +288,7 @@ export default function Feed() {
         ));
         try {
             const token = getToken();
-            const response = await fetch(`${API_BASE_URL}/posts/${id}/like`, {
+            const response = await fetch(`${PORTAL_API_URL}/posts/${id}/like`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -317,7 +321,7 @@ export default function Feed() {
 
         try {
             const token = getToken();
-            await fetch(`${API_BASE_URL}/posts/${id}/comments`, {
+            await fetch(`${PORTAL_API_URL}/posts/${id}/comments`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -369,7 +373,7 @@ export default function Feed() {
         setPosts(posts.filter(p => p.id !== id));
         try {
             const token = getToken();
-            await fetch(`${API_BASE_URL}/posts/${id}`, {
+            await fetch(`${PORTAL_API_URL}/posts/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -385,7 +389,7 @@ export default function Feed() {
         } : p));
         try {
             const token = getToken();
-            await fetch(`${API_BASE_URL}/posts/${id}`, {
+            await fetch(`${PORTAL_API_URL}/posts/${id}`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: newContent })
@@ -396,7 +400,7 @@ export default function Feed() {
     const handleReport = async (id: string, reason: string) => {
         try {
             const token = getToken();
-            await fetch(`${API_BASE_URL}/posts/${id}/report`, {
+            await fetch(`${PORTAL_API_URL}/posts/${id}/report`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ reason })

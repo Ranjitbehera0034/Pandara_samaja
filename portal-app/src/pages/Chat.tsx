@@ -10,13 +10,9 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { io, Socket } from 'socket.io-client';
+import { SOCKET_URL, PORTAL_API_URL } from '../config/apiConfig';
 
-const API_BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
-    ? 'http://localhost:5000/api/v1/portal'
-    : 'https://pandara-samaja-backend.onrender.com/api/v1/portal';
-const SOCKET_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
-    ? 'http://localhost:5000'
-    : 'https://pandara-samaja-backend.onrender.com';
+// URLs are now imported from config/apiConfig.ts
 
 // ─── Types ───────────────────────────────────────────
 interface ChatContact {
@@ -130,14 +126,19 @@ export default function Chat() {
 
     // ─── Socket Setup ──────────────────────────────────
     useEffect(() => {
-        const newSocket = io(SOCKET_URL);
+        const token = getToken();
+        if (!token) return;
+
+        // Pass token in auth handshake for secure connection
+        const newSocket = io(SOCKET_URL, {
+            auth: { token }
+        });
 
         newSocket.on('connect', () => {
             setIsConnected(true);
-            if (myId) {
-                newSocket.emit('join_chat', { userId: myId });
-                newSocket.emit('get_online_users');
-            }
+            const userMobile = (member?.mobile || '').replace(/\D/g, '');
+            newSocket.emit('join_chat', { mobile: userMobile });
+            newSocket.emit('get_online_users');
         });
 
         newSocket.on('disconnect', () => {
@@ -288,7 +289,7 @@ export default function Chat() {
             const token = getToken();
             if (!token) return;
 
-            const res = await fetch(`${API_BASE_URL}/chat/contacts`, {
+            const res = await fetch(`${PORTAL_API_URL}/chat/contacts`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -340,7 +341,7 @@ export default function Chat() {
             const token = getToken();
             if (!token) return;
 
-            const res = await fetch(`${API_BASE_URL}/chat/conversation/${contactId}`, {
+            const res = await fetch(`${PORTAL_API_URL}/chat/conversation/${contactId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -427,8 +428,8 @@ export default function Chat() {
 
         // Send via socket
         socket.emit('send_message', {
-            senderId: myId,
             receiverId: selectedContact.contact_id,
+            receiverMobile: (selectedContact as any).contact_mobile || '', // optional
             content,
             type: 'text',
         });
@@ -470,7 +471,7 @@ export default function Chat() {
             const token = getToken();
             if (!token) return;
 
-            const res = await fetch(`${API_BASE_URL}/members`, {
+            const res = await fetch(`${PORTAL_API_URL}/members`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) throw new Error('Failed to fetch members');

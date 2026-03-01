@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { PORTAL_API_URL, API_BASE_URL } from '../config/apiConfig';
 
 // ─── Types ───────────────────────────────────────────
 interface AlbumPhoto {
@@ -44,7 +45,7 @@ export default function FamilyAlbums() {
 
     const fetchAlbums = async () => {
         try {
-            const res = await fetch(((typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal') + '/family/albums', {
+            const res = await fetch(`${PORTAL_API_URL}/family/albums`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` }
             });
             const data = await res.json();
@@ -53,11 +54,11 @@ export default function FamilyAlbums() {
                     id: a.id.toString(),
                     title: a.title,
                     description: a.description,
-                    coverUrl: a.cover_url ? `${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000' : 'https://pandara-samaja-backend.onrender.com'}/${a.cover_url}` : '',
+                    coverUrl: a.cover_url ? `${API_BASE_URL}/${a.cover_url}` : '',
                     photos: a.photos.map((p: any) => ({
                         ...p,
                         id: p.id.toString(),
-                        url: `${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000' : 'https://pandara-samaja-backend.onrender.com'}/${p.url}`,
+                        url: `${API_BASE_URL}/${p.url}`,
                         uploadedBy: 'Family Member',
                         uploadedAt: new Date(p.uploadedAt).toISOString().split('T')[0]
                     })),
@@ -89,7 +90,7 @@ export default function FamilyAlbums() {
                 formData.append('cover', newAlbumCover);
             }
 
-            const res = await fetch(((typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal') + '/family/albums', {
+            const res = await fetch(`${PORTAL_API_URL}/family/albums`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('portalToken')}`
@@ -118,7 +119,7 @@ export default function FamilyAlbums() {
         files.forEach(file => formData.append('photos', file));
 
         try {
-            const res = await fetch(`${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal'}//family/albums/${albumId}/photos`, {
+            const res = await fetch(`${PORTAL_API_URL}/family/albums/${albumId}/photos`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` },
                 body: formData
@@ -137,7 +138,7 @@ export default function FamilyAlbums() {
     const handleDeleteAlbum = async (albumId: string) => {
         if (!confirm('Are you sure you want to delete this album?')) return;
         try {
-            const res = await fetch(`${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000/api/portal' : 'https://pandara-samaja-backend.onrender.com/api/portal'}//family/albums/${albumId}`, {
+            const res = await fetch(`${PORTAL_API_URL}/family/albums/${albumId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` }
             });
