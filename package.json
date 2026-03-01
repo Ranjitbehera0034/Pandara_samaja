@@ -22,5 +22,9 @@
     "vite"
   ],
   "author": "Ranjit Behera",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "rollup": "^4.59.0"
+  }
 }
