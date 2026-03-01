@@ -472,10 +472,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     const res = await fetch(`${API_BASE_URL}/api/posts`);
-    const posts = await res.json();
+    const result = await res.json();
 
-    allPosts = posts;
-    renderPosts(posts);
+    if (result.success && Array.isArray(result.posts)) {
+      allPosts = result.posts;
+    } else if (Array.isArray(result)) {
+      allPosts = result;
+    } else {
+      allPosts = [];
+    }
+
+    renderPosts(allPosts);
     setupSearch();
     setupFilters();
 

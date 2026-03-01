@@ -479,7 +479,16 @@
 
                                 let src = PLACEHOLDER;
                                 if (image_url) {
-                                    if (image_url.startsWith('http') || image_url.startsWith('blob') || image_url.startsWith('assets/')) {
+                                    // Route Google Drive images through our backend proxy
+                                    // to avoid 403 hotlink-protection errors in the browser.
+                                    if (image_url.includes('drive.google.com') || image_url.includes('lh3.googleusercontent.com')) {
+                                        const driveIdMatch = image_url.match(/([a-zA-Z0-9_-]{25,})/);
+                                        if (driveIdMatch && driveIdMatch[1]) {
+                                            src = baseUrl + '/api/image-proxy/' + driveIdMatch[1];
+                                        } else {
+                                            src = image_url;
+                                        }
+                                    } else if (image_url.startsWith('http') || image_url.startsWith('blob') || image_url.startsWith('assets/')) {
                                         src = image_url;
                                     } else {
                                         src = baseUrl + (image_url.startsWith('/') ? '' : '/') + image_url;

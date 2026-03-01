@@ -24,7 +24,13 @@ export default function Posts() {
         setLoading(true);
         try {
             const res = await api.get('/posts');
-            setPosts(res.data || []);
+            if (res.data && res.data.success && Array.isArray(res.data.posts)) {
+                setPosts(res.data.posts);
+            } else if (Array.isArray(res.data)) {
+                setPosts(res.data);
+            } else {
+                setPosts([]);
+            }
         } catch (e) {
             toast.error('Failed to load posts');
         } finally {

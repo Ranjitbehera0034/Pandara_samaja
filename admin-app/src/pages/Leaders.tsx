@@ -24,6 +24,15 @@ export default function Leaders() {
 
     const getImageUrl = (url: string | null) => {
         if (!url) return '';
+
+        // Route Google Drive images through our backend proxy to avoid 403 hotlink blocks
+        if (url.includes('drive.google.com') || url.includes('lh3.googleusercontent.com')) {
+            const driveIdMatch = url.match(/([a-zA-Z0-9_-]{25,})/);
+            if (driveIdMatch && driveIdMatch[1]) {
+                return `${BACKEND_URL}/api/image-proxy/${driveIdMatch[1]}`;
+            }
+        }
+
         if (url.startsWith('http') || url.startsWith('blob:')) return url;
         if (url.startsWith('assets/')) {
             const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
