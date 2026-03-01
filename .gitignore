@@ -1,21 +1,48 @@
-# dependencies
+# Dependencies
 node_modules/
 
-# build outputs
+# Build Outputs
 admin/
 portal/
 dist/
 
-# environments / secrets
+# Environments / Secrets
 .env
 .env.local
 .env.*.local
 firebase-service-account.json
 
-# vestigial backend (if it stays)
+# Vestigial Backend
 Pandara_samaja_backend/node_modules/
 Pandara_samaja_backend/package-lock.json
 
 # macOS
 .DS_Store
 **/.DS_Store
+
+# Large Raw Images — must never be committed raw.
+# Optimize to JPEG (<100KB) first.
+*.PNG
+*.bmp
+*.tiff
+*.tif
+*.raw
+*.psd
+
+# Personal Photos at Repo Root — should never be here
+/*.jpeg
+/*.jpg
+/*.png
+
+# Debug / Temp Scripts
+debug-*.js
+reset-*.js
+change-*.js
+test_*.js
+test_*.sh
+test-*.js
+test-*.html
+replace_urls.js
+update_portal_links.js
+create-google-form.js
+test-drive-urls.js
