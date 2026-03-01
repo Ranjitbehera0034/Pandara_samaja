@@ -30,13 +30,13 @@ jobs:
       - name: Build Admin App
         working-directory: admin-app
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Build Portal App
         working-directory: portal-app
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Prepare deployment directory
