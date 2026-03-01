@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Users, Search, Plus, Trash2, Edit, Save, X, Image as ImageIcon } from 'lucide-react';
 import api from '../services/api';
 import { toast } from 'sonner';
+import { BACKEND_URL } from '../config/apiConfig';
 
 export default function Leaders() {
     const [leaders, setLeaders] = useState<any[]>([]);
@@ -20,6 +21,16 @@ export default function Leaders() {
 
     const levels = ['All', 'State', 'District', 'Taluka', 'Panchayat'];
     const formLevels = ['State', 'District', 'Taluka', 'Panchayat'];
+
+    const getImageUrl = (url: string | null) => {
+        if (!url) return '';
+        if (url.startsWith('http') || url.startsWith('blob:')) return url;
+        if (url.startsWith('assets/')) {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            return `${isLocal ? 'http://localhost:3000/' : '/'}${url}`;
+        }
+        return `${BACKEND_URL}/${url.replace(/^\//, '')}`;
+    };
 
     const [allMembers, setAllMembers] = useState<any[]>([]);
 
@@ -244,7 +255,7 @@ export default function Leaders() {
                             <div key={leader.id} className="relative group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300">
                                 <div className="aspect-[4/3] bg-slate-100 dark:bg-slate-900 relative">
                                     {leader.image_url ? (
-                                        <img src={leader.image_url.startsWith('http') || leader.image_url.startsWith('blob:') ? leader.image_url : (leader.image_url.startsWith('assets/') ? `${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:3000/' : '/'}${leader.image_url}` : `${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000' : 'https://pandara-samaja-backend.onrender.com'}/${leader.image_url.startsWith('/') ? '' : '/'}${leader.image_url}`)} alt={leader.name} className="w-full h-full object-cover" />
+                                        <img src={getImageUrl(leader.image_url)} alt={leader.name} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-slate-400">
                                             <Users size={48} />
@@ -301,7 +312,7 @@ export default function Leaders() {
                                 >
                                     {imagePreview ? (
                                         <div className="relative w-full h-full rounded-lg overflow-hidden">
-                                            <img src={imagePreview.startsWith('http') || imagePreview.startsWith('blob:') ? imagePreview : (imagePreview.startsWith('assets/') ? `${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:3000/' : '/'}${imagePreview}` : `${(typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000' : 'https://pandara-samaja-backend.onrender.com'}/${imagePreview.startsWith('/') ? '' : '/'}${imagePreview}`)} alt="Preview" className="w-full h-full object-contain" />
+                                            <img src={getImageUrl(imagePreview)} alt="Preview" className="w-full h-full object-contain" />
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-medium">
                                                 Change Image
                                             </div>

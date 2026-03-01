@@ -1,10 +1,9 @@
 import axios from 'axios';
 
-const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const baseURL = isLocal ? 'http://localhost:5000/api/v1' : 'https://pandara-samaja-backend.onrender.com/api/v1';
+import { API_BASE_URL } from '../config/apiConfig';
 
 const api = axios.create({
-    baseURL,
+    baseURL: API_BASE_URL,
 });
 
 api.interceptors.request.use((config) => {

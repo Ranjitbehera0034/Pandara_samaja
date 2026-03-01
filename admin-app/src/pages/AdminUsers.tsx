@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { toast } from 'sonner';
 import { Shield, Trash2, UserPlus, RefreshCcw, ShieldCheck, Search, User, MapPin, CheckCircle2, ChevronRight, X } from 'lucide-react';
+import { API_BASE_URL } from '../config/apiConfig';
 
 interface AdminUser {
     id: number;
@@ -37,9 +38,6 @@ const AdminUsers: React.FC = () => {
 
     const [newAdmin, setNewAdmin] = useState({ username: '', password: '', role: 'admin' });
 
-    const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-        ? 'http://localhost:5000/api/v1'
-        : 'https://pandara-samaja-backend.onrender.com/api/v1';
 
     const fetchAdmins = async () => {
         setIsLoading(true);
