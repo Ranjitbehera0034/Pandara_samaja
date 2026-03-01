@@ -1,17 +1,21 @@
 # dependencies
 node_modules/
-Pandara_samaja_backend/node_modules/
+
+# build outputs
+admin/
+portal/
+dist/
 
 # environments / secrets
 .env
 .env.local
+.env.*.local
 firebase-service-account.json
 
-# specific requests
+# vestigial backend (if it stays)
+Pandara_samaja_backend/node_modules/
 Pandara_samaja_backend/package-lock.json
 
 # macOS
 .DS_Store
-android/.DS_Store
-assets/.DS_Store
-assets/img/.DS_Store
+**/.DS_Store

@@ -97,7 +97,8 @@ export default function Reviews() {
             // Cross reference with DB
             try {
                 const membersRes = await api.get('/members');
-                const existingNos = new Set(membersRes.data.map((m: any) => String(m.membership_no)));
+                const membersData = membersRes.data.success ? membersRes.data.members : (Array.isArray(membersRes.data) ? membersRes.data : []);
+                const existingNos = new Set(membersData.map((m: any) => String(m.membership_no)));
 
                 parsedSubmissions.forEach((s: any) => {
                     if (existingNos.has(String(s.membership_no))) {

@@ -42,7 +42,11 @@ export default function Leaders() {
     const fetchMembers = async () => {
         try {
             const res = await api.get('/members');
-            if (res.data) setAllMembers(res.data);
+            if (res.data.success) {
+                setAllMembers(res.data.members || []);
+            } else if (Array.isArray(res.data)) {
+                setAllMembers(res.data);
+            }
         } catch (error) {
             console.error('Failed to fetch members for locations:', error);
         }
@@ -53,7 +57,7 @@ export default function Leaders() {
             setLoading(true);
             const res = await api.get('/leaders');
             if (res.data.success) {
-                setLeaders(res.data.data);
+                setLeaders(res.data.data || []);
             }
         } catch (error) {
             console.error('Failed to fetch leaders:', error);
@@ -152,31 +156,36 @@ export default function Leaders() {
         setLocationFilter('');
     };
 
-    const filteredLeaders = leaders.filter(l => {
+    const filteredLeaders = (Array.isArray(leaders) ? leaders : []).filter(l => {
+        const name = l.name || '';
+        const role = l.role || '';
+        const location = l.location || '';
+
         const matchesLevel = levelFilter === 'All' || l.level === levelFilter;
-        const matchesLocation = !locationFilter || l.location === locationFilter;
-        const matchesSearch = l.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            l.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (l.location && l.location.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesLocation = !locationFilter || location === locationFilter;
+        const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            location.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesLevel && matchesLocation && matchesSearch;
     });
 
     let viewAvailableLocations: string[] = [];
+    const safeAllMembers = Array.isArray(allMembers) ? allMembers : [];
     if (levelFilter === 'District') {
-        viewAvailableLocations = Array.from(new Set(allMembers.map(m => m.district).filter(Boolean))).sort() as string[];
+        viewAvailableLocations = Array.from(new Set(safeAllMembers.map(m => String(m.district || '')).filter(Boolean))).sort();
     } else if (levelFilter === 'Taluka') {
-        viewAvailableLocations = Array.from(new Set(allMembers.map(m => m.taluka).filter(Boolean))).sort() as string[];
+        viewAvailableLocations = Array.from(new Set(safeAllMembers.map(m => String(m.taluka || '')).filter(Boolean))).sort();
     } else if (levelFilter === 'Panchayat') {
-        viewAvailableLocations = Array.from(new Set(allMembers.map(m => m.panchayat).filter(Boolean))).sort() as string[];
+        viewAvailableLocations = Array.from(new Set(safeAllMembers.map(m => String(m.panchayat || '')).filter(Boolean))).sort();
     }
 
     let availableLocations: string[] = [];
     if (formData.level === 'District') {
-        availableLocations = Array.from(new Set(allMembers.map(m => m.district).filter(Boolean))).sort() as string[];
+        availableLocations = Array.from(new Set(safeAllMembers.map(m => String(m.district || '')).filter(Boolean))).sort();
     } else if (formData.level === 'Taluka') {
-        availableLocations = Array.from(new Set(allMembers.map(m => m.taluka).filter(Boolean))).sort() as string[];
+        availableLocations = Array.from(new Set(safeAllMembers.map(m => String(m.taluka || '')).filter(Boolean))).sort();
     } else if (formData.level === 'Panchayat') {
-        availableLocations = Array.from(new Set(allMembers.map(m => m.panchayat).filter(Boolean))).sort() as string[];
+        availableLocations = Array.from(new Set(safeAllMembers.map(m => String(m.panchayat || '')).filter(Boolean))).sort();
     }
 
     return (
