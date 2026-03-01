@@ -30,12 +30,14 @@ jobs:
       - name: Build Admin App
         working-directory: admin-app
         run: |
+          rm -f package-lock.json
           npm install
           npm run build
 
       - name: Build Portal App
         working-directory: portal-app
         run: |
+          rm -f package-lock.json
           npm install
           npm run build
 
