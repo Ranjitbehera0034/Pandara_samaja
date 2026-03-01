@@ -526,7 +526,14 @@ function addTableDataLabels() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/members`);
     if (!res.ok) throw new Error(`API Error: ${res.status}`);
-    allMembers = await res.json();
+    const result = await res.json();
+    if (result.success && Array.isArray(result.members)) {
+      allMembers = result.members;
+    } else if (Array.isArray(result)) {
+      allMembers = result;
+    } else {
+      allMembers = [];
+    }
     console.log(`Loaded ${allMembers.length} members`);
   } catch (err) {
     console.error("Failed to load members:", err);

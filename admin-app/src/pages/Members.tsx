@@ -55,7 +55,13 @@ export default function Members() {
         setLoading(true);
         try {
             const res = await api.get('/members');
-            setMembers(res.data || []);
+            if (res.data.success) {
+                setMembers(res.data.members || []);
+            } else if (Array.isArray(res.data)) {
+                setMembers(res.data);
+            } else {
+                setMembers([]);
+            }
         } catch (e) {
             toast.error('Failed to load members');
         } finally {
@@ -68,7 +74,7 @@ export default function Members() {
         try {
             const res = await api.get('/admin/members/pending');
             if (res.data.success) {
-                setPendingMembers(res.data.members);
+                setPendingMembers(res.data.members || []);
             }
         } catch (e) {
             toast.error('Failed to load pending members');
@@ -242,7 +248,8 @@ export default function Members() {
         setFamilyMembers(familyMembers.filter(fm => fm.id !== id));
     };
 
-    const displayMembers = (activeTab === 'all' ? members : pendingMembers).filter(m =>
+    const membersToFilter = activeTab === 'all' ? members : pendingMembers;
+    const displayMembers = (Array.isArray(membersToFilter) ? membersToFilter : []).filter(m =>
         (m.name?.toLowerCase().includes(search.toLowerCase())) ||
         (m.membership_no?.toLowerCase().includes(search.toLowerCase())) ||
         (m.mobile?.includes(search))

@@ -20,7 +20,7 @@ export default function Matrimony() {
         try {
             const res = await api.get('/admin/candidates');
             if (res.data.success) {
-                setCandidates(res.data.candidates);
+                setCandidates(res.data.candidates || []);
             }
         } catch (error) {
             toast.error('Failed to load candidate profiles');
@@ -50,8 +50,9 @@ export default function Matrimony() {
         }
     };
 
-    const filteredCandidates = candidates.filter(c => {
-        const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const filteredCandidates = (Array.isArray(candidates) ? candidates : []).filter(c => {
+        const name = c.name || '';
+        const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (c.phone && c.phone.includes(searchQuery));
         const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
         return matchesSearch && matchesStatus;

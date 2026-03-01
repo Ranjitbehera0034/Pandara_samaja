@@ -1,0 +1,26 @@
+{
+  "name": "pandara-samaja-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nikhila Odisha Pandara Samaja Community Platform",
+  "workspaces": [
+    "admin-app",
+    "portal-app"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "build:admin": "npm run build -w admin-app",
+    "build:portal": "npm run build -w portal-app",
+    "build": "npm run build --workspaces",
+    "dev:admin": "npm run dev -w admin-app",
+    "dev:portal": "npm run dev -w portal-app",
+    "lint": "npm run lint --workspaces"
+  },
+  "keywords": [
+    "monorepo",
+    "react",
+    "vite"
+  ],
+  "author": "Ranjit Behera",
+  "license": "ISC"
+}
