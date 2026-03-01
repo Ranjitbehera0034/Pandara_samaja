@@ -305,8 +305,8 @@ export default function Members() {
                 </button>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex-1 flex flex-col">
-                <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden flex-1 flex flex-col">
+                <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
                     <div className="relative max-w-md w-full">
                         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                         <input
@@ -314,7 +314,7 @@ export default function Members() {
                             placeholder="Search by name, membership no, or mobile..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                            className="w-full pl-10 pr-4 py-2.5"
                         />
                     </div>
                 </div>
@@ -415,198 +415,207 @@ export default function Members() {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl w-full max-w-2xl shadow-xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
-                        <div className="px-4 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                            <h2 className="text-lg sm:text-xl font-bold text-slate-900">{isEditing ? 'Edit Member' : 'Add New Member'}</h2>
-                            <button onClick={closeModal} className="text-slate-400 hover:text-slate-600 p-1">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/40 backdrop-blur-md">
+                    <div className="bg-white dark:bg-slate-900 rounded-[32px] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] border border-white/20 dark:border-slate-800 animate-in fade-in zoom-in duration-200">
+                        <div className="px-6 sm:px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
+                            <div>
+                                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">{isEditing ? 'Edit Member' : 'Add New Member'}</h2>
+                                <p className="text-slate-500 text-sm mt-0.5">Fill in the details below to {isEditing ? 'update' : 'register'} a member.</p>
+                            </div>
+                            <button onClick={closeModal} className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-all text-slate-500 dark:text-slate-400">
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
-                            <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
-                                <h4 className="font-semibold text-blue-900 mb-4 flex items-center gap-2">👤 Head of Family Details</h4>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Membership No. *</label>
+                        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 custom-scrollbar">
+                            <div className="bg-blue-50/50 dark:bg-blue-900/20 p-6 rounded-3xl border border-blue-100 dark:border-blue-900/30">
+                                <h4 className="font-bold text-blue-900 dark:text-blue-400 mb-6 flex items-center gap-2">
+                                    <span className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs">01</span>
+                                    Head of Family Details
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div className="space-y-1.5">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Membership No. *</label>
                                         <input
                                             type="text"
                                             value={membershipNo}
                                             onChange={(e) => setMembershipNo(e.target.value)}
                                             required
                                             disabled={isEditing}
-                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:bg-slate-50 disabled:text-slate-500"
+                                            className="w-full disabled:bg-slate-50 dark:disabled:bg-slate-950 disabled:text-slate-400"
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Full Name *</label>
+                                    <div className="space-y-1.5">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Full Name *</label>
                                         <input
                                             type="text"
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
                                             required
-                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                            className="w-full"
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Gender</label>
+                                    <div className="space-y-1.5">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Gender</label>
                                         <select
                                             value={headGender}
                                             onChange={(e) => setHeadGender(e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white dark:bg-slate-900"
+                                            className="w-full"
                                         >
                                             <option value="">Select Gender</option>
                                             <option value="Male">Male</option>
                                             <option value="Female">Female</option>
                                         </select>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mobile Number</label>
+                                    <div className="space-y-1.5">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Mobile Number</label>
                                         <input
                                             type="text"
                                             value={mobile}
                                             onChange={(e) => setMobile(e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                            className="w-full"
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Aadhaar No.</label>
+                                    <div className="space-y-1.5 lg:col-span-2">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Aadhaar No.</label>
                                         <input
                                             type="text"
                                             value={aadharNo}
                                             onChange={(e) => setAadharNo(e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                            className="w-full"
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/50">
-                                <h4 className="font-semibold text-emerald-900 mb-4 flex items-center gap-2">📍 Address Details</h4>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">District</label>
-                                        <input type="text" value={district} onChange={(e) => setDistrict(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+                            <div className="bg-emerald-50/50 dark:bg-emerald-900/10 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-900/20">
+                                <h4 className="font-bold text-emerald-900 dark:text-emerald-400 mb-6 flex items-center gap-2">
+                                    <span className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs">02</span>
+                                    Address Details
+                                </h4>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                    <div className="space-y-1.5">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">District</label>
+                                        <input type="text" value={district} onChange={(e) => setDistrict(e.target.value)} className="w-full" />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Taluka</label>
-                                        <input type="text" value={taluka} onChange={(e) => setTaluka(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+                                    <div className="space-y-1.5">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Taluka</label>
+                                        <input type="text" value={taluka} onChange={(e) => setTaluka(e.target.value)} className="w-full" />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Panchayat</label>
-                                        <input type="text" value={panchayat} onChange={(e) => setPanchayat(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+                                    <div className="space-y-1.5">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Panchayat</label>
+                                        <input type="text" value={panchayat} onChange={(e) => setPanchayat(e.target.value)} className="w-full" />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Village</label>
-                                        <input type="text" value={village} onChange={(e) => setVillage(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+                                    <div className="space-y-1.5">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Village</label>
+                                        <input type="text" value={village} onChange={(e) => setVillage(e.target.value)} className="w-full" />
                                     </div>
-                                    <div className="col-span-2 md:col-span-4">
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Full Address</label>
-                                        <textarea value={address} onChange={(e) => setAddress(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 rows-2" placeholder="House/Street details (optional)"></textarea>
+                                    <div className="col-span-2 md:col-span-4 space-y-1.5">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Full Address</label>
+                                        <textarea value={address} onChange={(e) => setAddress(e.target.value)} className="w-full h-24" placeholder="House/Street details (optional)"></textarea>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-100/50">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h4 className="font-semibold text-amber-900 flex items-center gap-2">👨‍👩‍👧‍👦 Family Members</h4>
-                                    <div className="flex items-center gap-4 text-sm font-medium text-amber-800">
-                                        <span>Male: {maleCount}</span>
-                                        <span>Female: {femaleCount}</span>
-                                        <span>Total: {maleCount + femaleCount}</span>
+                            <div className="bg-amber-50/50 dark:bg-amber-900/10 p-6 rounded-3xl border border-amber-100 dark:border-amber-900/20">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h4 className="font-bold text-amber-900 dark:text-amber-400 flex items-center gap-2">
+                                        <span className="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center text-xs">03</span>
+                                        Family Members
+                                    </h4>
+                                    <div className="flex items-center gap-4 text-xs font-black text-amber-700 dark:text-amber-500 uppercase tracking-widest">
+                                        <span>M: {maleCount}</span>
+                                        <span className="opacity-30">|</span>
+                                        <span>F: {femaleCount}</span>
+                                        <span className="opacity-30">|</span>
+                                        <span className="bg-amber-200 dark:bg-amber-900/40 px-3 py-1 rounded-full text-amber-900 dark:text-amber-200">Total: {maleCount + femaleCount}</span>
                                     </div>
                                 </div>
 
-                                <div className="space-y-3 mb-4">
+                                <div className="space-y-4 mb-8">
                                     {/* Head of Family Implicit Row */}
-                                    <div className="grid grid-cols-12 gap-3 items-center bg-blue-50/50 p-3 rounded-lg border border-blue-200/50">
+                                    <div className="grid grid-cols-12 gap-4 items-center bg-white dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
                                         <div className="col-span-12 md:col-span-3">
                                             <input
                                                 type="text"
                                                 value={name}
                                                 onChange={(e) => setName(e.target.value)}
                                                 placeholder="Head Name"
-                                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white dark:bg-slate-900"
+                                                className="w-full px-4 py-2 text-sm bg-transparent"
                                             />
                                         </div>
-                                        <div className="col-span-6 md:col-span-3">
-                                            <input
-                                                type="text"
-                                                value="Self"
-                                                disabled
-                                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 bg-slate-100/50 text-slate-500 cursor-not-allowed"
-                                            />
+                                        <div className="col-span-4 md:col-span-3">
+                                            <div className="px-4 py-2 text-sm bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-500 dark:text-slate-400 font-bold text-center border border-slate-200 dark:border-slate-800">
+                                                Self (Head)
+                                            </div>
                                         </div>
-                                        <div className="col-span-6 md:col-span-3">
+                                        <div className="col-span-4 md:col-span-3">
                                             <select
                                                 value={headGender}
                                                 onChange={(e) => setHeadGender(e.target.value)}
-                                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white dark:bg-slate-900"
+                                                className="w-full px-4 py-2 text-sm bg-transparent"
                                             >
                                                 <option value="">Gender</option>
                                                 <option value="Male">Male</option>
                                                 <option value="Female">Female</option>
                                             </select>
                                         </div>
-                                        <div className="col-span-10 md:col-span-2">
+                                        <div className="col-span-4 md:col-span-2">
                                             <input
                                                 type="number"
                                                 placeholder="Age"
                                                 value={headAge}
                                                 onChange={(e) => setHeadAge(e.target.value)}
-                                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white dark:bg-slate-900"
+                                                className="w-full px-4 py-2 text-sm bg-transparent"
                                             />
-                                        </div>
-                                        <div className="col-span-2 md:col-span-1 text-right">
-                                            <span className="text-xs font-semibold text-blue-500 px-1">Self</span>
                                         </div>
                                     </div>
 
                                     {familyMembers.map((fm) => (
-                                        <div key={fm.id} className="grid grid-cols-12 gap-3 items-center bg-white p-3 rounded-lg border border-amber-200/50">
+                                        <div key={fm.id} className="grid grid-cols-12 gap-4 items-center bg-white dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm group hover:border-amber-300 dark:hover:border-amber-500/30 transition-all">
                                             <div className="col-span-12 md:col-span-3">
                                                 <input
                                                     type="text"
                                                     placeholder="Name"
                                                     value={fm.name}
                                                     onChange={(e) => updateFamilyMember(fm.id, 'name', e.target.value)}
-                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                                    className="w-full px-4 py-2 text-sm bg-transparent"
                                                 />
                                             </div>
-                                            <div className="col-span-6 md:col-span-3">
+                                            <div className="col-span-4 md:col-span-3">
                                                 <input
                                                     type="text"
                                                     placeholder="Relation"
                                                     value={fm.relation}
                                                     onChange={(e) => updateFamilyMember(fm.id, 'relation', e.target.value)}
-                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                                    className="w-full px-4 py-2 text-sm bg-transparent"
                                                 />
                                             </div>
-                                            <div className="col-span-6 md:col-span-3">
+                                            <div className="col-span-4 md:col-span-3">
                                                 <select
                                                     value={fm.gender}
                                                     onChange={(e) => updateFamilyMember(fm.id, 'gender', e.target.value)}
-                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white dark:bg-slate-900"
+                                                    className="w-full px-4 py-2 text-sm bg-transparent"
                                                 >
                                                     <option value="">Gender</option>
                                                     <option value="Male">Male</option>
                                                     <option value="Female">Female</option>
                                                 </select>
                                             </div>
-                                            <div className="col-span-10 md:col-span-2">
+                                            <div className="col-span-4 md:col-span-2">
                                                 <input
                                                     type="number"
                                                     placeholder="Age"
                                                     value={fm.age}
                                                     onChange={(e) => updateFamilyMember(fm.id, 'age', e.target.value)}
-                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                                    className="w-full px-4 py-2 text-sm bg-transparent"
                                                 />
                                             </div>
-                                            <div className="col-span-2 md:col-span-1 text-right">
+                                            <div className="col-span-12 md:col-span-1 text-right">
                                                 <button
                                                     type="button"
                                                     onClick={() => removeFamilyMember(fm.id)}
-                                                    className="text-red-400 hover:text-red-600 p-1 bg-red-50 hover:bg-red-100 rounded-md transition-colors"
+                                                    className="p-2 text-red-400 hover:text-red-500 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-xl transition-all"
                                                     title="Remove"
                                                 >
                                                     <Trash2 size={16} />
@@ -615,8 +624,8 @@ export default function Members() {
                                         </div>
                                     ))}
                                     {familyMembers.length === 0 && (
-                                        <div className="text-center py-4 text-sm text-slate-500 bg-white/50 rounded-lg border border-dashed border-slate-200">
-                                            No family members added.
+                                        <div className="text-center py-8 text-sm text-slate-400 font-medium bg-slate-50/50 dark:bg-slate-950/20 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                                            No additional family members added yet.
                                         </div>
                                     )}
                                 </div>
@@ -624,19 +633,19 @@ export default function Members() {
                                 <button
                                     type="button"
                                     onClick={addFamilyMember}
-                                    className="flex items-center justify-center gap-2 w-full py-2.5 bg-white border border-dashed border-amber-300 text-amber-700 font-medium rounded-xl hover:bg-amber-50 transition-colors"
+                                    className="flex items-center justify-center gap-2 w-full py-4 bg-white dark:bg-slate-900 border-2 border-dashed border-amber-200 dark:border-amber-900/30 text-amber-700 dark:text-amber-500 font-bold rounded-2xl hover:bg-amber-50 dark:hover:bg-amber-900/10 hover:border-amber-400 dark:hover:border-amber-500 transition-all text-sm uppercase tracking-widest"
                                 >
-                                    <Plus size={16} />
+                                    <Plus size={18} />
                                     Add Family Member
                                 </button>
                             </div>
                         </form>
-                        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-                            <button onClick={closeModal} className="px-5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-200/50 transition-colors">
+                        <div className="px-8 py-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30 flex justify-end gap-3 backdrop-blur-sm">
+                            <button onClick={closeModal} className="px-6 py-3 rounded-2xl font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-all">
                                 Cancel
                             </button>
-                            <button onClick={handleSubmit} className="px-5 py-2.5 rounded-xl font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-colors">
-                                {isEditing ? 'Save Changes' : 'Add Member'}
+                            <button onClick={handleSubmit} className="px-8 py-3 rounded-2xl font-black text-white bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                                {isEditing ? 'Update Member' : 'Register Member'}
                             </button>
                         </div>
                     </div>

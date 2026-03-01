@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-
-import { Users, Search, Plus, Trash2, Edit, Save, X, Image as ImageIcon } from 'lucide-react';
+import { Users, Search, Plus, Trash2, Edit2, Save, X, Image as ImageIcon, Briefcase, Layers } from 'lucide-react';
 import api from '../services/api';
 import { toast } from 'sonner';
 import { BACKEND_URL } from '../config/apiConfig';
@@ -14,7 +13,16 @@ export default function Leaders() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingLeader, setEditingLeader] = useState<any>(null);
-    const [formData, setFormData] = useState({ name: '', name_or: '', role: '', role_or: '', level: 'State', location: '', display_order: 0, existingImage: '' });
+    const [formData, setFormData] = useState({
+        name: '',
+        name_or: '',
+        role: '',
+        role_or: '',
+        level: 'State',
+        location: '',
+        display_order: 0,
+        existingImage: ''
+    });
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -24,20 +32,13 @@ export default function Leaders() {
 
     const getImageUrl = (url: string | null) => {
         if (!url) return '';
-
-        // Route Google Drive images through our backend proxy to avoid 403 hotlink blocks
         if (url.includes('drive.google.com') || url.includes('lh3.googleusercontent.com')) {
             const driveIdMatch = url.match(/([a-zA-Z0-9_-]{25,})/);
             if (driveIdMatch && driveIdMatch[1]) {
                 return `${BACKEND_URL}/api/image-proxy/${driveIdMatch[1]}`;
             }
         }
-
         if (url.startsWith('http') || url.startsWith('blob:')) return url;
-        if (url.startsWith('assets/')) {
-            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            return `${isLocal ? 'http://localhost:3000/' : '/'}${url}`;
-        }
         return `${BACKEND_URL}/${url.replace(/^\//, '')}`;
     };
 
@@ -160,82 +161,73 @@ export default function Leaders() {
         }
     };
 
-    const handleLevelChange = (level: string) => {
-        setLevelFilter(level);
-        setLocationFilter('');
-    };
-
     const filteredLeaders = (Array.isArray(leaders) ? leaders : []).filter(l => {
-        const name = l.name || '';
-        const role = l.role || '';
-        const location = l.location || '';
-
         const matchesLevel = levelFilter === 'All' || l.level === levelFilter;
-        const matchesLocation = !locationFilter || location === locationFilter;
-        const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            location.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesLocation = !locationFilter || l.location === locationFilter;
+        const matchesSearch = (l.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (l.role || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (l.location || '').toLowerCase().includes(searchQuery.toLowerCase());
         return matchesLevel && matchesLocation && matchesSearch;
     });
 
-    let viewAvailableLocations: string[] = [];
     const safeAllMembers = Array.isArray(allMembers) ? allMembers : [];
-    if (levelFilter === 'District') {
-        viewAvailableLocations = Array.from(new Set(safeAllMembers.map(m => String(m.district || '')).filter(Boolean))).sort();
-    } else if (levelFilter === 'Taluka') {
-        viewAvailableLocations = Array.from(new Set(safeAllMembers.map(m => String(m.taluka || '')).filter(Boolean))).sort();
-    } else if (levelFilter === 'Panchayat') {
-        viewAvailableLocations = Array.from(new Set(safeAllMembers.map(m => String(m.panchayat || '')).filter(Boolean))).sort();
-    }
+    const getLocationsForLevel = (level: string) => {
+        if (level === 'District') return Array.from(new Set(safeAllMembers.map(m => String(m.district || '')).filter(Boolean))).sort();
+        if (level === 'Taluka') return Array.from(new Set(safeAllMembers.map(m => String(m.taluka || '')).filter(Boolean))).sort();
+        if (level === 'Panchayat') return Array.from(new Set(safeAllMembers.map(m => String(m.panchayat || '')).filter(Boolean))).sort();
+        return [];
+    };
 
-    let availableLocations: string[] = [];
-    if (formData.level === 'District') {
-        availableLocations = Array.from(new Set(safeAllMembers.map(m => String(m.district || '')).filter(Boolean))).sort();
-    } else if (formData.level === 'Taluka') {
-        availableLocations = Array.from(new Set(safeAllMembers.map(m => String(m.taluka || '')).filter(Boolean))).sort();
-    } else if (formData.level === 'Panchayat') {
-        availableLocations = Array.from(new Set(safeAllMembers.map(m => String(m.panchayat || '')).filter(Boolean))).sort();
-    }
+    const viewAvailableLocations = getLocationsForLevel(levelFilter);
+    const formAvailableLocations = getLocationsForLevel(formData.level);
 
     return (
-        <div className="p-4 sm:p-8 pb-32 max-w-7xl mx-auto dark:text-slate-200">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 sm:mb-8">
+        <div className="p-4 sm:p-8 pb-32 max-w-7xl mx-auto">
+            {/* Header section with glass effect */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                        <Users className="text-blue-600 dark:text-blue-400" size={32} />
-                        Leadership Directory
-                    </h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1">Manage State, District, Taluka, and Panchayat leaders.</p>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="p-3 bg-blue-600 rounded-2xl shadow-xl shadow-blue-500/20">
+                            <Users className="text-white" size={28} />
+                        </div>
+                        <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Leaders Directory</h1>
+                    </div>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium">Manage organization hierarchy and leadership profiles</p>
                 </div>
                 <button
                     onClick={() => handleOpenModal()}
-                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-xl hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30"
+                    className="group relative px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-[20px] overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl"
                 >
-                    <Plus size={18} />
-                    Add Leader
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <span className="relative flex items-center gap-2 group-hover:text-white">
+                        <Plus size={20} strokeWidth={3} />
+                        Add New Leader
+                    </span>
                 </button>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-8">
-                <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-6">
-                    <div className="relative w-full md:w-96 flex-shrink-0">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 flex-shrink-0" size={20} />
+            {/* Filter controls */}
+            <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 mb-10 shadow-xl shadow-slate-200/50 dark:shadow-none">
+                <div className="flex flex-col lg:flex-row gap-6">
+                    <div className="relative flex-1 group">
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={22} />
                         <input
                             type="text"
-                            placeholder="Search leaders by name, role or location..."
+                            placeholder="Search by name, role or location..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all shadow-sm flex-shrink-0"
+                            className="w-full pl-14 pr-6 py-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl focus:border-blue-500 dark:focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium text-slate-900 dark:text-white"
                         />
                     </div>
-                    <div className="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto">
+
+                    <div className="flex flex-wrap gap-2">
                         {levels.map(level => (
                             <button
                                 key={level}
-                                onClick={() => handleLevelChange(level)}
-                                className={`px-4 py-2 font-medium text-sm rounded-xl transition-colors whitespace-nowrap ${levelFilter === level
-                                    ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 shadow-sm border border-blue-200 dark:border-blue-800'
-                                    : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                onClick={() => { setLevelFilter(level); setLocationFilter(''); }}
+                                className={`px-6 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all ${levelFilter === level
+                                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/30'
+                                    : 'bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                                     }`}
                             >
                                 {level}
@@ -244,211 +236,289 @@ export default function Leaders() {
                     </div>
                 </div>
 
-                {['District', 'Taluka', 'Panchayat'].includes(levelFilter) && viewAvailableLocations.length > 0 && (
-                    <div className="flex justify-end mb-6">
-                        <select
-                            value={locationFilter}
-                            onChange={(e) => setLocationFilter(e.target.value)}
-                            className="w-full md:w-64 px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-blue-500 outline-none transition-all shadow-sm text-sm"
-                        >
-                            <option value="">All {levelFilter}s</option>
+                {viewAvailableLocations.length > 0 && (
+                    <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                        <div className="flex flex-wrap gap-2">
+                            <button
+                                onClick={() => setLocationFilter('')}
+                                className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${!locationFilter
+                                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                                    }`}
+                            >
+                                All {levelFilter}s
+                            </button>
                             {viewAvailableLocations.map(loc => (
-                                <option key={loc} value={loc}>{loc}</option>
+                                <button
+                                    key={loc}
+                                    onClick={() => setLocationFilter(loc)}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${locationFilter === loc
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                        }`}
+                                >
+                                    {loc}
+                                </button>
                             ))}
-                        </select>
-                    </div>
-                )}
-
-                {loading ? (
-                    <div className="py-20 text-center text-slate-500 dark:text-slate-400">Loading leaders...</div>
-                ) : filteredLeaders.length === 0 ? (
-                    <div className="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
-                        <Users className="text-slate-300 dark:text-slate-600 mx-auto mb-4" size={48} />
-                        <h3 className="text-lg font-medium text-slate-900 dark:text-white">No Leaders Found</h3>
-                        <p className="text-slate-500 dark:text-slate-400 mt-1">Add a new leader to see them listed here.</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {filteredLeaders.map(leader => (
-                            <div key={leader.id} className="relative group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300">
-                                <div className="aspect-[4/3] bg-slate-100 dark:bg-slate-900 relative">
-                                    {leader.image_url ? (
-                                        <img src={getImageUrl(leader.image_url)} alt={leader.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-slate-400">
-                                            <Users size={48} />
-                                        </div>
-                                    )}
-                                    <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-md">
-                                        {leader.level}
-                                    </div>
-                                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => handleOpenModal(leader)} className="bg-white/90 text-blue-600 p-2 rounded-full hover:bg-white shadow-lg">
-                                            <Edit size={16} />
-                                        </button>
-                                        <button onClick={() => handleDelete(leader.id)} className="bg-white/90 text-red-600 p-2 rounded-full hover:bg-white shadow-lg">
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="p-4">
-                                    <h3 className="font-bold text-lg text-slate-900 dark:text-white line-clamp-1">{leader.name}</h3>
-                                    <p className="text-blue-600 dark:text-blue-400 font-medium text-sm mt-1 flex items-center gap-1 line-clamp-1">
-                                        {leader.role}
-                                    </p>
-                                    {leader.location && (
-                                        <p className="text-slate-500 dark:text-slate-400 text-xs mt-2 line-clamp-1">{leader.location}</p>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                        </div>
                     </div>
                 )}
             </div>
 
-            {/* Modal */}
+            {/* Content Table / Grid */}
+            <div className="bg-white dark:bg-slate-900 rounded-[40px] shadow-2xl shadow-slate-200/50 dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-slate-50/50 dark:bg-slate-950/20 text-slate-500 dark:text-slate-400 text-[11px] uppercase tracking-[0.2em] font-black border-b border-slate-200 dark:border-slate-800">
+                                <th className="px-10 py-6">Leader Profile</th>
+                                <th className="px-10 py-6">Hierarchy & Rank</th>
+                                <th className="px-10 py-6 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={3} className="py-32 text-center">
+                                        <div className="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+                                        <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Synchronizing Database...</p>
+                                    </td>
+                                </tr>
+                            ) : filteredLeaders.length === 0 ? (
+                                <tr>
+                                    <td colSpan={3} className="py-32 text-center">
+                                        <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300 dark:text-slate-600">
+                                            <Users size={40} />
+                                        </div>
+                                        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1">No Leaders Found</h3>
+                                        <p className="text-slate-500">Refine your search or add a new entry.</p>
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredLeaders.map((leader) => (
+                                    <tr key={leader.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all group">
+                                        <td className="px-10 py-8 whitespace-nowrap">
+                                            <div className="flex items-center gap-6">
+                                                <div className="relative">
+                                                    <div className="h-16 w-16 rounded-[24px] overflow-hidden bg-slate-100 dark:bg-slate-800 ring-4 ring-slate-50 dark:ring-slate-900 group-hover:ring-blue-50 dark:group-hover:ring-blue-900/30 transition-all shadow-lg">
+                                                        <img
+                                                            src={getImageUrl(leader.image_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(leader.name)}&background=2563eb&color=fff&bold=true`}
+                                                            alt={leader.name}
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    </div>
+                                                    <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-lg border-4 border-white dark:border-slate-900 flex items-center justify-center shadow-lg ${leader.level === 'State' ? 'bg-blue-600' : 'bg-emerald-600'
+                                                        }`}>
+                                                        <Layers className="text-white" size={10} />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-lg font-black text-slate-900 dark:text-white mb-1 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{leader.name}</div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">{leader.name_or || 'Name (Odia)'}</span>
+                                                        <span className="text-slate-200 dark:text-slate-700">|</span>
+                                                        <span className="text-xs text-slate-500 font-bold">{leader.location || 'Central Command'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-10 py-8 whitespace-nowrap">
+                                            <div className="flex flex-col gap-2">
+                                                <div className="flex items-center gap-2">
+                                                    <Briefcase size={14} className="text-slate-400" />
+                                                    <span className="text-sm font-black text-slate-700 dark:text-slate-200">{leader.role}</span>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-[0.15em] rounded-lg ${leader.level === 'State'
+                                                        ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+                                                        : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
+                                                        }`}>
+                                                        {leader.level} LEVEL
+                                                    </span>
+                                                    <span className="flex items-center gap-1 text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                                                        Rank #{leader.display_order || 0}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-10 py-8 whitespace-nowrap text-right">
+                                            <div className="flex items-center justify-end gap-3 opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                                                <button
+                                                    onClick={() => handleOpenModal(leader)}
+                                                    className="p-3 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 hover:bg-blue-600 dark:hover:bg-blue-600 hover:text-white transition-all transform hover:scale-110"
+                                                    title="Edit Professional Profile"
+                                                >
+                                                    <Edit2 size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(leader.id)}
+                                                    className="p-3 bg-white dark:bg-slate-800 text-red-500 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 hover:bg-red-500 hover:text-white transition-all transform hover:scale-110"
+                                                    title="Permanently Remove"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Modal - Fully Rebuilt */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
-                        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 z-10">
-                            <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-                                {editingLeader ? <Edit className="text-blue-500" size={24} /> : <Plus className="text-blue-500" size={24} />}
-                                {editingLeader ? 'Edit Leader' : 'Add New Leader'}
-                            </h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 p-2 rounded-full transition-colors">
-                                <X size={20} />
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xl animate-in fade-in duration-300">
+                    <div className="bg-white dark:bg-slate-900 rounded-[48px] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-white/20 dark:border-slate-800 animate-in zoom-in duration-300">
+                        <div className="px-10 py-10 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div>
+                                <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                                    {editingLeader ? 'Refine Profile' : 'Enlist New Leader'}
+                                </h1>
+                                <p className="text-slate-500 font-medium mt-1">Populate the fields to establish leadership presence.</p>
+                            </div>
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="w-12 h-12 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 transition-all"
+                            >
+                                <X size={24} />
                             </button>
                         </div>
 
-                        <div className="p-6 overflow-y-auto space-y-5">
-                            {/* Image Upload */}
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Photo</label>
+                        <div className="flex-1 overflow-y-auto px-10 py-10 space-y-10 custom-scrollbar">
+                            {/* Profile Image Preview & Upload */}
+                            <div className="flex flex-col items-center gap-6">
                                 <div
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors group aspect-video bg-slate-50 dark:bg-slate-800/50"
+                                    className="relative group cursor-pointer"
                                 >
-                                    {imagePreview ? (
-                                        <div className="relative w-full h-full rounded-lg overflow-hidden">
-                                            <img src={getImageUrl(imagePreview)} alt="Preview" className="w-full h-full object-contain" />
-                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-medium">
-                                                Change Image
+                                    <div className="w-40 h-40 rounded-[48px] overflow-hidden border-4 border-slate-100 dark:border-slate-800 shadow-2xl bg-slate-50 dark:bg-slate-950 transition-transform group-hover:scale-[1.05]">
+                                        {imagePreview ? (
+                                            <img src={getImageUrl(imagePreview)} alt="Preview" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-700">
+                                                <ImageIcon size={48} />
+                                                <span className="text-[10px] font-black uppercase tracking-widest mt-2">No Photo</span>
                                             </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-blue-600/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-all">
+                                            <Plus size={32} />
+                                            <span className="text-xs font-black uppercase tracking-widest mt-2">Upload</span>
                                         </div>
-                                    ) : (
-                                        <div className="text-center">
-                                            <ImageIcon className="text-slate-400 group-hover:text-blue-500 mx-auto mb-2" size={32} />
-                                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Click to upload photo</p>
-                                        </div>
+                                    </div>
+                                    {imagePreview && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); setImageFile(null); setImagePreview(null); }}
+                                            className="absolute -top-2 -right-2 w-10 h-10 bg-white shadow-xl rounded-2xl flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all transform rotate-0 hover:rotate-90"
+                                        >
+                                            <X size={20} />
+                                        </button>
                                     )}
                                 </div>
                                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Full Name (English) *</label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-2">
+                                    <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-2">Name (English)</label>
                                     <input
                                         type="text"
+                                        placeholder="Full Legal Name"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                                        placeholder="e.g. John Doe"
+                                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl focus:border-blue-500 outline-none font-bold text-slate-900 dark:text-white"
                                     />
                                 </div>
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Full Name (Odia)</label>
+                                <div className="space-y-2">
+                                    <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-2">Name (Odia)</label>
                                     <input
                                         type="text"
+                                        placeholder="ଓଡ଼ିଆ ନାମ"
                                         value={formData.name_or}
                                         onChange={(e) => setFormData({ ...formData, name_or: e.target.value })}
-                                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                                        placeholder="e.g. ଜନ ଡୋ"
+                                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl focus:border-blue-500 outline-none font-bold text-blue-600 dark:text-blue-400"
                                     />
                                 </div>
-
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Role/Designation (English) *</label>
+                                <div className="space-y-2">
+                                    <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-2">Designation</label>
                                     <input
                                         type="text"
+                                        placeholder="Professional Role"
                                         value={formData.role}
                                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                                        placeholder="e.g. President"
+                                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl focus:border-blue-500 outline-none font-bold"
                                     />
                                 </div>
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Role/Designation (Odia)</label>
+                                <div className="space-y-2">
+                                    <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-2">Designation (Odia)</label>
                                     <input
                                         type="text"
+                                        placeholder="ଓଡ଼ିଆ ପଦବୀ"
                                         value={formData.role_or}
                                         onChange={(e) => setFormData({ ...formData, role_or: e.target.value })}
-                                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                                        placeholder="e.g. ସଭାପତି"
+                                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl focus:border-blue-500 outline-none font-bold"
                                     />
                                 </div>
+                            </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Hierarchy Level *</label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-8 bg-slate-50 dark:bg-slate-950/40 rounded-[32px] border border-slate-100 dark:border-slate-800">
+                                <div className="space-y-2">
+                                    <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em]">Hierarchy Level</label>
                                     <select
                                         value={formData.level}
-                                        onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                        onChange={(e) => {
+                                            const newLevel = e.target.value;
+                                            setFormData({ ...formData, level: newLevel, location: '' });
+                                        }}
+                                        className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl font-bold"
                                     >
-                                        {formLevels.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+                                        {formLevels.map(lvl => <option key={lvl} value={lvl}>{lvl} Level</option>)}
                                     </select>
                                 </div>
 
-                                {formData.level !== 'State' && (
-                                    <div className="col-span-1 md:col-span-2">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                            {formData.level === 'District' ? 'District Name *' :
-                                                formData.level === 'Taluka' ? 'Taluka Name *' :
-                                                    'Panchayat Name *'}
-                                        </label>
-                                        <select
-                                            value={formData.location}
-                                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                                        >
-                                            <option value="">
-                                                Select {formData.level === 'District' ? 'District' :
-                                                    formData.level === 'Taluka' ? 'Taluka' :
-                                                        'Panchayat'}
-                                            </option>
-                                            {availableLocations.map(loc => (
-                                                <option key={loc} value={loc}>{loc}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
+                                <div className="space-y-2">
+                                    <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em]">Assigned Hub</label>
+                                    <select
+                                        disabled={formData.level === 'State'}
+                                        value={formData.location}
+                                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                        className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl font-bold disabled:opacity-40"
+                                    >
+                                        <option value="">{formData.level === 'State' ? 'All (Central)' : `Select ${formData.level}`}</option>
+                                        {formAvailableLocations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+                                    </select>
+                                </div>
 
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Display Order</label>
-                                    <input
-                                        type="number"
-                                        value={formData.display_order}
-                                        onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
-                                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                                        placeholder="0"
-                                    />
+                                <div className="space-y-2">
+                                    <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em]">Priority Rank</label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            value={formData.display_order}
+                                            onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
+                                            className="w-full pl-6 pr-12 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl font-bold"
+                                        />
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-500">POS</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="p-5 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 sticky bottom-0 bg-white dark:bg-slate-900 z-10">
+                        <div className="px-10 py-10 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-4">
                             <button
                                 onClick={() => setIsModalOpen(false)}
-                                className="px-5 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium rounded-xl transition-colors"
+                                className="px-8 py-4 font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest text-xs hover:text-slate-800 dark:hover:text-white transition-colors"
                             >
-                                Cancel
+                                Abandon Changes
                             </button>
                             <button
                                 onClick={handleSave}
-                                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-lg shadow-blue-500/20 transition-colors flex items-center gap-2"
+                                className="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-xl shadow-blue-500/30 transition-all flex items-center gap-3 active:scale-95"
                             >
-                                <Save size={18} />
-                                {editingLeader ? 'Update Leader' : 'Save Leader'}
+                                <Save size={20} />
+                                {editingLeader ? 'COMMIT UPDATES' : 'ENLIST LEADER'}
                             </button>
                         </div>
                     </div>

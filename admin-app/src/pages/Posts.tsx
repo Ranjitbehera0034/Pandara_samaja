@@ -66,10 +66,7 @@ export default function Posts() {
         }
     };
 
-    const removeImage = () => {
-        setImageFile(null);
-        setImagePreview('');
-    };
+
 
     const closeModal = () => {
         setIsModalOpen(false);
@@ -130,45 +127,59 @@ export default function Posts() {
                 </button>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex-1 flex flex-col">
-                <div className="overflow-x-auto flex-1">
-                    <table className="w-full min-w-[600px] text-left border-collapse">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden flex-1 flex flex-col">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200 sticky top-0 z-10">
-                                <th className="px-6 py-4">Title</th>
-                                <th className="px-6 py-4">Date</th>
-                                <th className="px-6 py-4">Preview</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
+                            <tr className="bg-slate-50/50 dark:bg-slate-950/20 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-200 dark:border-slate-800">
+                                <th className="px-8 py-5">Title</th>
+                                <th className="px-8 py-5">Date</th>
+                                <th className="px-8 py-5">Excerpt</th>
+                                <th className="px-8 py-5 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={4} className="py-12 text-center text-slate-500">Loading posts...</td>
+                                    <td colSpan={4} className="py-20 text-center text-slate-500">
+                                        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                                        Fetching latest announcements...
+                                    </td>
                                 </tr>
                             ) : posts.length === 0 ? (
                                 <tr>
-                                    <td colSpan={4} className="py-12 text-center text-slate-500">No posts found.</td>
+                                    <td colSpan={4} className="py-20 text-center">
+                                        <div className="mb-4 text-slate-300 dark:text-slate-700 flex justify-center"><Plus size={48} /></div>
+                                        <p className="text-slate-500 font-medium">No announcements found. Start by creating one!</p>
+                                    </td>
                                 </tr>
                             ) : (
-                                posts.map((p, i) => (
-                                    <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">{p.title}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{new Date(p.created_at).toLocaleDateString()}</td>
-                                        <td className="px-6 py-4 text-sm text-slate-500 max-w-sm line-clamp-1">{p.content.substring(0, 50)}...</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right">
-                                            <button
-                                                onClick={() => openEditModal(p)}
-                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors inline-block"
-                                            >
-                                                <Edit2 size={16} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(p.id)}
-                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-block ml-1"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                                posts.map((post) => (
+                                    <tr key={post.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+                                        <td className="px-8 py-5 whitespace-nowrap text-sm font-bold text-blue-600 dark:text-blue-400 group-hover:underline">
+                                            {post.title}
+                                        </td>
+                                        <td className="px-8 py-5 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
+                                            {new Date(post.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                                        </td>
+                                        <td className="px-8 py-5 text-sm text-slate-500 dark:text-slate-400 max-w-sm">
+                                            <div className="line-clamp-1">{post.content.substring(0, 100)}...</div>
+                                        </td>
+                                        <td className="px-8 py-5 whitespace-nowrap text-right">
+                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => openEditModal(post)}
+                                                    className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-all"
+                                                >
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(post.id)}
+                                                    className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -180,76 +191,84 @@ export default function Posts() {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl w-full max-w-2xl shadow-xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
-                        <div className="px-4 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                            <h2 className="text-lg sm:text-xl font-bold text-slate-900">{isEditing ? 'Edit Post' : 'Create New Post'}</h2>
-                            <button onClick={closeModal} className="text-slate-400 hover:text-slate-600 p-1">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/40 backdrop-blur-md">
+                    <div className="bg-white dark:bg-slate-900 rounded-[32px] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] border border-white/20 dark:border-slate-800 animate-in fade-in zoom-in duration-200">
+                        <div className="px-6 sm:px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
+                            <div>
+                                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">{isEditing ? 'Edit Post' : 'Create New Post'}</h2>
+                                <p className="text-slate-500 text-sm mt-0.5">Share news or announcements with the community.</p>
+                            </div>
+                            <button onClick={closeModal} className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-all text-slate-500 dark:text-slate-400">
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Title *</label>
+
+                        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 custom-scrollbar">
+                            <div className="space-y-2">
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Post Title *</label>
                                 <input
                                     type="text"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    placeholder="Enter post title"
                                     required
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                    placeholder="Enter a descriptive title..."
+                                    className="w-full px-5 py-4 text-lg font-bold"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Cover Image</label>
-                                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl relative group hover:border-blue-400 transition-colors bg-slate-50">
-                                    {imagePreview ? (
-                                        <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-slate-200 shadow-sm">
-                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                            <button
-                                                type="button"
-                                                onClick={removeImage}
-                                                className="absolute top-3 right-3 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-sm transition-colors"
-                                            >
-                                                <X size={16} />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-2 text-center py-4">
-                                            <div className="mx-auto h-12 w-12 text-slate-400 flex justify-center items-center rounded-full bg-white shadow-sm border border-slate-100">
-                                                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
+
+                            <div className="space-y-2">
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Cover Image</label>
+                                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-200 dark:border-slate-800 border-dashed rounded-[24px] hover:border-blue-400 dark:hover:border-blue-500 transition-all bg-slate-50/50 dark:bg-slate-950/20 group">
+                                    <div className="space-y-2 text-center w-full">
+                                        {imagePreview ? (
+                                            <div className="relative inline-block group w-full">
+                                                <img src={imagePreview} alt="Preview" className="h-48 w-full object-cover rounded-2xl shadow-lg" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setImageFile(null); setImagePreview(''); }}
+                                                    className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg hover:scale-110 transition-transform"
+                                                >
+                                                    <X size={14} />
+                                                </button>
                                             </div>
-                                            <div className="flex text-sm text-slate-600 justify-center">
-                                                <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2 py-1 shadow-sm border border-slate-200 transition-colors">
-                                                    <span>Upload a file</span>
-                                                    <input type="file" className="sr-only" onChange={handleImageChange} accept="image/*" />
-                                                </label>
+                                        ) : (
+                                            <div className="flex flex-col items-center">
+                                                <div className="w-16 h-16 mb-4 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                    <Plus size={32} />
+                                                </div>
+                                                <div className="flex text-sm text-slate-600 dark:text-slate-400 font-medium">
+                                                    <label htmlFor="file-upload" className="relative cursor-pointer bg-white dark:bg-slate-900 rounded-md font-bold text-blue-600 hover:text-blue-500">
+                                                        <span>Upload a file</span>
+                                                        <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleImageChange} accept="image/*" />
+                                                    </label>
+                                                    <p className="pl-1">or drag and drop</p>
+                                                </div>
+                                                <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">PNG, JPG, GIF up to 10MB</p>
                                             </div>
-                                            <p className="text-xs text-slate-500">PNG, JPG, GIF up to 5MB</p>
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Content *</label>
+
+                            <div className="space-y-2">
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Content *</label>
                                 <textarea
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
-                                    placeholder="Write your content here..."
                                     required
-                                    rows={10}
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-y"
-                                ></textarea>
+                                    rows={8}
+                                    placeholder="Write your announcement here..."
+                                    className="w-full px-5 py-4"
+                                />
                             </div>
                         </form>
-                        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-                            <button onClick={closeModal} className="px-5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-200/50 transition-colors">
+
+                        <div className="px-8 py-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30 flex justify-end gap-3 backdrop-blur-sm">
+                            <button onClick={closeModal} className="px-6 py-3 rounded-2xl font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-all">
                                 Cancel
                             </button>
-                            <button onClick={handleSubmit} className="px-5 py-2.5 rounded-xl font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-colors">
-                                {isEditing ? 'Save Changes' : 'Create Post'}
+                            <button onClick={handleSubmit} className="px-8 py-3 rounded-2xl font-black text-white bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                                {isEditing ? 'Update Post' : 'Publish Announcement'}
                             </button>
                         </div>
                     </div>
