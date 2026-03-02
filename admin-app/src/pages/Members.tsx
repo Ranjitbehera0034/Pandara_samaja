@@ -355,7 +355,7 @@ export default function Members() {
                     </button>
                 </div>
 
-                <div className="hidden sm:flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg mb-2">
+                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg mb-2 shrink-0">
                     <button
                         onClick={() => setViewMode('table')}
                         className={`p-1.5 rounded-md flex items-center justify-center transition-colors ${viewMode === 'table' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
