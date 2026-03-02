@@ -484,7 +484,7 @@
                                     if (image_url.includes('drive.google.com') || image_url.includes('lh3.googleusercontent.com')) {
                                         const driveIdMatch = image_url.match(/([a-zA-Z0-9_-]{25,})/);
                                         if (driveIdMatch && driveIdMatch[1]) {
-                                            src = baseUrl + '/api/image-proxy/' + driveIdMatch[1];
+                                            src = baseUrl + '/api/v1/image-proxy' + driveIdMatch[1];
                                         } else {
                                             src = image_url;
                                         }
