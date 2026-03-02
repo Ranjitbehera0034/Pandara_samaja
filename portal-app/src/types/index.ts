@@ -39,6 +39,7 @@ export interface FamilyMember {
 export interface LoggedUser {
     name: string;
     relation: string;
+    mobile?: string;
 }
 
 // ─── Reaction system (Phase 1) ──────────────────────
