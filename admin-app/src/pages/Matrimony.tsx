@@ -33,7 +33,7 @@ type Candidate = {
 };
 
 export default function Matrimony() {
-    const { t, i18n } = useTranslation();
+    const { i18n } = useTranslation();
     const lang = i18n.language;
     const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [loading, setLoading] = useState(true);
@@ -66,7 +66,7 @@ export default function Matrimony() {
                 setCandidates(res.data.candidates);
             }
         } catch {
-            toast.error(t('matrimony', 'failedLoad') || 'Could not load matrimony profiles');
+            toast.error(lang === 'or' ? 'ବିବାହ ପ୍ରୋଫାଇଲ୍ ଲୋଡ୍ କରିପାରିଲା ନାହିଁ' : 'Could not load matrimony profiles');
         } finally {
             setLoading(false);
         }
@@ -209,7 +209,7 @@ export default function Matrimony() {
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-pink-500 transition-colors" size={20} />
                             <input
                                 type="text"
-                                placeholder={t('matrimony', 'searchPlaceholder') || "Search name, education, location..."}
+                                placeholder={lang === 'or' ? 'ନାମ, ଶିକ୍ଷା, ସ୍ଥାନ ଖୋଜନ୍ତୁ...' : "Search name, education, location..."}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full pl-12 pr-4 py-4 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:outline-none focus:border-pink-500 text-slate-900 dark:text-white placeholder-slate-500 transition-all text-sm font-medium"
@@ -240,9 +240,9 @@ export default function Matrimony() {
                                     >
                                         {g === 'All' ? <Filter size={14} /> : g === 'Male' ? <User size={14} /> : <Heart size={14} />}
                                         <span className="hidden sm:inline">
-                                            {g === 'All' ? t('matrimony', 'all') || 'All' :
-                                                g === 'Male' ? t('matrimony', 'male') || 'Male' :
-                                                    t('matrimony', 'female') || 'Female'}
+                                            {g === 'All' ? (lang === 'or' ? 'ସମସ୍ତ' : 'All') :
+                                                g === 'Male' ? (lang === 'or' ? 'ପୁରୁଷ' : 'Male') :
+                                                    (lang === 'or' ? 'ମହିଳା' : 'Female')}
                                         </span>
                                     </button>
                                 ))}
@@ -278,13 +278,13 @@ export default function Matrimony() {
                         <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
                             <Search size={32} className="text-slate-400 dark:text-slate-600" />
                         </div>
-                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('matrimony', 'noProfiles') || 'No Profiles Found'}</h3>
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{lang === 'or' ? 'କୌଣସି ପ୍ରୋଫାଇଲ୍ ମିଳିଲା ନାହିଁ' : 'No Profiles Found'}</h3>
                         <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">Try adjusting your filters or search terms.</p>
                         <button
                             onClick={() => { setSearchQuery(''); setGenderFilter('All'); setStatusFilter('All'); }}
                             className="mt-6 text-pink-500 font-bold hover:underline"
                         >
-                            {t('matrimony', 'resetFilters') || 'Reset Filters'}
+                            {lang === 'or' ? 'ଫିଲ୍ଟର୍ ରିସେଟ୍ କରନ୍ତୁ' : 'Reset Filters'}
                         </button>
                     </motion.div>
                 ) : (
@@ -321,11 +321,11 @@ export default function Matrimony() {
                                             <div className="flex flex-col gap-2">
                                                 <div className="flex gap-2">
                                                     <span className={`px-3 py-1.5 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border flex items-center gap-1 ${c.gender === 'Female' ? 'bg-pink-100/80 dark:bg-pink-500/30 text-pink-700 dark:text-pink-200 border-pink-200 dark:border-pink-500/30' : 'bg-blue-100/80 dark:bg-blue-500/30 text-blue-700 dark:text-blue-200 border-blue-200 dark:border-blue-500/30'}`}>
-                                                        {c.gender === 'Female' ? t('matrimony', 'female') || 'Female' : t('matrimony', 'male') || 'Male'}
+                                                        {c.gender === 'Female' ? (lang === 'or' ? 'ମହିଳା' : 'Female') : (lang === 'or' ? 'ପୁରୁଷ' : 'Male')}
                                                     </span>
                                                     {calculateAge(c.date_of_birth || c.dob) && (
                                                         <span className="px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/20">
-                                                            {calculateAge(c.date_of_birth || c.dob)} {t('matrimony', 'years') || 'YRS'}
+                                                            {calculateAge(c.date_of_birth || c.dob)} {lang === 'or' ? 'ବର୍ଷ' : 'YRS'}
                                                         </span>
                                                     )}
                                                 </div>
@@ -361,11 +361,11 @@ export default function Matrimony() {
                                     <div className="p-6 space-y-5 flex-1 flex flex-col">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1">
-                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'education') || 'Education'}</p>
+                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{lang === 'or' ? 'ଶିକ୍ଷା' : 'Education'}</p>
                                                 <p className="text-xs font-bold text-slate-900 dark:text-slate-200 line-clamp-1">{c.education || '---'}</p>
                                             </div>
                                             <div className="space-y-1">
-                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'occupation') || 'Profession'}</p>
+                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{lang === 'or' ? 'ବୃତ୍ତି / ପେଷା' : 'Profession'}</p>
                                                 <p className="text-xs font-bold text-slate-900 dark:text-slate-200 line-clamp-1">{c.occupation || '---'}</p>
                                             </div>
                                         </div>
@@ -375,7 +375,7 @@ export default function Matrimony() {
                                                 <MapPin size={18} className="text-pink-600 dark:text-pink-500" />
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[1.5px]">{t('matrimony', 'address') || 'Location'}</p>
+                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[1.5px]">{lang === 'or' ? 'ସ୍ଥାନ' : 'Location'}</p>
                                                 <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{c.address || 'Unknown'}</p>
                                             </div>
                                         </div>
@@ -424,7 +424,7 @@ export default function Matrimony() {
                             className="bg-white dark:bg-slate-900 rounded-[32px] w-full max-w-lg border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl p-8"
                         >
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Update Status</h3>
+                                <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">{lang === 'or' ? 'ସ୍ଥିତି ଅଦ୍ୟତନ' : 'Update Status'}</h3>
                                 <button onClick={() => setAdminActionCandidate(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white"><X size={24} /></button>
                             </div>
 
@@ -438,13 +438,13 @@ export default function Matrimony() {
                                 </div>
                                 <div>
                                     <p className="text-sm font-bold text-slate-900 dark:text-white">{adminActionCandidate.name}</p>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">Current Status: {adminActionCandidate.status.replace('_', ' ')}</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">{lang === 'or' ? 'ବର୍ତ୍ତମାନର ସ୍ଥିତି: ' : 'Current Status: '}{adminActionCandidate.status.replace('_', ' ')}</p>
                                 </div>
                             </div>
 
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">New Status</label>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">{lang === 'or' ? 'ନୂତନ ସ୍ଥିତି' : 'New Status'}</label>
                                     <select
                                         value={newStatus}
                                         onChange={(e) => setNewStatus(e.target.value)}
@@ -459,7 +459,7 @@ export default function Matrimony() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">Admin Comments (Sent to User)</label>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">{lang === 'or' ? 'ଆଡମିନ୍ ମନ୍ତବ୍ୟ (ୟୁଜର୍ କୁ ପଠାଯିବ)' : 'Admin Comments (Sent to User)'}</label>
                                     <textarea
                                         value={adminComments}
                                         onChange={(e) => setAdminComments(e.target.value)}
@@ -491,7 +491,7 @@ export default function Matrimony() {
                 )}
             </AnimatePresence>
 
-            {/* Admin Action Modal (Mark Matched) */}
+            {/* Admin Action Modal ({lang === 'or' ? 'ମ୍ୟାଚ୍ ହୋଇଛି ବୋଲି ଚିହ୍ନଟ କରନ୍ତୁ' : 'Mark Matched'}) */}
             <AnimatePresence>
                 {adminActionCandidate && actionType === 'match' && (
                     <div className="fixed inset-0 z-[160] flex items-center justify-center p-4 bg-slate-900/60 dark:bg-slate-950/90 backdrop-blur-xl">
@@ -502,28 +502,28 @@ export default function Matrimony() {
                             className="bg-white dark:bg-slate-900 rounded-[32px] w-full max-w-lg border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl p-8"
                         >
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500 uppercase tracking-tighter">Mark Matched</h3>
+                                <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500 uppercase tracking-tighter">{lang === 'or' ? 'ମ୍ୟାଚ୍ ହୋଇଛି ବୋଲି ଚିହ୍ନଟ କରନ୍ତୁ' : 'Mark Matched'}</h3>
                                 <button onClick={() => setAdminActionCandidate(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white"><X size={24} /></button>
                             </div>
 
-                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">Record a successful match for <strong className="text-slate-900 dark:text-white">{adminActionCandidate.name}</strong>. Their profile will be hidden from the public feed but kept in the administrative record.</p>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">{lang === 'or' ? 'ଏକ ସଫଳ ମ୍ୟାଚ୍ ରେକର୍ଡ କରନ୍ତୁ:' : 'Record a successful match for'} <strong className="text-slate-900 dark:text-white">{adminActionCandidate.name}</strong>. {lang === 'or' ? 'ସେମାନଙ୍କ ପ୍ରୋଫାଇଲ୍ ଲୁଚାଯିବ' : 'Their profile will be hidden'} {lang === 'or' ? 'ଏବଂ କେବଳ ଆଡମିନ୍ ଦେଖିପାରିବେ ।' : 'from the public feed but kept in the administrative record.'}</p>
 
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">Match Event</label>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">{lang === 'or' ? 'ମ୍ୟାଚ୍ ଘଟଣା' : 'Match Event'}</label>
                                     <select
                                         value={matchData.status}
                                         onChange={(e) => setMatchData({ ...matchData, status: e.target.value })}
                                         className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold"
                                     >
-                                        <option value="Matched" className="bg-white dark:bg-slate-900">Matched</option>
-                                        <option value="Engaged" className="bg-white dark:bg-slate-900">Engaged</option>
-                                        <option value="Married" className="bg-white dark:bg-slate-900">Married</option>
+                                        <option value="Matched" className="bg-white dark:bg-slate-900">{lang === 'or' ? 'ମ୍ୟାଚ୍ ହୋଇଛି' : 'Matched'}</option>
+                                        <option value="Engaged" className="bg-white dark:bg-slate-900">{lang === 'or' ? 'ନିର୍ବନ୍ଧ' : 'Engaged'}</option>
+                                        <option value="Married" className="bg-white dark:bg-slate-900">{lang === 'or' ? 'ବିବାହ' : 'Married'}</option>
                                     </select>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">Partner Name (Optional)</label>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">{lang === 'or' ? 'ସାଥୀଙ୍କ ନାମ' : 'Partner Name'} (Optional)</label>
                                     <input
                                         type="text"
                                         value={matchData.partnerName}
@@ -540,7 +540,7 @@ export default function Matrimony() {
                                     disabled={submitting}
                                     className="w-full px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-90 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-amber-500/20"
                                 >
-                                    {submitting ? 'Saving...' : 'Confirm Match ✨'}
+                                    {submitting ? (lang === 'or' ? 'ଅପେକ୍ଷା କରନ୍ତୁ...' : 'Saving...') : (lang === 'or' ? 'ମ୍ୟାଚ୍ ନିଶ୍ଚିତ କରନ୍ତୁ ✨' : 'Confirm Match ✨')}
                                 </button>
                             </div>
                         </motion.div>
@@ -580,7 +580,7 @@ export default function Matrimony() {
                                     <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-2 uppercase tracking-tighter drop-shadow-md">{selectedCandidate.name}</h2>
                                     <div className="flex gap-2">
                                         <span className="px-4 py-1.5 bg-pink-500 rounded-lg text-[10px] font-black text-white uppercase tracking-widest shadow-sm">{selectedCandidate.gender}</span>
-                                        <span className="px-4 py-1.5 bg-slate-800/80 backdrop-blur-sm rounded-lg text-[10px] font-black text-white uppercase tracking-widest shadow-sm">{calculateAge(selectedCandidate.date_of_birth || selectedCandidate.dob)} {t('matrimony', 'years') || 'YRS'}</span>
+                                        <span className="px-4 py-1.5 bg-slate-800/80 backdrop-blur-sm rounded-lg text-[10px] font-black text-white uppercase tracking-widest shadow-sm">{calculateAge(selectedCandidate.date_of_birth || selectedCandidate.dob)} {lang === 'or' ? 'ବର୍ଷ' : 'YRS'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -588,7 +588,7 @@ export default function Matrimony() {
                             <div className="md:w-7/12 flex flex-col overflow-y-auto">
                                 <div className="p-6 md:p-10 space-y-8">
                                     <div className="flex justify-between items-center">
-                                        <p className="text-xs font-black text-pink-500 uppercase tracking-[4px]">Candidate Dossier</p>
+                                        <p className="text-xs font-black text-pink-500 uppercase tracking-[4px]">{lang === 'or' ? 'ପ୍ରାର୍ଥୀ ବିବରଣୀ' : 'Candidate Dossier'}</p>
                                         <button onClick={() => setSelectedCandidate(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors text-slate-400">
                                             <X size={24} />
                                         </button>
@@ -610,34 +610,34 @@ export default function Matrimony() {
 
                                     {selectedCandidate.admin_comments && (
                                         <div className="p-6 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl">
-                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px] mb-2">Admin Comments</p>
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px] mb-2">{lang === 'or' ? 'ଆଡମିନ୍ ମନ୍ତବ୍ୟ' : 'Admin Comments'}</p>
                                             <p className="text-slate-700 dark:text-slate-300 text-sm italic">"{selectedCandidate.admin_comments}"</p>
                                         </div>
                                     )}
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'education') || 'Education'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{lang === 'or' ? 'ଶିକ୍ଷା' : 'Education'}</p>
                                             <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.education || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'occupation') || 'Occupation'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{lang === 'or' ? 'ବୃତ୍ତି / ପେଷା' : 'Occupation'}</p>
                                             <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.occupation || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'address') || 'Address'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{lang === 'or' ? 'ଠିକଣା' : 'Address'}</p>
                                             <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.address || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'fatherName') || 'Father'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{lang === 'or' ? 'ପିତାଙ୍କ ନାମ' : 'Father'}</p>
                                             <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.father_name || selectedCandidate.father || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'income') || 'Income'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{lang === 'or' ? 'ଆୟ' : 'Income'}</p>
                                             <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.income || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'phone') || 'Mobile'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{lang === 'or' ? 'ମୋବାଇଲ୍' : 'Mobile'}</p>
                                             <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.mobile || selectedCandidate.phone || '---'}</p>
                                         </div>
                                     </div>
@@ -647,7 +647,7 @@ export default function Matrimony() {
                                         onClick={() => { setSelectedCandidate(null); setAdminActionCandidate(selectedCandidate); setActionType('status'); setNewStatus(selectedCandidate.status); setAdminComments(selectedCandidate.admin_comments || ''); }}
                                         className="flex-1 py-4 bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-transparent rounded-xl text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white transition-all shadow-sm flex items-center justify-center gap-2"
                                     >
-                                        <Pencil size={18} /> Update / Edit
+                                        <Pencil size={18} /> {lang === 'or' ? 'ଅପଡେଟ୍ / ଏଡିଟ୍' : 'Update / Edit'}
                                     </button>
                                 </div>
                             </div>
