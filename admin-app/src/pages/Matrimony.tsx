@@ -33,7 +33,7 @@ type Candidate = {
 };
 
 export default function Matrimony() {
-    const { t, i18n } = useTranslation();
+    const { i18n } = useTranslation();
     const lang = i18n.language;
     const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [loading, setLoading] = useState(true);
@@ -240,9 +240,9 @@ export default function Matrimony() {
                                     >
                                         {g === 'All' ? <Filter size={14} /> : g === 'Male' ? <User size={14} /> : <Heart size={14} />}
                                         <span className="hidden sm:inline">
-                                            {g === 'All' ? t('matrimony.all', { defaultValue: 'All' }) :
-                                                g === 'Male' ? t('matrimony.male', { defaultValue: 'Male' }) :
-                                                    t('matrimony.female', { defaultValue: 'Female' })}
+                                            {g === 'All' ? (lang === 'or' ? 'ସମସ୍ତ' : 'All') :
+                                                g === 'Male' ? (lang === 'or' ? 'ପୁରୁଷ' : 'Male') :
+                                                    (lang === 'or' ? 'ମହିଳା' : 'Female')}
                                         </span>
                                     </button>
                                 ))}
