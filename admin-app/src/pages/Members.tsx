@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
-import { Search, Plus, Upload, Edit2, Trash2, X, Ban, CheckCircle } from 'lucide-react';
+import { Search, Plus, Upload, Edit2, Trash2, X, Ban, CheckCircle, LayoutGrid, List, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -14,6 +14,8 @@ interface FamilyMember {
 
 export default function Members() {
     const [activeTab, setActiveTab] = useState<'all' | 'pending'>('all');
+    const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
+    const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
     const [members, setMembers] = useState<any[]>([]);
     const [pendingMembers, setPendingMembers] = useState<any[]>([]);
     const [search, setSearch] = useState('');
@@ -24,6 +26,15 @@ export default function Members() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+
+    const toggleCard = (id: string) => {
+        setExpandedCards(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    };
 
     // Form State
     const [memberId, setMemberId] = useState('');
@@ -290,19 +301,38 @@ export default function Members() {
                 </div>
             </div>
 
-            <div className="flex overflow-x-auto gap-2 border-b border-slate-200 dark:border-slate-800 mb-6 scrollbar-hide shrink-0">
-                <button
-                    onClick={() => setActiveTab('all')}
-                    className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 ${activeTab === 'all' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
-                >
-                    {t('member_directory')}
-                </button>
-                <button
-                    onClick={() => setActiveTab('pending')}
-                    className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 flex items-center gap-2 ${activeTab === 'pending' ? 'border-amber-500 text-amber-600 dark:text-amber-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
-                >
-                    {t('pending_approvals')} {activeTab === 'pending' && pendingMembers.length > 0 && <span className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 py-0.5 px-2 rounded-full text-xs">{pendingMembers.length}</span>}
-                </button>
+            <div className="flex items-center justify-between mb-6 border-b border-slate-200 dark:border-slate-800">
+                <div className="flex overflow-x-auto gap-2 scrollbar-hide shrink-0">
+                    <button
+                        onClick={() => setActiveTab('all')}
+                        className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 ${activeTab === 'all' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+                    >
+                        {t('member_directory')}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('pending')}
+                        className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 flex items-center gap-2 ${activeTab === 'pending' ? 'border-amber-500 text-amber-600 dark:text-amber-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+                    >
+                        {t('pending_approvals')} {activeTab === 'pending' && pendingMembers.length > 0 && <span className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 py-0.5 px-2 rounded-full text-xs">{pendingMembers.length}</span>}
+                    </button>
+                </div>
+
+                <div className="hidden sm:flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg mb-2">
+                    <button
+                        onClick={() => setViewMode('table')}
+                        className={`p-1.5 rounded-md flex items-center justify-center transition-colors ${viewMode === 'table' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                        title="Table View"
+                    >
+                        <List size={18} />
+                    </button>
+                    <button
+                        onClick={() => setViewMode('card')}
+                        className={`p-1.5 rounded-md flex items-center justify-center transition-colors ${viewMode === 'card' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                        title="Card View"
+                    >
+                        <LayoutGrid size={18} />
+                    </button>
+                </div>
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden flex-1 flex flex-col">
@@ -320,28 +350,24 @@ export default function Members() {
                 </div>
 
                 <div className="overflow-x-auto flex-1">
-                    <table className="w-full min-w-[800px] text-left border-collapse">
-                        <thead>
-                            <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200 sticky top-0 z-10">
-                                <th className="px-6 py-4">Membership No.</th>
-                                <th className="px-6 py-4">Name</th>
-                                <th className="px-6 py-4">Mobile</th>
-                                <th className="px-6 py-4">Address</th>
-                                {activeTab === 'all' && <th className="px-6 py-4 text-center">{t('status')}</th>}
-                                <th className="px-6 py-4 text-right">{t('actions')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={5} className="py-12 text-center text-slate-500">Loading members...</td>
+                    {loading ? (
+                        <div className="p-12 text-center text-slate-500">Loading members...</div>
+                    ) : displayMembers.length === 0 ? (
+                        <div className="p-12 text-center text-slate-500">No members found.</div>
+                    ) : viewMode === 'table' ? (
+                        <table className="w-full min-w-[800px] text-left border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200 sticky top-0 z-10">
+                                    <th className="px-6 py-4">Membership No.</th>
+                                    <th className="px-6 py-4">Name</th>
+                                    <th className="px-6 py-4">Mobile</th>
+                                    <th className="px-6 py-4">Address</th>
+                                    {activeTab === 'all' && <th className="px-6 py-4 text-center">{t('status')}</th>}
+                                    <th className="px-6 py-4 text-right">{t('actions')}</th>
                                 </tr>
-                            ) : displayMembers.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="py-12 text-center text-slate-500">No members found.</td>
-                                </tr>
-                            ) : (
-                                displayMembers.map((m, i) => (
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {displayMembers.map((m, i) => (
                                     <tr key={i} className="hover:bg-slate-50/50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">{m.membership_no}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">{m.name}</td>
@@ -363,53 +389,126 @@ export default function Members() {
                                         <td className="px-6 py-4 whitespace-nowrap text-right">
                                             {activeTab === 'pending' ? (
                                                 <>
-                                                    <button
-                                                        onClick={() => handleApprove(m.membership_no)}
-                                                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition-colors shadow-sm mr-2"
-                                                    >
-                                                        {t('approve')}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleReject(m.membership_no)}
-                                                        className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition-colors shadow-sm mr-2"
-                                                    >
-                                                        {t('reject')}
-                                                    </button>
+                                                    <button onClick={() => handleApprove(m.membership_no)} className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition-colors shadow-sm mr-2">{t('approve')}</button>
+                                                    <button onClick={() => handleReject(m.membership_no)} className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition-colors shadow-sm mr-2">{t('reject')}</button>
                                                 </>
                                             ) : (
-                                                <button
-                                                    onClick={() => {
-                                                        const reason = prompt('Enter a reason to ban this member:', m.ban_reason || '');
-                                                        if (reason !== null) {
-                                                            m.is_banned
-                                                                ? api.put(`/admin/members/${m.membership_no}/unban`).then(() => { toast.success('Member unbanned'); fetchMembers(); }).catch(() => toast.error('Failed to unban'))
-                                                                : api.put(`/admin/members/${m.membership_no}/ban`, { reason }).then(() => { toast.success('Member banned'); fetchMembers(); }).catch(() => toast.error('Failed to ban'));
-                                                        }
-                                                    }}
-                                                    className={`p-2 rounded-lg transition-colors inline-block mr-1 ${m.is_banned ? 'text-green-600 hover:bg-green-50' : 'text-slate-400 hover:text-red-500 hover:bg-red-50'}`}
-                                                    title={m.is_banned ? 'Unban Member' : 'Ban Member'}
-                                                >
-                                                    {m.is_banned ? <CheckCircle size={16} /> : <Ban size={16} />}
-                                                </button>
+                                                <button onClick={() => {
+                                                    const reason = prompt('Enter a reason to ban this member:', m.ban_reason || '');
+                                                    if (reason !== null) {
+                                                        m.is_banned ? api.put(`/admin/members/${m.membership_no}/unban`).then(() => { toast.success('Member unbanned'); fetchMembers(); }).catch(() => toast.error('Failed to unban')) : api.put(`/admin/members/${m.membership_no}/ban`, { reason }).then(() => { toast.success('Member banned'); fetchMembers(); }).catch(() => toast.error('Failed to ban'));
+                                                    }
+                                                }} className={`p-2 rounded-lg transition-colors inline-block mr-1 ${m.is_banned ? 'text-green-600 hover:bg-green-50' : 'text-slate-400 hover:text-red-500 hover:bg-red-50'}`} title={m.is_banned ? 'Unban Member' : 'Ban Member'}>{m.is_banned ? <CheckCircle size={16} /> : <Ban size={16} />}</button>
                                             )}
-                                            <button
-                                                onClick={() => openEditModal(m)}
-                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors inline-block"
-                                            >
-                                                <Edit2 size={16} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(m.membership_no)}
-                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-block ml-1"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                                            <button onClick={() => openEditModal(m)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors inline-block"><Edit2 size={16} /></button>
+                                            <button onClick={() => handleDelete(m.membership_no)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-block ml-1"><Trash2 size={16} /></button>
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 p-4 lg:p-6 bg-slate-50/50 dark:bg-slate-900/50">
+                            {displayMembers.map((m, i) => {
+                                const isExpanded = expandedCards.has(m.membership_no);
+                                return (
+                                    <div key={i} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col">
+                                        <div className="p-5 flex justify-between items-start gap-4">
+                                            <div>
+                                                <span className="text-xs font-mono font-bold text-slate-400 px-2 py-0.5 bg-slate-100 dark:bg-slate-900 rounded inline-block mb-2">#{m.membership_no}</span>
+                                                <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight">{m.name}</h3>
+                                                <div className="text-sm text-slate-500 mt-1 space-y-0.5">
+                                                    <p>{m.mobile || 'No Mobile'}</p>
+                                                    <p className="line-clamp-1" title={[m.village, m.panchayat, m.taluka, m.district].filter(Boolean).join(', ')}>
+                                                        {[m.village, m.panchayat, m.taluka, m.district].filter(Boolean).join(', ') || 'No Address'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-2">
+                                                {activeTab === 'all' && (
+                                                    m.is_banned ? (
+                                                        <span className="inline-flex items-center px-2 py-1 rounded bg-red-100 text-red-700 text-[10px] font-bold uppercase"><Ban size={10} className="mr-1" /> {t('banned')}</span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-700 text-[10px] font-bold uppercase"><CheckCircle size={10} className="mr-1" /> {t('active')}</span>
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {isExpanded && (
+                                            <div className="px-5 pb-5 pt-2 border-t border-slate-100 dark:border-slate-700/50 mt-auto bg-slate-50/50 dark:bg-slate-900/20 text-sm">
+                                                <div className="grid grid-cols-2 gap-4 mt-3">
+                                                    <div>
+                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aadhar No</p>
+                                                        <p className="font-medium text-slate-700 dark:text-slate-200">{m.aadhar_no || '---'}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Family Head Gender</p>
+                                                        <p className="font-medium text-slate-700 dark:text-slate-200">{m.head_gender || '---'}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Male Members</p>
+                                                        <p className="font-medium text-slate-700 dark:text-slate-200">{m.male || 0}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Female Members</p>
+                                                        <p className="font-medium text-slate-700 dark:text-slate-200">{m.female || 0}</p>
+                                                    </div>
+                                                </div>
+
+                                                {Array.isArray(m.family_members) && m.family_members.length > 0 && (
+                                                    <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50">
+                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Family Members List</p>
+                                                        <ul className="space-y-1.5">
+                                                            {m.family_members.map((fm: any, idx: number) => (
+                                                                <li key={idx} className="flex justify-between items-center text-xs p-2 bg-white dark:bg-slate-800 rounded border border-slate-100 dark:border-slate-700">
+                                                                    <span className="font-medium">{fm.name}</span>
+                                                                    <div className="text-slate-500 flex items-center gap-2">
+                                                                        <span className="bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded">{fm.relation}</span>
+                                                                    </div>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        <div className="p-3 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
+                                            <button
+                                                onClick={() => toggleCard(m.membership_no)}
+                                                className="text-xs font-medium text-slate-500 hover:text-blue-600 flex items-center gap-1 p-1.5 rounded-lg hover:bg-blue-50 transition-colors"
+                                            >
+                                                {isExpanded ? <><ChevronUp size={14} /> Shrink</> : <><ChevronDown size={14} /> Expand</>}
+                                            </button>
+
+                                            <div className="flex items-center">
+                                                {activeTab === 'pending' ? (
+                                                    <>
+                                                        <button onClick={() => handleApprove(m.membership_no)} className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-medium mr-1">Approve</button>
+                                                        <button onClick={() => handleReject(m.membership_no)} className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-medium">Reject</button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button onClick={() => {
+                                                            const reason = prompt('Ban reason:', m.ban_reason || '');
+                                                            if (reason !== null) {
+                                                                m.is_banned ? api.put(`/admin/members/${m.membership_no}/unban`).then(() => { fetchMembers(); }) : api.put(`/admin/members/${m.membership_no}/ban`, { reason }).then(() => { fetchMembers(); });
+                                                            }
+                                                        }} className={`p-1.5 rounded transition-colors mr-1 ${m.is_banned ? 'text-green-600 bg-green-50' : 'text-slate-400 hover:text-red-500 hover:bg-red-50'}`} title={m.is_banned ? 'Unban' : 'Ban'}>
+                                                            {m.is_banned ? <CheckCircle size={14} /> : <Ban size={14} />}
+                                                        </button>
+                                                    </>
+                                                )}
+                                                <button onClick={() => openEditModal(m)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors mr-1"><Edit2 size={14} /></button>
+                                                <button onClick={() => handleDelete(m.membership_no)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"><Trash2 size={14} /></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </div>
 
