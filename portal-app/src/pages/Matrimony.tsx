@@ -122,13 +122,15 @@ export default function Matrimony() {
         return age;
     };
 
-    const getImageUrl = (raw: string | null, full: boolean = false) => {
-        if (!raw) return '';
-        const m = raw.match(/id=([^&]+)/);
-        if (m) {
-            return full ? `https://lh3.googleusercontent.com/d/${m[1]}=s0` : `https://lh3.googleusercontent.com/d/${m[1]}=w1000`;
+    const getImageUrl = (url: string | null) => {
+        if (!url) return '';
+        if (url.includes('drive.google.com') || url.includes('lh3.googleusercontent.com')) {
+            const driveIdMatch = url.match(/([a-zA-Z0-9_-]{25,})/);
+            if (driveIdMatch && driveIdMatch[1]) {
+                return `${API_BASE_URL}/image-proxy/${driveIdMatch[1]}`;
+            }
         }
-        return raw;
+        return url;
     };
 
     const sortedCandidates = (Array.isArray(candidates) ? [...candidates] : []).sort((a, b) => {
@@ -342,7 +344,7 @@ export default function Matrimony() {
                                                 <Info size={24} />
                                             </button>
                                             <button
-                                                onClick={() => setSelectedPhoto(getImageUrl(c.photo, true))}
+                                                onClick={() => setSelectedPhoto(getImageUrl(c.photo))}
                                                 className="w-14 h-14 rounded-2xl bg-white text-slate-900 flex items-center justify-center shadow-xl hover:bg-pink-50 transition-colors"
                                             >
                                                 <Eye size={24} />

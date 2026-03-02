@@ -172,10 +172,20 @@ export default function Leaders() {
 
     const safeAllMembers = Array.isArray(allMembers) ? allMembers : [];
     const getLocationsForLevel = (level: string) => {
-        if (level === 'District') return Array.from(new Set(safeAllMembers.map(m => String(m.district || '')).filter(Boolean))).sort();
-        if (level === 'Taluka') return Array.from(new Set(safeAllMembers.map(m => String(m.taluka || '')).filter(Boolean))).sort();
-        if (level === 'Panchayat') return Array.from(new Set(safeAllMembers.map(m => String(m.panchayat || '')).filter(Boolean))).sort();
-        return [];
+        let locations = new Set<string>();
+        if (level === 'District') {
+            safeAllMembers.forEach(m => { if (m.district) locations.add(String(m.district)); });
+            (Array.isArray(leaders) ? leaders : []).forEach(l => { if (l.level === 'District' && l.location) locations.add(l.location); });
+        }
+        if (level === 'Taluka') {
+            safeAllMembers.forEach(m => { if (m.taluka) locations.add(String(m.taluka)); });
+            (Array.isArray(leaders) ? leaders : []).forEach(l => { if (l.level === 'Taluka' && l.location) locations.add(l.location); });
+        }
+        if (level === 'Panchayat') {
+            safeAllMembers.forEach(m => { if (m.panchayat) locations.add(String(m.panchayat)); });
+            (Array.isArray(leaders) ? leaders : []).forEach(l => { if (l.level === 'Panchayat' && l.location) locations.add(l.location); });
+        }
+        return Array.from(locations).sort();
     };
 
     const viewAvailableLocations = getLocationsForLevel(levelFilter);
@@ -480,15 +490,33 @@ export default function Leaders() {
 
                                 <div className="space-y-2">
                                     <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em]">Assigned Hub</label>
-                                    <select
-                                        disabled={formData.level === 'State'}
-                                        value={formData.location}
-                                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl font-bold disabled:opacity-40"
-                                    >
-                                        <option value="">{formData.level === 'State' ? 'All (Central)' : `Select ${formData.level}`}</option>
-                                        {formAvailableLocations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
-                                    </select>
+                                    <div className="relative">
+                                        {formData.level === 'District' ? (
+                                            <select
+                                                value={formData.location}
+                                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                                className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl font-bold"
+                                            >
+                                                <option value="">Select District</option>
+                                                {formAvailableLocations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+                                            </select>
+                                        ) : (
+                                            <>
+                                                <input
+                                                    type="text"
+                                                    list={`locations-${formData.level}`}
+                                                    disabled={formData.level === 'State'}
+                                                    value={formData.location}
+                                                    placeholder={formData.level === 'State' ? 'All (Central)' : `Enter or Select ${formData.level}`}
+                                                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                                    className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl font-bold disabled:opacity-40"
+                                                />
+                                                <datalist id={`locations-${formData.level}`}>
+                                                    {formAvailableLocations.map(loc => <option key={loc} value={loc} />)}
+                                                </datalist>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="space-y-2">
