@@ -15,12 +15,18 @@ import type { FamilyMember } from '../types';
 import { PORTAL_API_URL } from '../config/apiConfig';
 
 export default function Profile() {
-    const { member } = useAuth();
+    const { member, user } = useAuth();
     const { t } = useLanguage();
     const [isEditing, setIsEditing] = useState(false);
     const [showFamily, setShowFamily] = useState(true);
     const [saving, setSaving] = useState(false);
     const photoInputRef = useRef<HTMLInputElement>(null);
+
+    const isHoF = user?.relation?.toLowerCase() === 'self' || user?.relation?.toLowerCase() === 'head' || user?.relation?.toLowerCase() === 'self/head';
+
+    const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>(
+        member?.family_members || []
+    );
 
     // Editable state mirrors member data
     const [form, setForm] = useState({
@@ -32,12 +38,8 @@ export default function Profile() {
         village: member?.village || '',
         address: member?.address || '',
         aadhar_no: member?.aadhar_no || '',
-        head_gender: member?.head_gender || '',
+        head_gender: isHoF ? (member?.head_gender || '') : (familyMembers.find(f => (f.mobile || '').replace(/\D/g, '').slice(-10) === (member?.mobile || '').replace(/\D/g, '').slice(-10))?.gender || ''),
     });
-
-    const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>(
-        member?.family_members || []
-    );
 
     const handleFormChange = (field: string, value: string) => {
         setForm(prev => ({ ...prev, [field]: value }));
@@ -293,7 +295,7 @@ export default function Profile() {
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-4">
-                            {[
+                            {isHoF ? [
                                 { label: t('profile', 'name'), field: 'name', value: form.name },
                                 { label: t('profile', 'mobileNumber'), field: 'mobile', value: form.mobile },
                                 { label: t('profile', 'district'), field: 'district', value: form.district },
@@ -311,18 +313,32 @@ export default function Profile() {
                                         className="w-full bg-slate-900/50 text-white px-4 py-2.5 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 placeholder-slate-500"
                                     />
                                 </div>
+                            )) : [
+                                { label: t('profile', 'name'), field: 'name', value: form.name },
+                            ].map(({ label, field, value }) => (
+                                <div key={field}>
+                                    <label className="block text-sm text-slate-400 mb-1.5">{label}</label>
+                                    <input
+                                        type="text"
+                                        value={value}
+                                        onChange={(e) => handleFormChange(field, e.target.value)}
+                                        className="w-full bg-slate-900/50 text-white px-4 py-2.5 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 placeholder-slate-500"
+                                    />
+                                </div>
                             ))}
-                            <div className="md:col-span-2">
-                                <label className="block text-sm text-slate-400 mb-1.5">{t('profile', 'address')}</label>
-                                <textarea
-                                    value={form.address}
-                                    onChange={(e) => handleFormChange('address', e.target.value)}
-                                    rows={2}
-                                    className="w-full bg-slate-900/50 text-white px-4 py-2.5 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
-                                />
-                            </div>
+                            {isHoF && (
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm text-slate-400 mb-1.5">{t('profile', 'address')}</label>
+                                    <textarea
+                                        value={form.address}
+                                        onChange={(e) => handleFormChange('address', e.target.value)}
+                                        rows={2}
+                                        className="w-full bg-slate-900/50 text-white px-4 py-2.5 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
+                                    />
+                                </div>
+                            )}
                             <div>
-                                <label className="block text-sm text-slate-400 mb-1.5">{t('profile', 'headGender')}</label>
+                                <label className="block text-sm text-slate-400 mb-1.5">Gender</label>
                                 <select
                                     value={form.head_gender}
                                     onChange={(e) => handleFormChange('head_gender', e.target.value)}
@@ -372,7 +388,7 @@ export default function Profile() {
                                             exit={{ opacity: 0, x: 20 }}
                                             className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-4"
                                         >
-                                            {isEditing ? (
+                                            {isEditing && isHoF ? (
                                                 <div className="grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
                                                     <div>
                                                         <label className="block text-xs text-slate-500 mb-1">{t('profile', 'name')}</label>
@@ -459,7 +475,7 @@ export default function Profile() {
                                     ))
                                 )}
 
-                                {isEditing && (
+                                {isEditing && isHoF && (
                                     <button
                                         onClick={addFamilyMember}
                                         className="w-full py-3 border-2 border-dashed border-slate-700 hover:border-blue-500 text-slate-400 hover:text-blue-400 rounded-xl flex items-center justify-center gap-2 transition-colors"
