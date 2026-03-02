@@ -63,7 +63,6 @@ export default function Matrimony() {
         try {
             const res = await api.get('/admin/candidates');
             if (res.data.success) {
-                // We fetch all candidates for admin, apply filters locally for speed
                 setCandidates(res.data.candidates);
             }
         } catch {
@@ -77,12 +76,12 @@ export default function Matrimony() {
         setSubmitting(true);
         try {
             await api.put(`/admin/candidates/${id}/status`, { status, admin_comments: comments });
-            toast.success(`Candidate marked as ${status.replace('_', ' ')}`);
+            toast.success(lang === 'or' ? 'ସ୍ଥିତି ଅଦ୍ୟତନ ହେଲା' : `Candidate marked as ${status.replace('_', ' ')}`);
             setAdminActionCandidate(null);
             setActionType(null);
             fetchCandidates();
         } catch {
-            toast.error('Failed to update status');
+            toast.error(lang === 'or' ? 'ବିଫଳ ହେଲା' : 'Failed to update status');
         } finally {
             setSubmitting(false);
         }
@@ -96,7 +95,7 @@ export default function Matrimony() {
                 matched_partner_name: matchData.partnerName,
                 matched_partner_gender: matchData.partnerGender
             });
-            toast.success(`Candidate marked as ${matchData.status}`);
+            toast.success(lang === 'or' ? 'ସଫଳତାର ସହ ମ୍ୟାଚ୍ କରାଗଲା' : `Candidate marked as ${matchData.status}`);
             setAdminActionCandidate(null);
             setActionType(null);
             fetchCandidates();
@@ -108,11 +107,12 @@ export default function Matrimony() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!window.confirm('Are you sure you want to permanently delete this candidate?')) return;
+        if (!window.confirm(lang === 'or' ? 'ଆପଣ ନିଶ୍ଚିତ କି ଆପଣ ଏହାକୁ ଡିଲିଟ୍ କରିବାକୁ ଚାହୁଁଛନ୍ତି?' : 'Are you sure you want to permanently delete this candidate?')) return;
         try {
             await api.delete(`/admin/candidates/${id}`);
-            toast.success('Candidate profile deleted');
+            toast.success(lang === 'or' ? 'ଡିଲିଟ୍ ହେଲା' : 'Candidate profile deleted');
             if (selectedCandidate?.id === id) setSelectedCandidate(null);
+            if (adminActionCandidate?.id === id) setAdminActionCandidate(null);
             fetchCandidates();
         } catch {
             toast.error('Failed to delete candidate');
@@ -135,7 +135,7 @@ export default function Matrimony() {
         if (url.includes('drive.google.com') || url.includes('lh3.googleusercontent.com')) {
             const driveIdMatch = url.match(/([a-zA-Z0-9_-]{25,})/);
             if (driveIdMatch && driveIdMatch[1]) {
-                return `${BACKEND_URL}/image-proxy/${driveIdMatch[1]}`;
+                return `${BACKEND_URL}/api/v1/image-proxy/${driveIdMatch[1]}`;
             }
         }
         return url;
@@ -157,26 +157,26 @@ export default function Matrimony() {
     const filteredCandidates = sortedCandidates.filter(c => {
         const query = searchQuery.toLowerCase();
         return (
-            c.name.toLowerCase().includes(query) ||
-            (c.education && c.education.toLowerCase().includes(query)) ||
-            (c.occupation && c.occupation.toLowerCase().includes(query)) ||
-            (c.address && c.address.toLowerCase().includes(query))
+            (c.name || '').toLowerCase().includes(query) ||
+            (c.education || '').toLowerCase().includes(query) ||
+            (c.occupation || '').toLowerCase().includes(query) ||
+            (c.address || '').toLowerCase().includes(query)
         );
     });
 
     const getStatusStyle = (status: string) => {
         switch (status) {
-            case 'approved': return { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30' };
-            case 'verified': return { bg: 'bg-teal-500/20', text: 'text-teal-400', border: 'border-teal-500/30' };
-            case 'pending': return { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/30' };
-            case 'rejected': return { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30' };
-            case 'evidence_requested': return { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30' };
-            default: return { bg: 'bg-slate-500/20', text: 'text-slate-400', border: 'border-slate-500/30' };
+            case 'approved': return { bg: 'bg-green-100 dark:bg-green-500/20', text: 'text-green-700 dark:text-green-400', border: 'border-green-200 dark:border-green-500/30' };
+            case 'verified': return { bg: 'bg-teal-100 dark:bg-teal-500/20', text: 'text-teal-700 dark:text-teal-400', border: 'border-teal-200 dark:border-teal-500/30' };
+            case 'pending': return { bg: 'bg-amber-100 dark:bg-amber-500/20', text: 'text-amber-700 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/30' };
+            case 'rejected': return { bg: 'bg-red-100 dark:bg-red-500/20', text: 'text-red-700 dark:text-red-400', border: 'border-red-200 dark:border-red-500/30' };
+            case 'evidence_requested': return { bg: 'bg-purple-100 dark:bg-purple-500/20', text: 'text-purple-700 dark:text-purple-400', border: 'border-purple-200 dark:border-purple-500/30' };
+            default: return { bg: 'bg-slate-100 dark:bg-slate-500/20', text: 'text-slate-700 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-500/30' };
         }
     };
 
     return (
-        <div className="relative min-h-screen pb-20 bg-slate-900 overflow-hidden">
+        <div className="relative min-h-screen pb-20 bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
             {/* Background Decorations */}
             <div className="fixed inset-0 pointer-events-none opacity-20 z-0">
                 <div className="absolute top-1/4 -left-20 w-80 h-80 bg-pink-500/30 rounded-full blur-[120px] animate-pulse" />
@@ -188,15 +188,15 @@ export default function Matrimony() {
                 <header className="py-10 md:py-16">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-pink-500/10 text-pink-500 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border border-pink-500/20">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-500 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border border-pink-200 dark:border-pink-500/20">
                                 <Heart size={14} fill="currentColor" />
-                                Admin Matrimony Management
+                                {lang === 'or' ? 'ଆଡମିନ୍ ବିବାହ ପରିଚାଳନା' : 'Admin Matrimony Management'}
                             </div>
-                            <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
-                                {lang === 'en' ? 'Manage' : 'ସମାଜ'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-red-500">Profiles</span>
+                            <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 dark:text-white mb-4 tracking-tight">
+                                {lang === 'en' ? 'Manage' : 'ପରିଚାଳନା'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-red-500">{lang === 'or' ? 'ପ୍ରୋଫାଇଲ୍‍' : 'Profiles'}</span>
                             </h1>
-                            <p className="text-lg text-slate-400 max-w-2xl leading-relaxed">
-                                Review, approve, reject, or mark matrimony candidates as matched.
+                            <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
+                                {lang === 'or' ? 'ବିବାହ ପ୍ରାର୍ଥୀମାନଙ୍କୁ ସମୀକ୍ଷା, ଅନୁମୋଦନ କିମ୍ବା ମ୍ୟାଚ୍ ହୋଇଥିବା ଚିହ୍ନଟ କରନ୍ତୁ।' : 'Review, approve, reject, or mark matrimony candidates as matched.'}
                             </p>
                         </motion.div>
                     </div>
@@ -204,55 +204,59 @@ export default function Matrimony() {
 
                 {/* Filters & Tools */}
                 <div className="sticky top-4 z-40 mb-12">
-                    <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-3 flex flex-col lg:flex-row gap-4 shadow-2xl">
+                    <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-3 flex flex-col lg:flex-row gap-4 shadow-xl dark:shadow-2xl transition-colors">
                         <div className="relative flex-1 group">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-pink-500 transition-colors" size={20} />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-pink-500 transition-colors" size={20} />
                             <input
                                 type="text"
-                                placeholder={"Search name, education, location..."}
+                                placeholder={t('matrimony', 'searchPlaceholder') || "Search name, education, location..."}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-pink-500/50 text-white placeholder-slate-500 transition-all text-sm font-medium"
+                                className="w-full pl-12 pr-4 py-4 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:outline-none focus:border-pink-500 text-slate-900 dark:text-white placeholder-slate-500 transition-all text-sm font-medium"
                             />
                         </div>
                         <div className="flex flex-wrap items-center gap-4">
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                                className="h-14 px-4 bg-white/5 text-xs font-bold text-slate-300 focus:outline-none uppercase tracking-widest cursor-pointer rounded-2xl border border-white/10 focus:border-pink-500/50 transition-all"
+                                className="h-14 px-4 bg-slate-100 dark:bg-white/5 text-xs font-bold text-slate-600 dark:text-slate-300 focus:outline-none uppercase tracking-widest cursor-pointer rounded-2xl border border-slate-200 dark:border-white/10 focus:border-pink-500 transition-all"
                             >
-                                <option className="bg-slate-900" value="All">All Status</option>
-                                <option className="bg-slate-900" value="verified">Verified</option>
-                                <option className="bg-slate-900" value="approved">Approved</option>
-                                <option className="bg-slate-900" value="pending">Pending</option>
-                                <option className="bg-slate-900" value="evidence_requested">Evidence Req.</option>
-                                <option className="bg-slate-900" value="rejected">Rejected</option>
+                                <option className="bg-white dark:bg-slate-900" value="All">{lang === 'or' ? 'ସମସ୍ତ ସ୍ଥିତି' : 'All Status'}</option>
+                                <option className="bg-white dark:bg-slate-900" value="verified">{lang === 'or' ? 'ଯାଞ୍ଚ ହୋଇଛି' : 'Verified'}</option>
+                                <option className="bg-white dark:bg-slate-900" value="approved">{lang === 'or' ? 'ଅନୁମୋଦିତ' : 'Approved'}</option>
+                                <option className="bg-white dark:bg-slate-900" value="pending">{lang === 'or' ? 'ବିଚାରାଧୀନ' : 'Pending'}</option>
+                                <option className="bg-white dark:bg-slate-900" value="evidence_requested">{lang === 'or' ? 'ପ୍ରମାଣ ଆବଶ୍ୟକ' : 'Evidence Req.'}</option>
+                                <option className="bg-white dark:bg-slate-900" value="rejected">{lang === 'or' ? 'ନାକଚ' : 'Rejected'}</option>
                             </select>
-                            <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 h-14">
+                            <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-2xl border border-slate-200 dark:border-white/10 h-14">
                                 {['All', 'Male', 'Female'].map(g => (
                                     <button
                                         key={g}
                                         onClick={() => setGenderFilter(g)}
                                         className={`px-4 xl:px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${genderFilter === g
-                                            ? 'bg-gradient-to-r from-pink-600 to-red-600 text-white shadow-lg'
-                                            : 'text-slate-400 hover:text-slate-200'
+                                            ? 'bg-gradient-to-r from-pink-600 to-red-600 text-white shadow-lg shadow-pink-500/30'
+                                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                                             }`}
                                     >
                                         {g === 'All' ? <Filter size={14} /> : g === 'Male' ? <User size={14} /> : <Heart size={14} />}
-                                        <span className="hidden sm:inline">{g}</span>
+                                        <span className="hidden sm:inline">
+                                            {g === 'All' ? t('matrimony', 'all') || 'All' :
+                                                g === 'Male' ? t('matrimony', 'male') || 'Male' :
+                                                    t('matrimony', 'female') || 'Female'}
+                                        </span>
                                     </button>
                                 ))}
                             </div>
-                            <div className="relative h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center gap-3 w-full sm:w-auto">
-                                <ArrowUpDown size={16} className="text-slate-500 shrink-0" />
+                            <div className="relative h-14 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 px-4 flex items-center gap-3 w-full sm:w-auto">
+                                <ArrowUpDown size={16} className="text-slate-400 shrink-0" />
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value as any)}
-                                    className="w-full bg-transparent text-xs font-bold text-slate-300 focus:outline-none uppercase tracking-widest cursor-pointer pr-4"
+                                    className="w-full bg-transparent text-xs font-bold text-slate-600 dark:text-slate-300 focus:outline-none uppercase tracking-widest cursor-pointer pr-4"
                                 >
-                                    <option className="bg-slate-900" value="Default">Sort By</option>
-                                    <option className="bg-slate-900" value="Age">Age</option>
-                                    <option className="bg-slate-900" value="Name">Name (A-Z)</option>
+                                    <option className="bg-white dark:bg-slate-900" value="Default">{lang === 'or' ? 'ସଜାଡନ୍ତୁ' : 'Sort By'}</option>
+                                    <option className="bg-white dark:bg-slate-900" value="Age">{lang === 'or' ? 'ବୟସ' : 'Age'}</option>
+                                    <option className="bg-white dark:bg-slate-900" value="Name">{lang === 'or' ? 'ନାମ' : 'Name (A-Z)'}</option>
                                 </select>
                             </div>
                         </div>
@@ -263,24 +267,24 @@ export default function Matrimony() {
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[1, 2, 3, 4, 5, 6].map(i => (
-                            <div key={i} className="h-[500px] rounded-[32px] bg-white/5 animate-pulse border border-white/10 shadow-inner" />
+                            <div key={i} className="h-[500px] rounded-[32px] bg-white dark:bg-white/5 animate-pulse border border-slate-200 dark:border-white/10 shadow-sm" />
                         ))}
                     </div>
                 ) : filteredCandidates.length === 0 ? (
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                        className="text-center py-32 rounded-[40px] border-2 border-dashed border-white/10 bg-white/5"
+                        className="text-center py-32 rounded-[40px] border-2 border-dashed border-slate-300 dark:border-white/10 bg-white dark:bg-white/5"
                     >
-                        <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <Search size={32} className="text-slate-600" />
+                        <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Search size={32} className="text-slate-400 dark:text-slate-600" />
                         </div>
-                        <h3 className="text-2xl font-bold text-white mb-2">No Profiles Found</h3>
-                        <p className="text-slate-500 max-w-md mx-auto">Try adjusting your filters or search terms.</p>
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('matrimony', 'noProfiles') || 'No Profiles Found'}</h3>
+                        <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">Try adjusting your filters or search terms.</p>
                         <button
                             onClick={() => { setSearchQuery(''); setGenderFilter('All'); setStatusFilter('All'); }}
                             className="mt-6 text-pink-500 font-bold hover:underline"
                         >
-                            Reset Filters
+                            {t('matrimony', 'resetFilters') || 'Reset Filters'}
                         </button>
                     </motion.div>
                 ) : (
@@ -293,10 +297,10 @@ export default function Matrimony() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: Math.min(index * 0.05, 0.5) }}
                                     key={c.id}
-                                    className={`group relative flex flex-col bg-slate-800 border ${c.is_matched ? 'border-amber-500/50 opacity-80' : 'border-white/10'} rounded-[32px] overflow-hidden hover:border-pink-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-pink-500/10 hover:-translate-y-2 backdrop-blur-sm shadow-inner`}
+                                    className={`group relative flex flex-col bg-white dark:bg-slate-800 border ${c.is_matched ? 'border-amber-400 dark:border-amber-500/50 opacity-80' : 'border-slate-200 dark:border-white/10'} rounded-[32px] overflow-hidden hover:border-pink-500/50 dark:hover:border-pink-500/40 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-pink-500/10 hover:-translate-y-2`}
                                 >
                                     {/* Card Media Header */}
-                                    <div className="h-[280px] relative overflow-hidden bg-slate-950">
+                                    <div className="h-[280px] relative overflow-hidden bg-slate-100 dark:bg-slate-950">
                                         {c.photo ? (
                                             <img
                                                 src={getImageUrl(c.photo)}
@@ -305,48 +309,48 @@ export default function Matrimony() {
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center">
-                                                <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center border border-white/5">
-                                                    <User size={40} className="text-slate-700" />
+                                                <div className="w-20 h-20 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center border border-slate-200 dark:border-white/5 shadow-sm">
+                                                    <User size={40} className="text-slate-300 dark:text-slate-700" />
                                                 </div>
                                             </div>
                                         )}
 
-                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent opacity-80" />
 
                                         <div className="absolute top-4 inset-x-4 flex justify-between items-start">
                                             <div className="flex flex-col gap-2">
                                                 <div className="flex gap-2">
-                                                    <span className={`px-3 py-1.5 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border flex items-center gap-1 ${c.gender === 'Female' ? 'bg-pink-500/30 text-pink-200 border-pink-500/30' : 'bg-blue-500/30 text-blue-200 border-blue-500/30'}`}>
-                                                        {c.gender}
+                                                    <span className={`px-3 py-1.5 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border flex items-center gap-1 ${c.gender === 'Female' ? 'bg-pink-100/80 dark:bg-pink-500/30 text-pink-700 dark:text-pink-200 border-pink-200 dark:border-pink-500/30' : 'bg-blue-100/80 dark:bg-blue-500/30 text-blue-700 dark:text-blue-200 border-blue-200 dark:border-blue-500/30'}`}>
+                                                        {c.gender === 'Female' ? t('matrimony', 'female') || 'Female' : t('matrimony', 'male') || 'Male'}
                                                     </span>
                                                     {calculateAge(c.date_of_birth || c.dob) && (
-                                                        <span className="px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/10">
-                                                            {calculateAge(c.date_of_birth || c.dob)} YRS
+                                                        <span className="px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/20">
+                                                            {calculateAge(c.date_of_birth || c.dob)} {t('matrimony', 'years') || 'YRS'}
                                                         </span>
                                                     )}
                                                 </div>
                                                 <span className={`self-start px-3 py-1.5 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}>
-                                                    {c.status.replace('_', ' ')}
+                                                    {lang === 'or' ? (c.status === 'approved' ? 'ଅନୁମୋଦିତ' : c.status === 'pending' ? 'ବିଚାରାଧୀନ' : c.status === 'evidence_requested' ? 'ପ୍ରମାଣ ଆବଶ୍ୟକ' : c.status === 'rejected' ? 'ନାକଚ' : c.status === 'verified' ? 'ଯାଞ୍ଚ ହୋଇଛି' : c.status) : c.status.replace('_', ' ')}
                                                 </span>
                                             </div>
                                             {c.is_matched && (
-                                                <span className="px-3 py-1.5 bg-amber-500/30 text-amber-200 rounded-xl backdrop-blur-md text-[10px] font-black uppercase tracking-widest border border-amber-500/30 flex items-center gap-1">
+                                                <span className="px-3 py-1.5 bg-amber-500/90 dark:bg-amber-500/70 text-amber-950 dark:text-amber-100 rounded-xl backdrop-blur-md text-[10px] font-black uppercase tracking-widest border border-amber-400 dark:border-amber-500 flex items-center gap-1">
                                                     <Heart size={12} fill="currentColor" /> {c.matched_status}
                                                 </span>
                                             )}
                                         </div>
 
                                         <div className="absolute bottom-4 left-6 right-6">
-                                            <h3 className="text-2xl font-bold text-white line-clamp-1 drop-shadow-lg">
+                                            <h3 className="text-2xl font-bold text-white line-clamp-1 drop-shadow-md">
                                                 {c.name}
                                             </h3>
                                         </div>
 
                                         {/* Image Preview Hover */}
-                                        <div className="absolute inset-0 bg-pink-600/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 pointer-events-none">
+                                        <div className="absolute inset-0 bg-pink-600/10 dark:bg-pink-600/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 pointer-events-none">
                                             <button
                                                 onClick={() => setSelectedPhoto(getImageUrl(c.photo))}
-                                                className="w-14 h-14 rounded-2xl bg-white text-slate-900 flex items-center justify-center shadow-xl hover:bg-pink-50 transition-colors pointer-events-auto"
+                                                className="w-14 h-14 rounded-2xl bg-white text-slate-900 flex items-center justify-center shadow-xl hover:bg-pink-50 hover:text-pink-600 transition-colors pointer-events-auto"
                                             >
                                                 <Eye size={24} />
                                             </button>
@@ -357,22 +361,22 @@ export default function Matrimony() {
                                     <div className="p-6 space-y-5 flex-1 flex flex-col">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1">
-                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Education</p>
-                                                <p className="text-xs font-bold text-slate-200 line-clamp-1">{c.education || '---'}</p>
+                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'education') || 'Education'}</p>
+                                                <p className="text-xs font-bold text-slate-900 dark:text-slate-200 line-clamp-1">{c.education || '---'}</p>
                                             </div>
                                             <div className="space-y-1">
-                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Profession</p>
-                                                <p className="text-xs font-bold text-slate-200 line-clamp-1">{c.occupation || '---'}</p>
+                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'occupation') || 'Profession'}</p>
+                                                <p className="text-xs font-bold text-slate-900 dark:text-slate-200 line-clamp-1">{c.occupation || '---'}</p>
                                             </div>
                                         </div>
 
-                                        <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-4 group/item mt-auto">
-                                            <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center shrink-0 border border-pink-500/10 group-hover/item:bg-pink-500/20 transition-colors">
-                                                <MapPin size={18} className="text-pink-500" />
+                                        <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-4 flex items-center gap-4 group/item mt-auto border border-slate-100 dark:border-transparent">
+                                            <div className="w-10 h-10 rounded-xl bg-pink-100 dark:bg-pink-500/10 flex items-center justify-center shrink-0 border border-pink-200 dark:border-pink-500/10 group-hover/item:bg-pink-200 dark:group-hover/item:bg-pink-500/20 transition-colors">
+                                                <MapPin size={18} className="text-pink-600 dark:text-pink-500" />
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[1.5px]">Location</p>
-                                                <p className="text-xs font-bold text-slate-300 truncate">{c.address || 'Unknown'}</p>
+                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[1.5px]">{t('matrimony', 'address') || 'Location'}</p>
+                                                <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{c.address || 'Unknown'}</p>
                                             </div>
                                         </div>
 
@@ -380,14 +384,14 @@ export default function Matrimony() {
                                         <div className="grid grid-cols-2 gap-2 mt-4">
                                             <button
                                                 onClick={() => { setAdminActionCandidate(c); setActionType('status'); setNewStatus(c.status); setAdminComments(c.admin_comments || ''); }}
-                                                className="px-4 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/10 transition-all flex items-center justify-center gap-2"
+                                                className="px-4 py-3 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-white border border-slate-200 dark:border-white/10 transition-all flex items-center justify-center gap-2"
                                             >
                                                 <Pencil size={14} /> Update
                                             </button>
                                             {!c.is_matched && (
                                                 <button
                                                     onClick={() => { setAdminActionCandidate(c); setActionType('match'); setMatchData({ status: 'Matched', partnerName: '', partnerGender: '' }); }}
-                                                    className="px-4 py-3 bg-pink-600/20 hover:bg-pink-600/40 rounded-xl text-[10px] font-black uppercase tracking-widest text-pink-300 border border-pink-500/30 transition-all flex items-center justify-center gap-2"
+                                                    className="px-4 py-3 bg-pink-50 dark:bg-pink-600/20 hover:bg-pink-100 dark:hover:bg-pink-600/40 rounded-xl text-[10px] font-black uppercase tracking-widest text-pink-600 dark:text-pink-300 border border-pink-200 dark:border-pink-500/30 transition-all flex items-center justify-center gap-2"
                                                 >
                                                     <Heart size={14} /> Match
                                                 </button>
@@ -412,20 +416,20 @@ export default function Matrimony() {
             {/* Admin Action Modal (Status & Comments) */}
             <AnimatePresence>
                 {adminActionCandidate && actionType === 'status' && (
-                    <div className="fixed inset-0 z-[160] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
+                    <div className="fixed inset-0 z-[160] flex items-center justify-center p-4 bg-slate-900/60 dark:bg-slate-950/90 backdrop-blur-xl">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: 10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                            className="bg-slate-900 rounded-[32px] w-full max-w-lg border border-white/10 overflow-hidden shadow-2xl p-8"
+                            className="bg-white dark:bg-slate-900 rounded-[32px] w-full max-w-lg border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl p-8"
                         >
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Update Status</h3>
-                                <button onClick={() => setAdminActionCandidate(null)} className="text-slate-500 hover:text-white"><X size={24} /></button>
+                                <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Update Status</h3>
+                                <button onClick={() => setAdminActionCandidate(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white"><X size={24} /></button>
                             </div>
 
-                            <div className="flex items-center gap-4 p-4 bg-slate-800 rounded-2xl mb-6">
-                                <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-700">
+                            <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-transparent rounded-2xl mb-6">
+                                <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700">
                                     {adminActionCandidate.photo ? (
                                         <img src={getImageUrl(adminActionCandidate.photo)} className="w-full h-full object-cover" alt="" />
                                     ) : (
@@ -433,8 +437,8 @@ export default function Matrimony() {
                                     )}
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold text-white">{adminActionCandidate.name}</p>
-                                    <p className="text-xs text-slate-400">Current Status: {adminActionCandidate.status.replace('_', ' ')}</p>
+                                    <p className="text-sm font-bold text-slate-900 dark:text-white">{adminActionCandidate.name}</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">Current Status: {adminActionCandidate.status.replace('_', ' ')}</p>
                                 </div>
                             </div>
 
@@ -444,13 +448,13 @@ export default function Matrimony() {
                                     <select
                                         value={newStatus}
                                         onChange={(e) => setNewStatus(e.target.value)}
-                                        className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-pink-500/50 outline-none text-white text-sm font-bold"
+                                        className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:border-pink-500 outline-none text-slate-900 dark:text-white text-sm font-bold transition-colors"
                                     >
-                                        <option value="pending" className="bg-slate-900">Pending</option>
-                                        <option value="verified" className="bg-slate-900">Verified</option>
-                                        <option value="approved" className="bg-slate-900">Approved</option>
-                                        <option value="evidence_requested" className="bg-slate-900">Request Evidence</option>
-                                        <option value="rejected" className="bg-slate-900">Rejected</option>
+                                        <option value="pending" className="bg-white dark:bg-slate-900">{lang === 'or' ? 'ବିଚାରାଧୀନ' : 'Pending'}</option>
+                                        <option value="verified" className="bg-white dark:bg-slate-900">{lang === 'or' ? 'ଯାଞ୍ଚ ହୋଇଛି' : 'Verified'}</option>
+                                        <option value="approved" className="bg-white dark:bg-slate-900">{lang === 'or' ? 'ଅନୁମୋଦିତ' : 'Approved'}</option>
+                                        <option value="evidence_requested" className="bg-white dark:bg-slate-900">{lang === 'or' ? 'ପ୍ରମାଣ ଆବଶ୍ୟକ' : 'Request Evidence'}</option>
+                                        <option value="rejected" className="bg-white dark:bg-slate-900">{lang === 'or' ? 'ନାକଚ' : 'Rejected'}</option>
                                     </select>
                                 </div>
 
@@ -461,7 +465,7 @@ export default function Matrimony() {
                                         onChange={(e) => setAdminComments(e.target.value)}
                                         placeholder="E.g. Please upload a clearer photo, or submit Aadhar copy."
                                         rows={4}
-                                        className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-pink-500/50 outline-none text-white text-sm font-bold resize-none"
+                                        className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:border-pink-500 outline-none text-slate-900 dark:text-white text-sm font-bold resize-none transition-colors"
                                     />
                                 </div>
                             </div>
@@ -469,7 +473,7 @@ export default function Matrimony() {
                             <div className="mt-8 flex gap-4">
                                 <button
                                     onClick={() => handleDelete(adminActionCandidate.id)}
-                                    className="px-6 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-2xl transition-colors flex items-center justify-center border border-red-500/20"
+                                    className="px-6 py-4 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-500 rounded-2xl transition-colors flex items-center justify-center border border-red-200 dark:border-red-500/20"
                                     title="Delete Candidate"
                                 >
                                     <Trash2 size={20} />
@@ -477,9 +481,9 @@ export default function Matrimony() {
                                 <button
                                     onClick={() => handleUpdateStatus(adminActionCandidate.id, newStatus, adminComments)}
                                     disabled={submitting}
-                                    className="flex-1 px-8 py-4 bg-gradient-to-r from-pink-600 to-red-600 hover:opacity-90 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-pink-500/20"
+                                    className="flex-1 px-8 py-4 bg-gradient-to-r from-pink-600 to-red-600 hover:opacity-90 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-pink-500/20"
                                 >
-                                    {submitting ? 'Saving...' : 'Save Changes'}
+                                    {submitting ? (lang === 'or' ? 'ଅପେକ୍ଷା କରନ୍ତୁ...' : 'Saving...') : (lang === 'or' ? 'ସେଭ୍ କରନ୍ତୁ' : 'Save Changes')}
                                 </button>
                             </div>
                         </motion.div>
@@ -490,19 +494,19 @@ export default function Matrimony() {
             {/* Admin Action Modal (Mark Matched) */}
             <AnimatePresence>
                 {adminActionCandidate && actionType === 'match' && (
-                    <div className="fixed inset-0 z-[160] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
+                    <div className="fixed inset-0 z-[160] flex items-center justify-center p-4 bg-slate-900/60 dark:bg-slate-950/90 backdrop-blur-xl">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: 10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                            className="bg-slate-900 rounded-[32px] w-full max-w-lg border border-white/10 overflow-hidden shadow-2xl p-8"
+                            className="bg-white dark:bg-slate-900 rounded-[32px] w-full max-w-lg border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl p-8"
                         >
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600 uppercase tracking-tighter">Mark Matched</h3>
-                                <button onClick={() => setAdminActionCandidate(null)} className="text-slate-500 hover:text-white"><X size={24} /></button>
+                                <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500 uppercase tracking-tighter">Mark Matched</h3>
+                                <button onClick={() => setAdminActionCandidate(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white"><X size={24} /></button>
                             </div>
 
-                            <p className="text-sm text-slate-400 mb-6">Record a successful match for <strong className="text-white">{adminActionCandidate.name}</strong>. Their profile will be hidden from the public feed but kept in the record.</p>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">Record a successful match for <strong className="text-slate-900 dark:text-white">{adminActionCandidate.name}</strong>. Their profile will be hidden from the public feed but kept in the administrative record.</p>
 
                             <div className="space-y-6">
                                 <div className="space-y-2">
@@ -510,11 +514,11 @@ export default function Matrimony() {
                                     <select
                                         value={matchData.status}
                                         onChange={(e) => setMatchData({ ...matchData, status: e.target.value })}
-                                        className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-amber-500/50 outline-none text-white text-sm font-bold"
+                                        className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold"
                                     >
-                                        <option value="Matched" className="bg-slate-900">Matched</option>
-                                        <option value="Engaged" className="bg-slate-900">Engaged</option>
-                                        <option value="Married" className="bg-slate-900">Married</option>
+                                        <option value="Matched" className="bg-white dark:bg-slate-900">Matched</option>
+                                        <option value="Engaged" className="bg-white dark:bg-slate-900">Engaged</option>
+                                        <option value="Married" className="bg-white dark:bg-slate-900">Married</option>
                                     </select>
                                 </div>
 
@@ -525,7 +529,7 @@ export default function Matrimony() {
                                         value={matchData.partnerName}
                                         onChange={(e) => setMatchData({ ...matchData, partnerName: e.target.value })}
                                         placeholder="Who did they match with?"
-                                        className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-amber-500/50 outline-none text-white text-sm font-bold"
+                                        className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold"
                                     />
                                 </div>
                             </div>
@@ -534,7 +538,7 @@ export default function Matrimony() {
                                 <button
                                     onClick={() => handleMarkMatched(adminActionCandidate.id)}
                                     disabled={submitting}
-                                    className="w-full px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-90 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-amber-500/20"
+                                    className="w-full px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-90 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-amber-500/20"
                                 >
                                     {submitting ? 'Saving...' : 'Confirm Match ✨'}
                                 </button>
@@ -547,15 +551,15 @@ export default function Matrimony() {
             {/* Candidate Details Modal */}
             <AnimatePresence>
                 {selectedCandidate && (
-                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 dark:bg-slate-950/90 backdrop-blur-xl">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-slate-900 rounded-[40px] w-full max-w-4xl border border-white/10 overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]"
+                            className="bg-white dark:bg-slate-900 rounded-[40px] w-full max-w-4xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]"
                         >
                             {/* Detailed view similar to user side */}
-                            <div className="md:w-5/12 relative h-64 md:h-auto bg-slate-800">
+                            <div className="md:w-5/12 relative h-64 md:h-auto bg-slate-100 dark:bg-slate-800">
                                 {selectedCandidate.photo ? (
                                     <img
                                         src={getImageUrl(selectedCandidate.photo)}
@@ -563,20 +567,20 @@ export default function Matrimony() {
                                         alt={selectedCandidate.name}
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center"><User size={64} className="text-slate-700" /></div>
+                                    <div className="w-full h-full flex items-center justify-center"><User size={64} className="text-slate-300 dark:text-slate-700" /></div>
                                 )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 md:bg-gradient-to-r md:from-transparent md:to-slate-900" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 md:bg-gradient-to-r md:from-transparent md:to-slate-900/80" />
                                 <div className="absolute top-6 left-6 flex flex-col gap-2">
-                                    <span className="px-3 py-1 bg-white/10 backdrop-blur border border-white/20 rounded-lg text-[10px] font-black text-white uppercase tracking-widest">{selectedCandidate.status}</span>
+                                    <span className="px-3 py-1 bg-white/20 backdrop-blur border border-white/30 rounded-lg text-[10px] font-black text-white uppercase tracking-widest shadow-sm">{selectedCandidate.status}</span>
                                     {selectedCandidate.is_matched && (
-                                        <span className="px-3 py-1 bg-amber-500 border border-amber-400 rounded-lg text-[10px] font-black text-amber-950 uppercase tracking-widest">{selectedCandidate.matched_status || 'Matched'}</span>
+                                        <span className="px-3 py-1 bg-amber-500 border border-amber-400 rounded-lg text-[10px] font-black text-amber-950 uppercase tracking-widest shadow-sm">{selectedCandidate.matched_status || 'Matched'}</span>
                                     )}
                                 </div>
                                 <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10">
-                                    <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-2 uppercase tracking-tighter shadow-sm">{selectedCandidate.name}</h2>
+                                    <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-2 uppercase tracking-tighter drop-shadow-md">{selectedCandidate.name}</h2>
                                     <div className="flex gap-2">
-                                        <span className="px-4 py-1.5 bg-pink-500 rounded-lg text-[10px] font-black text-white uppercase tracking-widest">{selectedCandidate.gender}</span>
-                                        <span className="px-4 py-1.5 bg-slate-800 rounded-lg text-[10px] font-black text-white uppercase tracking-widest">{calculateAge(selectedCandidate.date_of_birth || selectedCandidate.dob)} YRS</span>
+                                        <span className="px-4 py-1.5 bg-pink-500 rounded-lg text-[10px] font-black text-white uppercase tracking-widest shadow-sm">{selectedCandidate.gender}</span>
+                                        <span className="px-4 py-1.5 bg-slate-800/80 backdrop-blur-sm rounded-lg text-[10px] font-black text-white uppercase tracking-widest shadow-sm">{calculateAge(selectedCandidate.date_of_birth || selectedCandidate.dob)} {t('matrimony', 'years') || 'YRS'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -585,17 +589,17 @@ export default function Matrimony() {
                                 <div className="p-6 md:p-10 space-y-8">
                                     <div className="flex justify-between items-center">
                                         <p className="text-xs font-black text-pink-500 uppercase tracking-[4px]">Candidate Dossier</p>
-                                        <button onClick={() => setSelectedCandidate(null)} className="p-2 hover:bg-white/5 rounded-full transition-colors text-slate-400">
+                                        <button onClick={() => setSelectedCandidate(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors text-slate-400">
                                             <X size={24} />
                                         </button>
                                     </div>
 
                                     {selectedCandidate.is_matched && (
-                                        <div className="p-6 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0"><Heart size={20} fill="currentColor" /></div>
+                                        <div className="p-6 bg-gradient-to-r from-amber-50 dark:from-amber-500/10 to-orange-50 dark:to-orange-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl flex items-start gap-4 shadow-sm">
+                                            <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-500 shrink-0"><Heart size={20} fill="currentColor" /></div>
                                             <div>
-                                                <h4 className="text-sm font-bold text-amber-400 uppercase tracking-widest mb-1">{selectedCandidate.matched_status || 'Matched'}</h4>
-                                                <p className="text-amber-200/70 text-sm">
+                                                <h4 className="text-sm font-bold text-amber-700 dark:text-amber-400 uppercase tracking-widest mb-1">{selectedCandidate.matched_status || 'Matched'}</h4>
+                                                <p className="text-amber-600 dark:text-amber-200/70 text-sm">
                                                     {selectedCandidate.matched_partner_name
                                                         ? `Matched/Married/Engaged to ${selectedCandidate.matched_partner_name}`
                                                         : 'Candidate has successfully found a match.'}
@@ -605,43 +609,43 @@ export default function Matrimony() {
                                     )}
 
                                     {selectedCandidate.admin_comments && (
-                                        <div className="p-6 bg-slate-800/50 border border-slate-700/50 rounded-2xl">
+                                        <div className="p-6 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl">
                                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px] mb-2">Admin Comments</p>
-                                            <p className="text-slate-300 text-sm italic">"{selectedCandidate.admin_comments}"</p>
+                                            <p className="text-slate-700 dark:text-slate-300 text-sm italic">"{selectedCandidate.admin_comments}"</p>
                                         </div>
                                     )}
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Education</p>
-                                            <p className="text-sm font-bold text-slate-200">{selectedCandidate.education || '---'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'education') || 'Education'}</p>
+                                            <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.education || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Occupation</p>
-                                            <p className="text-sm font-bold text-slate-200">{selectedCandidate.occupation || '---'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'occupation') || 'Occupation'}</p>
+                                            <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.occupation || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Address</p>
-                                            <p className="text-sm font-bold text-slate-200">{selectedCandidate.address || '---'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'address') || 'Address'}</p>
+                                            <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.address || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Father</p>
-                                            <p className="text-sm font-bold text-slate-200">{selectedCandidate.father_name || selectedCandidate.father || '---'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'fatherName') || 'Father'}</p>
+                                            <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.father_name || selectedCandidate.father || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Income</p>
-                                            <p className="text-sm font-bold text-slate-200">{selectedCandidate.income || '---'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'income') || 'Income'}</p>
+                                            <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.income || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Mobile</p>
-                                            <p className="text-sm font-bold text-slate-200">{selectedCandidate.mobile || selectedCandidate.phone || '---'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'phone') || 'Mobile'}</p>
+                                            <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.mobile || selectedCandidate.phone || '---'}</p>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="mt-auto p-6 border-t border-white/5 bg-white/2 flex gap-4">
+                                <div className="mt-auto p-6 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/2 flex gap-4">
                                     <button
                                         onClick={() => { setSelectedCandidate(null); setAdminActionCandidate(selectedCandidate); setActionType('status'); setNewStatus(selectedCandidate.status); setAdminComments(selectedCandidate.admin_comments || ''); }}
-                                        className="flex-1 py-4 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black uppercase tracking-widest text-white transition-all shadow-lg flex items-center justify-center gap-2"
+                                        className="flex-1 py-4 bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-transparent rounded-xl text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white transition-all shadow-sm flex items-center justify-center gap-2"
                                     >
                                         <Pencil size={18} /> Update / Edit
                                     </button>
@@ -658,7 +662,7 @@ export default function Matrimony() {
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         onClick={() => setSelectedPhoto(null)}
-                        className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/95 backdrop-blur-2xl cursor-zoom-out"
+                        className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/90 dark:bg-black/95 backdrop-blur-2xl cursor-zoom-out"
                     >
                         <motion.button className="absolute top-8 right-8 w-14 h-14 bg-white/10 hover:bg-white/20 rounded-2xl text-white border border-white/20 transition-all flex items-center justify-center">
                             <X size={32} />
