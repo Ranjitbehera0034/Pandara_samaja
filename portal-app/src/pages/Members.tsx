@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import type { Member } from '../types';
-import { Loader2, Search, UserCheck, UserPlus, MapPin, Users, MessageSquare, BadgeCheck } from 'lucide-react';
+import { Loader2, Search, UserCheck, UserPlus, MapPin, Users, MessageSquare, BadgeCheck, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -179,6 +179,14 @@ export default function Members() {
                                 <div className="flex items-center gap-2">
                                     <MapPin size={16} className="text-slate-500" />
                                     <span>{member.village}{member.village && member.district ? ', ' : ''}{member.district}</span>
+                                </div>
+                            )}
+                            {member.mobile && (
+                                <div className="flex items-center gap-2">
+                                    <Phone size={16} className="text-slate-500" />
+                                    <a href={`tel:${member.mobile}`} className="hover:text-blue-400 hover:underline transition-colors">
+                                        {member.mobile}
+                                    </a>
                                 </div>
                             )}
                             {member.family_members && member.family_members.length > 0 && (
