@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { useTranslation } from 'react-i18next';
-import { LogOut, LayoutDashboard, Users, Heart, Megaphone, ShieldAlert, Calendar, UsersRound, BellRing, Settings, FileClock, Languages, Moon, Sun, X, Shield } from 'lucide-react';
+import { LogOut, LayoutDashboard, Users, Heart, Megaphone, ShieldAlert, Calendar, UsersRound, BellRing, Settings, FileClock, Languages, Moon, Sun, X, Shield, Globe } from 'lucide-react';
 
 interface SidebarProps {
     isMobileOpen?: boolean;
@@ -149,6 +149,13 @@ export default function Sidebar({ isMobileOpen = false, setIsMobileOpen }: Sideb
                                 </NavLink>
                             </>
                         )}
+                        <a
+                            href="https://nikhilaodishapandarasamaja.in"
+                            className={`flex items-center gap-3 px-4 py-3.5 transition-colors text-sm font-medium whitespace-nowrap overflow-hidden text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white`}
+                        >
+                            <div className="shrink-0 px-2 flex justify-center w-10"><Globe size={20} /></div>
+                            <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Website Home</span>
+                        </a>
                     </div>
                 </nav>
             </div>

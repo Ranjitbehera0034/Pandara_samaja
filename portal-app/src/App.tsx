@@ -33,6 +33,8 @@ import Announcements from './pages/Announcements';
 import { GlobalSearch } from './components/GlobalSearch';
 
 import { PORTAL_API_URL } from './config/apiConfig';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { ScrollToTop } from './components/ScrollToTop';
 
 // ─── Protected Layout ────────────────────────────────────────────
 function ProtectedLayout() {
@@ -106,6 +108,7 @@ function ProtectedLayout() {
     { to: '/gallery', icon: <ImageIcon size={20} />, label: t('nav', 'gallery') },
     { to: '/profile', icon: <User size={20} />, label: t('nav', 'profile') },
     { to: '/settings', icon: <Settings size={20} />, label: t('nav', 'settings') },
+    { to: 'https://nikhilaodishapandarasamaja.in', isExternal: true, icon: <Globe size={20} />, label: 'Website Home' },
   ];
 
   const closeMobileSidebar = () => setSidebarOpen(false);
@@ -165,21 +168,8 @@ function ProtectedLayout() {
         <nav className={`flex-1 overflow-y-auto overflow-x-hidden ${collapsed ? 'p-2 space-y-1' : 'p-3 space-y-0.5'}`}>
           {navLinks.map(link => {
             const isActive = location.pathname === link.to;
-            return (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={closeMobileSidebar}
-                title={collapsed ? link.label : undefined}
-                className={`
-                                    flex items-center rounded-xl transition-all duration-200 relative group
-                                    ${collapsed ? 'justify-center p-3' : 'gap-3 px-3 py-2.5'}
-                                    ${isActive
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25 font-semibold'
-                    : 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
-                  }
-                                `}
-              >
+            const content = (
+              <>
                 <span className="shrink-0 relative">
                   {link.icon}
                   {link.badge && (
@@ -194,12 +184,46 @@ function ProtectedLayout() {
                 {/* Tooltip on collapsed hover */}
                 {collapsed && (
                   <span className="
-                                        absolute left-full ml-3 px-2.5 py-1 bg-slate-700 text-white text-xs font-medium rounded-lg shadow-xl
-                                        opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50
-                                    ">
+                    absolute left-full ml-3 px-2.5 py-1 bg-slate-700 text-white text-xs font-medium rounded-lg shadow-xl
+                    opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50
+                  ">
                     {link.label}
                   </span>
                 )}
+              </>
+            );
+
+            const className = `
+              flex items-center rounded-xl transition-all duration-200 relative group
+              ${collapsed ? 'justify-center p-3' : 'gap-3 px-3 py-2.5'}
+              ${isActive
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25 font-semibold'
+                : 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
+              }
+            `;
+
+            if (link.isExternal) {
+              return (
+                <a
+                  key={link.to}
+                  href={link.to}
+                  title={collapsed ? link.label : undefined}
+                  className={className}
+                >
+                  {content}
+                </a>
+              );
+            }
+
+            return (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={closeMobileSidebar}
+                title={collapsed ? link.label : undefined}
+                className={className}
+              >
+                {content}
               </Link>
             );
           })}
@@ -308,30 +332,35 @@ function ProtectedLayout() {
         </header>
 
         {/* Page */}
-        <main className={`flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900 scroll-smooth ${settings.compactMode ? 'text-sm' : ''}`}>
+        <main id="main-scroll-container" className={`flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900 scroll-smooth ${settings.compactMode ? 'text-sm' : ''}`}>
+          <ScrollToTop containerId="main-scroll-container" />
           <div className={`max-w-5xl mx-auto px-4 ${settings.compactMode ? 'py-3' : 'py-6'}`}>
-            <Routes>
-              <Route path="/" element={<Feed />} />
-              <Route path="/feed" element={<Navigate to="/" replace />} />
-              <Route path="/dashboard" element={<Navigate to="/" replace />} />
-              <Route path="/announcements" element={<Announcements />} />
-              <Route path="/explore" element={<Explore />} />
-              <Route path="/matrimony" element={<Matrimony />} />
-              <Route path="/live" element={<LiveStream />} />
-              <Route path="/groups" element={<Groups />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/chat" element={<Chat />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/members" element={<Members />} />
-              <Route path="/gallery" element={<Gallery />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/profile/:id" element={<MemberProfile />} />
-              <Route path="/family/tree" element={<FamilyTree />} />
-              <Route path="/family/albums" element={<FamilyAlbums />} />
-              <Route path="/family/events" element={<FamilyEvents />} />
-              <Route path="/family/logins" element={<FamilyLogin />} />
-              <Route path="/settings" element={<SettingsPage />} />
-            </Routes>
+            <ErrorBoundary>
+              <Routes>
+                <Route path="/" element={<Feed />} />
+                <Route path="/feed" element={<Navigate to="/" replace />} />
+                <Route path="/dashboard" element={<Navigate to="/" replace />} />
+                <Route path="/announcements" element={<Announcements />} />
+                <Route path="/explore" element={<Explore />} />
+                <Route path="/matrimony" element={<Matrimony />} />
+                <Route path="/live" element={<LiveStream />} />
+                <Route path="/groups" element={<Groups />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/notifications" element={<Notifications />} />
+                <Route path="/members" element={<Members />} />
+                <Route path="/gallery" element={<Gallery />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/:id" element={<MemberProfile />} />
+                <Route path="/family/tree" element={<FamilyTree />} />
+                <Route path="/family/albums" element={<FamilyAlbums />} />
+                <Route path="/family/events" element={<FamilyEvents />} />
+                <Route path="/family/logins" element={<FamilyLogin />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                {/* Fallback Catch-all -> Redirect to Feed to prevent blank pages on mistyped hashes */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </ErrorBoundary>
           </div>
         </main>
       </div>
