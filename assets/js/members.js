@@ -59,7 +59,7 @@ function renderLeadersHTML(level, locationString) {
       if (leader.image_url.includes('drive.google.com') || leader.image_url.includes('lh3.googleusercontent.com')) {
         const driveIdMatch = leader.image_url.match(/([a-zA-Z0-9_-]{25,})/);
         if (driveIdMatch && driveIdMatch[1]) {
-          src = baseUrl + '/api/v1/image-proxy' + driveIdMatch[1];
+          src = baseUrl + '/api/v1/image-proxy/' + driveIdMatch[1];
         } else {
           src = leader.image_url;
         }
@@ -531,7 +531,7 @@ function addTableDataLabels() {
   if (memberTable) memberTable.style.display = 'none';
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/v1/members`);
+    const res = await fetch(`${API_BASE_URL}/api/v1/members?limit=10000&page=1`);
     if (!res.ok) throw new Error(`API Error: ${res.status}`);
     const result = await res.json();
     if (result.success && Array.isArray(result.members)) {
@@ -668,7 +668,7 @@ function addTableDataLabels() {
 
       if (confirm('Are you sure you want to delete this member?')) {
         try {
-          const res = await fetch(`${API_BASE_URL}/api/v1/members${id}`, {
+          const res = await fetch(`${API_BASE_URL}/api/v1/members/${id}`, {
             method: 'DELETE',
             headers: getAuthHeaders()
           });
