@@ -59,7 +59,7 @@ function renderLeadersHTML(level, locationString) {
       if (leader.image_url.includes('drive.google.com') || leader.image_url.includes('lh3.googleusercontent.com')) {
         const driveIdMatch = leader.image_url.match(/([a-zA-Z0-9_-]{25,})/);
         if (driveIdMatch && driveIdMatch[1]) {
-          src = baseUrl + '/api/image-proxy/' + driveIdMatch[1];
+          src = baseUrl + '/api/v1/image-proxy' + driveIdMatch[1];
         } else {
           src = leader.image_url;
         }
