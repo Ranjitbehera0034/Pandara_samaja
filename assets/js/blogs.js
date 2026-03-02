@@ -37,6 +37,17 @@ function showSkeleton() {
     </div>`;
 }
 
+function hideSkeleton() {
+  const blogList = document.getElementById('blog-list');
+  if (!blogList) return;
+  const hasSkeleton = blogList.querySelector('.blog-skeleton-grid');
+  if (hasSkeleton && allPosts.length > 0) {
+    renderPosts(allPosts);
+  } else if (hasSkeleton) {
+    blogList.innerHTML = '';
+  }
+}
+
 /* ─── Toast ─── */
 function showToast(message, type = 'success') {
   const toast = document.createElement('div');
@@ -466,7 +477,7 @@ function showEditModal(id, title, content) {
 }
 
 /* ─── Init ─── */
-document.addEventListener("DOMContentLoaded", async () => {
+async function loadBlogPosts() {
   const blogList = document.getElementById("blog-list");
   showSkeleton();
 
@@ -488,21 +499,38 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   } catch (err) {
     console.error("Error loading posts:", err);
-    blogList.innerHTML = `
-      <div class="blog-empty">
-        <div class="blog-empty-icon">📝</div>
-        <h3>
-          <span class="lang-or">ଲେଖା ଶୀଘ୍ର ପ୍ରକାଶିତ ହେବ</span>
-          <span class="lang-en">Articles Coming Soon</span>
-        </h3>
-        <p>
-          <span class="lang-or">ସମାଜର ଖବର ଓ ଘୋଷଣା ଶୀଘ୍ର ଏଠାରେ ପ୍ରକାଶିତ ହେବ</span>
-          <span class="lang-en">Community news and announcements will be published here soon</span>
-        </p>
-        <p style="opacity:0.6; font-size:0.85rem;">
-          <span class="lang-or">ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ ସହ ଯୋଡ଼ି ରୁହନ୍ତୁ</span>
-          <span class="lang-en">Stay connected with Nikhila Odisha Pandara Samaja</span>
-        </p>
-      </div>`;
+    if (blogList) {
+      blogList.innerHTML = `
+        <div class="blog-empty">
+          <div class="blog-empty-icon">📝</div>
+          <h3>
+            <span class="lang-or">ଲେଖା ଶୀଘ୍ର ପ୍ରକାଶିତ ହେବ</span>
+            <span class="lang-en">Articles Coming Soon</span>
+          </h3>
+          <p>
+            <span class="lang-or">ସମାଜର ଖବର ଓ ଘୋଷଣା ଶୀଘ୍ର ଏଠାରେ ପ୍ରକାଶିତ ହେବ</span>
+            <span class="lang-en">Community news and announcements will be published here soon</span>
+          </p>
+          <p style="opacity:0.6; font-size:0.85rem;">
+            <span class="lang-or">ନିଖିଳ ଓଡିଶା ପନ୍ଦରା ସମାଜ ସହ ଯୋଡ଼ି ରୁହନ୍ତୁ</span>
+            <span class="lang-en">Stay connected with Nikhila Odisha Pandara Samaja</span>
+          </p>
+        </div>`;
+    }
+  } finally {
+    // Ensure skeleton is never stuck visible
+    hideSkeleton();
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadBlogPosts();
+});
+
+// Handle browser back/forward (bfcache restore) — DOMContentLoaded does NOT fire
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) {
+    // Page was restored from bfcache. If skeleton is still showing, clear it.
+    hideSkeleton();
   }
 });
