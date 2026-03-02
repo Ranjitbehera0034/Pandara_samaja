@@ -179,6 +179,9 @@ export const translations = {
         sendMessage: { en: 'Send message', od: 'ବାର୍ତ୍ତା ପଠାନ୍ତୁ' },
         familyMembers: { en: 'Family Members', od: 'ପରିବାର ସଦସ୍ୟ' },
         failedLoad: { en: 'Failed to load members directory', od: 'ସଦସ୍ୟ ତାଲିକା ଲୋଡ ବିଫଳ' },
+        mobileNumber: { en: 'Mobile', od: 'ମୋବାଇଲ୍' },
+        call: { en: 'Call', od: 'କଲ୍' },
+        viewProfile: { en: 'View Profile', od: 'ପ୍ରୋଫାଇଲ୍ ଦେଖନ୍ତୁ' }
     },
 
     // ═══════════════════════════════════════════
