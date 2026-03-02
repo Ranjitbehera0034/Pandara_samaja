@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, MapPin, MessageSquare, Loader2, BadgeCheck, Users, Image as ImageIcon, LayoutGrid } from 'lucide-react';
+import { PORTAL_API_URL } from '../config/apiConfig';
 import { PostCard } from '../components/feed/PostCard';
 import type { Post } from '../types';
 
@@ -50,7 +51,7 @@ export default function MemberProfile() {
                 setLoading(true);
                 const token = localStorage.getItem('portalToken');
                 const nameQuery = nameParam ? `?name=${encodeURIComponent(nameParam)}` : '';
-                const url = `${import.meta.env.VITE_PORTAL_API_URL || 'http://localhost:5001'}/api/portal/members/public/${id}${nameQuery}`;
+                const url = `${PORTAL_API_URL}/members/public/${id}${nameQuery}`;
 
                 const res = await fetch(url, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -86,7 +87,7 @@ export default function MemberProfile() {
                 }
             }) : prev);
 
-            await fetch(`${import.meta.env.VITE_PORTAL_API_URL || 'http://localhost:5001'}/api/portal/subscribe/${profile.id}`, {
+            await fetch(`${PORTAL_API_URL}/subscribe/${profile.id}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
