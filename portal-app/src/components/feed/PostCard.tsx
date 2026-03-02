@@ -430,7 +430,7 @@ export function PostCard({
                     </div>
                     <div>
                         <div className="flex items-center gap-1.5">
-                            <a href={`#/profile/${post.authorId}`}
+                            <a href={`#/profile/${post.authorId}?name=${encodeURIComponent(post.authorName)}`}
                                 className="font-semibold text-white hover:text-blue-400 transition-colors leading-tight text-sm hover:underline cursor-pointer">
                                 {post.authorName}
                             </a>
