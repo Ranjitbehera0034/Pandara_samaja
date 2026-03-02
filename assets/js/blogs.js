@@ -190,7 +190,7 @@ function renderPosts(posts) {
         const delId = btn.dataset.id;
         if (confirm("Delete this post?")) {
           try {
-            const res = await fetch(`${API_BASE_URL}/api/posts/${delId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/v1/posts/${delId}`, {
               method: "DELETE",
               headers: getAuthHeaders()
             });
@@ -450,7 +450,7 @@ function showEditModal(id, title, content) {
     if (!newTitle || !newContent) return showToast("Fill all fields", "error");
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/posts/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ title: newTitle, content: newContent })
@@ -471,7 +471,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   showSkeleton();
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/posts`);
+    const res = await fetch(`${API_BASE_URL}/api/v1/posts`);
     const result = await res.json();
 
     if (result.success && Array.isArray(result.posts)) {

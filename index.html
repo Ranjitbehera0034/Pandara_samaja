@@ -435,7 +435,7 @@
             try {
                 // Ensure config.js has set window.API_BASE_URL
                 const baseUrl = window.API_BASE_URL || 'http://localhost:5000';
-                const response = await fetch(baseUrl + '/api/leaders');
+                const response = await fetch(baseUrl + '/api/v1/leaders');
                 const result = await response.json();
 
                 if (result.success && result.data && result.data.length > 0) {
@@ -484,7 +484,7 @@
                                     if (image_url.includes('drive.google.com') || image_url.includes('lh3.googleusercontent.com')) {
                                         const driveIdMatch = image_url.match(/([a-zA-Z0-9_-]{25,})/);
                                         if (driveIdMatch && driveIdMatch[1]) {
-                                            src = baseUrl + '/api/v1/image-proxy' + driveIdMatch[1];
+                                            src = baseUrl + '/api/v1/image-proxy/' + driveIdMatch[1];
                                         } else {
                                             src = image_url;
                                         }
