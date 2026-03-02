@@ -19,7 +19,7 @@ interface PreviewItem {
 }
 
 export function CreatePost({ onPostCreate }: CreatePostProps) {
-    const { member } = useAuth();
+    const { member, user } = useAuth();
     const { t } = useLanguage();
     const [content, setContent] = useState('');
     const [previews, setPreviews] = useState<PreviewItem[]>([]);
@@ -128,6 +128,13 @@ export function CreatePost({ onPostCreate }: CreatePostProps) {
     const hasHashtags = content.includes('#');
     const hasMentions = content.includes('@');
 
+    const displayName = user?.name || member?.name || '';
+    const rawPhoto = user?.profile_photo_url || null;
+    const cleanedPhoto = rawPhoto?.includes('drive.google.com/uc?id=')
+        ? rawPhoto.replace('drive.google.com/uc?id=', 'lh3.googleusercontent.com/d/')
+        : rawPhoto;
+    const isFemale = ['female', 'f'].includes((user?.gender || '').toLowerCase());
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -135,8 +142,16 @@ export function CreatePost({ onPostCreate }: CreatePostProps) {
             className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 mb-6 shadow-xl"
         >
             <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20 shrink-0">
-                    {member?.name?.[0] || '?'}
+                <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ${isFemale ? 'ring-pink-500/50' : 'ring-blue-500/50'} shrink-0 flex items-center justify-center font-bold text-white shadow-lg`}>
+                    {cleanedPhoto ? (
+                        <img src={cleanedPhoto} referrerPolicy="no-referrer" alt={displayName}
+                            className="w-full h-full object-cover"
+                            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    ) : (
+                        <div className={`w-full h-full flex items-center justify-center ${isFemale ? 'bg-gradient-to-br from-rose-500 to-pink-600' : 'bg-gradient-to-br from-blue-500 to-indigo-600'}`}>
+                            {displayName[0] || '?'}
+                        </div>
+                    )}
                 </div>
                 <div className="flex-1">
                     <textarea

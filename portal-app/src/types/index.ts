@@ -40,6 +40,8 @@ export interface LoggedUser {
     name: string;
     relation: string;
     mobile?: string;
+    profile_photo_url?: string | null;
+    gender?: string | null;
 }
 
 // ─── Reaction system (Phase 1) ──────────────────────
@@ -82,6 +84,7 @@ export interface Post {
     authorName: string;
     authorAvatar?: string;
     authorVerified?: boolean;    // Phase 5: Verified Badge
+    authorMembershipNo?: string; // for linking to profile
     location?: string;
     content: string;
     images?: string[];           // Legacy image URLs

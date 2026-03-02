@@ -250,7 +250,7 @@ export function PostCard({
     post, onLike, onReact, onComment, onReply,
     onDelete, onEdit, onReport, onShare, onBookmark, onPollVote
 }: PostCardProps) {
-    const { member } = useAuth();
+    const { member, user } = useAuth();
     const { t } = useLanguage();
     const [showComments, setShowComments] = useState(false);
     const [commentText, setCommentText] = useState('');
@@ -430,10 +430,17 @@ export function PostCard({
                     </div>
                     <div>
                         <div className="flex items-center gap-1.5">
-                            <h3 className="font-semibold text-white leading-tight text-sm">{post.authorName}</h3>
+                            <a href={`#/profile/${post.authorId}`}
+                                className="font-semibold text-white hover:text-blue-400 transition-colors leading-tight text-sm hover:underline cursor-pointer">
+                                {post.authorName}
+                            </a>
                             {post.authorVerified && <BadgeCheck size={16} className="text-blue-500" />}
                         </div>
-                        <p className="text-xs text-slate-500">{timeAgoShort(post.timestamp)}{post.location ? ` • ${post.location}` : ''}</p>
+                        <p className="text-xs text-slate-500">
+                            {timeAgoShort(post.timestamp)}
+                            {post.location ? ` • ${post.location}` : ''}
+                            {post.authorMembershipNo ? ` • #${post.authorMembershipNo}` : ''}
+                        </p>
                     </div>
                 </div>
 
@@ -664,7 +671,24 @@ export function PostCard({
                             )}
                         </div>
 
-                        <form onSubmit={handleCommentSubmit} className="flex gap-2">
+                        <form onSubmit={handleCommentSubmit} className="flex gap-2 items-center">
+                            {/* Show logged-in user's avatar */}
+                            {(() => {
+                                const rawP = user?.profile_photo_url || null;
+                                const cP = rawP?.includes('drive.google.com/uc?id=') ? rawP.replace('drive.google.com/uc?id=', 'lh3.googleusercontent.com/d/') : rawP;
+                                const fem = ['female', 'f'].includes((user?.gender || '').toLowerCase());
+                                return (
+                                    <div className={`w-8 h-8 rounded-full overflow-hidden shrink-0 ring-1 ${fem ? 'ring-pink-500/40' : 'ring-blue-500/40'} flex items-center justify-center font-bold text-xs text-white`}>
+                                        {cP ? (
+                                            <img src={cP} referrerPolicy="no-referrer" alt="" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                        ) : (
+                                            <div className={`w-full h-full flex items-center justify-center ${fem ? 'bg-gradient-to-br from-rose-500 to-pink-600' : 'bg-gradient-to-br from-blue-500 to-indigo-600'}`}>
+                                                {(user?.name || member?.name || '?')[0].toUpperCase()}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                             <input
                                 type="text"
                                 value={commentText}
