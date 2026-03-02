@@ -240,9 +240,9 @@ export default function Matrimony() {
                                     >
                                         {g === 'All' ? <Filter size={14} /> : g === 'Male' ? <User size={14} /> : <Heart size={14} />}
                                         <span className="hidden sm:inline">
-                                            {g === 'All' ? t('matrimony', 'all') || 'All' :
-                                                g === 'Male' ? t('matrimony', 'male') || 'Male' :
-                                                    t('matrimony', 'female') || 'Female'}
+                                            {g === 'All' ? t('matrimony.all', { defaultValue: 'All' }) :
+                                                g === 'Male' ? t('matrimony.male', { defaultValue: 'Male' }) :
+                                                    t('matrimony.female', { defaultValue: 'Female' })}
                                         </span>
                                     </button>
                                 ))}
