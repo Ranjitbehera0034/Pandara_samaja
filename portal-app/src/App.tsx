@@ -93,6 +93,14 @@ function ProtectedLayout() {
 
   const getInitial = (name?: string | null) => name ? name.charAt(0).toUpperCase() : '?';
   const displayName = user?.name || member?.name || t('nav', 'profile');
+  const isFemaleUser = ['female', 'f'].includes((user?.gender || '').toLowerCase());
+  const userPhotoUrl = user?.profile_photo_url || null;
+  const cleanPhoto = (url?: string | null) => {
+    if (!url) return null;
+    if (url.includes('drive.google.com/uc?id=')) return url.replace('drive.google.com/uc?id=', 'lh3.googleusercontent.com/d/');
+    return url;
+  };
+  const cleanedUserPhoto = cleanPhoto(userPhotoUrl);
 
   const navLinks = [
     { to: '/', icon: <Home size={20} />, label: t('nav', 'home') },
@@ -252,8 +260,17 @@ function ProtectedLayout() {
             className={`flex items-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors ${collapsed ? 'justify-center p-2' : 'gap-2.5 px-2.5 py-2'}`}
             title={collapsed ? displayName : undefined}
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-sm font-bold shrink-0 text-white">
-              {getInitial(displayName)}
+            <div className={`relative w-8 h-8 rounded-full overflow-hidden shrink-0 ring-2 ${isFemaleUser ? 'ring-pink-500/50' : 'ring-blue-500/50'}`}>
+              {cleanedUserPhoto ? (
+                <img src={cleanedUserPhoto} referrerPolicy="no-referrer" alt={displayName} className="w-full h-full object-cover"
+                  onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              ) : (
+                <div className={`w-full h-full flex items-center justify-center font-bold text-white text-sm ${isFemaleUser ? 'bg-gradient-to-br from-rose-500 to-pink-600' : 'bg-gradient-to-br from-blue-500 to-indigo-600'}`}>
+                  {getInitial(displayName)}
+                </div>
+              )}
+              {/* Active session green dot */}
+              <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-400 ring-1 ring-slate-800" />
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1 overflow-hidden">
@@ -324,8 +341,15 @@ function ProtectedLayout() {
                 <div className="text-sm font-semibold text-white leading-tight">{displayName}</div>
                 <div className="text-[11px] text-slate-500">#{member?.membership_no}</div>
               </div>
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-400 border-2 border-slate-700 flex items-center justify-center font-bold text-xs">
-                {getInitial(displayName)}
+              <div className={`w-8 h-8 rounded-full overflow-hidden border-2 ${isFemaleUser ? 'border-pink-500' : 'border-blue-500'} shrink-0 flex items-center justify-center font-bold text-xs text-white`}>
+                {cleanedUserPhoto ? (
+                  <img src={cleanedUserPhoto} referrerPolicy="no-referrer" alt={displayName} className="w-full h-full object-cover"
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                ) : (
+                  <div className={`w-full h-full flex items-center justify-center ${isFemaleUser ? 'bg-gradient-to-br from-rose-500 to-pink-600' : 'bg-gradient-to-br from-blue-500 to-indigo-600'}`}>
+                    {getInitial(displayName)}
+                  </div>
+                )}
               </div>
             </Link>
           </div>
