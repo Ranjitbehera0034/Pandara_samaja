@@ -66,7 +66,7 @@ export default function Matrimony() {
                 setCandidates(res.data.candidates);
             }
         } catch {
-            toast.error(t('matrimony', 'failedLoad') || 'Could not load matrimony profiles');
+            toast.error(t('matrimony.') || 'Could not load matrimony profiles');
         } finally {
             setLoading(false);
         }
@@ -209,7 +209,7 @@ export default function Matrimony() {
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-pink-500 transition-colors" size={20} />
                             <input
                                 type="text"
-                                placeholder={t('matrimony', 'searchPlaceholder') || "Search name, education, location..."}
+                                placeholder={t('matrimony.') || "Search name, education, location..."}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full pl-12 pr-4 py-4 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:outline-none focus:border-pink-500 text-slate-900 dark:text-white placeholder-slate-500 transition-all text-sm font-medium"
@@ -278,13 +278,13 @@ export default function Matrimony() {
                         <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
                             <Search size={32} className="text-slate-400 dark:text-slate-600" />
                         </div>
-                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('matrimony', 'noProfiles') || 'No Profiles Found'}</h3>
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('matrimony.') || 'No Profiles Found'}</h3>
                         <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">Try adjusting your filters or search terms.</p>
                         <button
                             onClick={() => { setSearchQuery(''); setGenderFilter('All'); setStatusFilter('All'); }}
                             className="mt-6 text-pink-500 font-bold hover:underline"
                         >
-                            {t('matrimony', 'resetFilters') || 'Reset Filters'}
+                            {t('matrimony.') || 'Reset Filters'}
                         </button>
                     </motion.div>
                 ) : (
@@ -321,11 +321,11 @@ export default function Matrimony() {
                                             <div className="flex flex-col gap-2">
                                                 <div className="flex gap-2">
                                                     <span className={`px-3 py-1.5 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border flex items-center gap-1 ${c.gender === 'Female' ? 'bg-pink-100/80 dark:bg-pink-500/30 text-pink-700 dark:text-pink-200 border-pink-200 dark:border-pink-500/30' : 'bg-blue-100/80 dark:bg-blue-500/30 text-blue-700 dark:text-blue-200 border-blue-200 dark:border-blue-500/30'}`}>
-                                                        {c.gender === 'Female' ? t('matrimony', 'female') || 'Female' : t('matrimony', 'male') || 'Male'}
+                                                        {c.gender === 'Female' ? t('matrimony.') || 'Female' : t('matrimony.') || 'Male'}
                                                     </span>
                                                     {calculateAge(c.date_of_birth || c.dob) && (
                                                         <span className="px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/20">
-                                                            {calculateAge(c.date_of_birth || c.dob)} {t('matrimony', 'years') || 'YRS'}
+                                                            {calculateAge(c.date_of_birth || c.dob)} {t('matrimony.') || 'YRS'}
                                                         </span>
                                                     )}
                                                 </div>
@@ -361,11 +361,11 @@ export default function Matrimony() {
                                     <div className="p-6 space-y-5 flex-1 flex flex-col">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1">
-                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'education') || 'Education'}</p>
+                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony.') || 'Education'}</p>
                                                 <p className="text-xs font-bold text-slate-900 dark:text-slate-200 line-clamp-1">{c.education || '---'}</p>
                                             </div>
                                             <div className="space-y-1">
-                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'occupation') || 'Profession'}</p>
+                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony.') || 'Profession'}</p>
                                                 <p className="text-xs font-bold text-slate-900 dark:text-slate-200 line-clamp-1">{c.occupation || '---'}</p>
                                             </div>
                                         </div>
@@ -375,7 +375,7 @@ export default function Matrimony() {
                                                 <MapPin size={18} className="text-pink-600 dark:text-pink-500" />
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[1.5px]">{t('matrimony', 'address') || 'Location'}</p>
+                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[1.5px]">{t('matrimony.') || 'Location'}</p>
                                                 <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{c.address || 'Unknown'}</p>
                                             </div>
                                         </div>
@@ -580,7 +580,7 @@ export default function Matrimony() {
                                     <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-2 uppercase tracking-tighter drop-shadow-md">{selectedCandidate.name}</h2>
                                     <div className="flex gap-2">
                                         <span className="px-4 py-1.5 bg-pink-500 rounded-lg text-[10px] font-black text-white uppercase tracking-widest shadow-sm">{selectedCandidate.gender}</span>
-                                        <span className="px-4 py-1.5 bg-slate-800/80 backdrop-blur-sm rounded-lg text-[10px] font-black text-white uppercase tracking-widest shadow-sm">{calculateAge(selectedCandidate.date_of_birth || selectedCandidate.dob)} {t('matrimony', 'years') || 'YRS'}</span>
+                                        <span className="px-4 py-1.5 bg-slate-800/80 backdrop-blur-sm rounded-lg text-[10px] font-black text-white uppercase tracking-widest shadow-sm">{calculateAge(selectedCandidate.date_of_birth || selectedCandidate.dob)} {t('matrimony.') || 'YRS'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -617,27 +617,27 @@ export default function Matrimony() {
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'education') || 'Education'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony.') || 'Education'}</p>
                                             <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.education || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'occupation') || 'Occupation'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony.') || 'Occupation'}</p>
                                             <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.occupation || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'address') || 'Address'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony.') || 'Address'}</p>
                                             <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.address || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'fatherName') || 'Father'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony.') || 'Father'}</p>
                                             <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.father_name || selectedCandidate.father || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'income') || 'Income'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony.') || 'Income'}</p>
                                             <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.income || '---'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony', 'phone') || 'Mobile'}</p>
+                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{t('matrimony.') || 'Mobile'}</p>
                                             <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{selectedCandidate.mobile || selectedCandidate.phone || '---'}</p>
                                         </div>
                                     </div>
