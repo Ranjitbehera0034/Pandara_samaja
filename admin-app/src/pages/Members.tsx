@@ -54,7 +54,7 @@ export default function Members() {
     const fetchMembers = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/members');
+            const res = await api.get('/members?limit=10000&page=1');
             if (res.data.success) {
                 setMembers(res.data.members || []);
             } else if (Array.isArray(res.data)) {
