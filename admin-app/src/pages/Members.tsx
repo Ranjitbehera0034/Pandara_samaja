@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
-import { Search, Plus, Upload, Edit2, Trash2, X, Ban, CheckCircle, LayoutGrid, List, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Plus, Upload, Edit2, Trash2, X, Ban, CheckCircle, LayoutGrid, List, ChevronDown, ChevronUp, Camera, UserCircle2, Phone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -10,6 +10,8 @@ interface FamilyMember {
     relation: string;
     gender: string;
     age: string;
+    mobile?: string;
+    profile_pic?: string;
 }
 
 export default function Members() {
@@ -48,6 +50,8 @@ export default function Members() {
     const [panchayat, setPanchayat] = useState('');
     const [village, setVillage] = useState('');
     const [address, setAddress] = useState('');
+    const [stateLocation, setStateLocation] = useState('');
+    const [headProfilePic, setHeadProfilePic] = useState<string | null>(null);
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [headAge, setHeadAge] = useState('');
 
@@ -151,6 +155,8 @@ export default function Members() {
         setPanchayat('');
         setVillage('');
         setAddress('');
+        setStateLocation('');
+        setHeadProfilePic(null);
         setFamilyMembers([]);
         setHeadAge('');
         setIsModalOpen(true);
@@ -161,7 +167,8 @@ export default function Members() {
         setMemberId(m.membership_no);
         setMembershipNo(m.membership_no);
         setName(m.name);
-        setHeadGender(m.head_gender || '');
+        const capitalize = (s: any) => (typeof s === 'string' && s.length > 0) ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
+        setHeadGender(capitalize(m.head_gender || ''));
         setMobile(m.mobile || '');
         setAadharNo(m.aadhar_no || '');
         setDistrict(m.district || '');
@@ -169,6 +176,8 @@ export default function Members() {
         setPanchayat(m.panchayat || '');
         setVillage(m.village || '');
         setAddress(m.address || '');
+        setStateLocation(m.state || m.stateLocation || '');
+        setHeadProfilePic(m.profile_photo_url || null);
 
         const parsedMembers = Array.isArray(m.family_members) ? m.family_members : [];
         const isHead = (rel: any) => !rel ? false : ['head', 'self'].includes(String(rel).toLowerCase());
@@ -180,8 +189,10 @@ export default function Members() {
             id: Math.random().toString(36).substr(2, 9),
             name: fm.name || '',
             relation: fm.relation || '',
-            gender: fm.gender || '',
-            age: fm.age || ''
+            gender: capitalize(fm.gender || ''),
+            age: fm.age || '',
+            mobile: fm.mobile || '',
+            profile_pic: fm.profile_pic || ''
         })));
         setIsModalOpen(true);
     };
@@ -194,12 +205,14 @@ export default function Members() {
         e.preventDefault();
         try {
             const allFamilyMembers = [
-                { name: String(name || '').trim(), relation: 'Self', gender: headGender, age: String(headAge || '').trim() },
-                ...familyMembers.map(({ name, relation, gender, age }) => ({
+                { name: String(name || '').trim(), relation: 'Self', gender: headGender, age: String(headAge || '').trim(), profile_pic: headProfilePic },
+                ...familyMembers.map(({ name, relation, gender, age, mobile, profile_pic }) => ({
                     name: String(name || '').trim(),
                     relation: String(relation || '').trim(),
                     gender,
-                    age: String(age || '').trim()
+                    age: String(age || '').trim(),
+                    mobile: String(mobile || '').trim(),
+                    profile_pic
                 }))
             ].filter(fm => fm.name); // only include if they have a name
 
@@ -214,6 +227,8 @@ export default function Members() {
                 panchayat,
                 village,
                 address,
+                state: stateLocation,
+                profile_photo_url: headProfilePic,
                 male: maleCount,
                 female: femaleCount,
                 family_members: allFamilyMembers
@@ -244,10 +259,33 @@ export default function Members() {
         }
     };
 
+
+    const handleHeadPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setHeadProfilePic(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleFamilyPhotoUpload = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                updateFamilyMember(id, 'profile_pic', reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const addFamilyMember = () => {
         setFamilyMembers([
             ...familyMembers,
-            { id: Math.random().toString(36).substr(2, 9), name: '', relation: '', gender: '', age: '' }
+            { id: Math.random().toString(36).substr(2, 9), name: '', relation: '', gender: '', age: '', mobile: '', profile_pic: '' }
         ]);
     };
 
@@ -515,7 +553,7 @@ export default function Members() {
             {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/40 backdrop-blur-md">
-                    <div className="bg-white dark:bg-slate-900 rounded-[32px] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] border border-white/20 dark:border-slate-800 animate-in fade-in zoom-in duration-200">
+                    <div className="bg-white dark:bg-slate-900 rounded-[32px] w-[98vw] sm:w-[95vw] lg:w-[90vw] max-w-7xl shadow-2xl overflow-hidden flex flex-col max-h-[96vh] sm:max-h-[90vh] border border-white/20 dark:border-slate-800 animate-in fade-in zoom-in duration-200">
                         <div className="px-6 sm:px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
                             <div>
                                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">{isEditing ? 'Edit Member' : 'Add New Member'}</h2>
@@ -535,36 +573,56 @@ export default function Members() {
                                     <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xs shadow-lg shadow-blue-500/20">01</span>
                                     Head of Family Details
                                 </h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
-                                    <div className="space-y-2">
-                                        <label className="block text-[11px] font-black text-blue-800/70 dark:text-blue-200/50 uppercase tracking-widest pl-1">Membership No. *</label>
-                                        <input type="text" value={membershipNo} onChange={(e) => setMembershipNo(e.target.value)} required disabled={isEditing} className="w-full px-4 py-3 rounded-xl border border-blue-200/50 dark:border-blue-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 outline-none backdrop-blur-xl transition-all disabled:opacity-50" />
+                                <div className="flex flex-col sm:flex-row gap-8 relative z-10 mb-6">
+                                    <div className="flex-shrink-0 flex flex-col items-center gap-3">
+                                        <div className="relative group cursor-pointer">
+                                            <div className="w-32 h-32 rounded-[2rem] overflow-hidden border-4 border-white dark:border-slate-800 shadow-xl bg-slate-100 dark:bg-slate-900/50 transition-transform group-hover:scale-105">
+                                                {headProfilePic ? (
+                                                    <img src={headProfilePic} alt="Head" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-600">
+                                                        <UserCircle2 size={40} className="mb-2" />
+                                                        <span className="text-[9px] font-black uppercase tracking-widest text-center px-2">No Photo</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <label className="absolute -bottom-3 -right-3 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg flex items-center justify-center cursor-pointer transition-transform hover:scale-110">
+                                                <Camera size={18} />
+                                                <input type="file" accept="image/*" className="hidden" onChange={handleHeadPhotoUpload} />
+                                            </label>
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="block text-[11px] font-black text-blue-800/70 dark:text-blue-200/50 uppercase tracking-widest pl-1">Full Name *</label>
-                                        <input type="text" name="member_name" autoComplete="off" value={name} onChange={(e) => setName(e.target.value)} required className="w-full px-4 py-3 rounded-xl border border-blue-200/50 dark:border-blue-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 outline-none backdrop-blur-xl transition-all shadow-inner" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="block text-[11px] font-black text-blue-800/70 dark:text-blue-200/50 uppercase tracking-widest pl-1">Gender</label>
-                                        <select value={headGender} onChange={(e) => setHeadGender(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-blue-200/50 dark:border-blue-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/50 outline-none backdrop-blur-xl transition-all shadow-inner">
-                                            <option value="">Select Gender</option>
-                                            <option value="Male">Male</option>
-                                            <option value="Female">Female</option>
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="block text-[11px] font-black text-blue-800/70 dark:text-blue-200/50 uppercase tracking-widest pl-1 flex items-center justify-between">
-                                            Mobile Number
-                                            <span className="text-[9px] lowercase bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded leading-none">tel</span>
-                                        </label>
-                                        <input type="tel" name="member_mobile_new" autoComplete="new-password" placeholder="Enter Mobile Number" value={mobile} onChange={(e) => setMobile(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-blue-200/50 dark:border-blue-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 outline-none backdrop-blur-xl transition-all shadow-inner" />
-                                    </div>
-                                    <div className="space-y-2 lg:col-span-2">
-                                        <label className="block text-[11px] font-black text-blue-800/70 dark:text-blue-200/50 uppercase tracking-widest pl-1 flex items-center justify-between">
-                                            Aadhaar No.
-                                            <span className="text-[9px] lowercase opacity-50 px-1.5 rounded bg-slate-200/50 dark:bg-slate-800 leading-none py-0.5">optional</span>
-                                        </label>
-                                        <input type="text" name="member_aadhar" autoComplete="off" placeholder="Enter Aadhaar Number" value={aadharNo} onChange={(e) => setAadharNo(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-blue-200/50 dark:border-blue-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 outline-none backdrop-blur-xl transition-all shadow-inner" />
+                                    <div className="grid grid-cols-1 md:grid-cols-12 flex-grow gap-6">
+                                        <div className="flex flex-col justify-end md:col-span-4 lg:col-span-3">
+                                            <label className="block text-[11px] font-black text-blue-800/70 dark:text-blue-200/50 uppercase tracking-widest pl-1 mb-2">Membership No. *</label>
+                                            <input type="text" value={membershipNo} onChange={(e) => setMembershipNo(e.target.value)} required disabled={isEditing} className="w-full px-4 py-3 rounded-xl border border-blue-200/50 dark:border-blue-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 outline-none backdrop-blur-xl transition-all disabled:opacity-50" />
+                                        </div>
+                                        <div className="flex flex-col justify-end md:col-span-8 lg:col-span-6">
+                                            <label className="block text-[11px] font-black text-blue-800/70 dark:text-blue-200/50 uppercase tracking-widest pl-1 mb-2">Full Name *</label>
+                                            <input type="text" name="member_name" autoComplete="off" value={name} onChange={(e) => setName(e.target.value)} required className="w-full px-4 py-3 rounded-xl border border-blue-200/50 dark:border-blue-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 outline-none backdrop-blur-xl transition-all shadow-inner" />
+                                        </div>
+                                        <div className="flex flex-col justify-end md:col-span-6 lg:col-span-3">
+                                            <label className="block text-[11px] font-black text-blue-800/70 dark:text-blue-200/50 uppercase tracking-widest pl-1 mb-2">Gender</label>
+                                            <select value={headGender} onChange={(e) => setHeadGender(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-blue-200/50 dark:border-blue-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/50 outline-none backdrop-blur-xl transition-all shadow-inner">
+                                                <option value="">Select Gender</option>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                            </select>
+                                        </div>
+                                        <div className="flex flex-col justify-end md:col-span-6 lg:col-span-6">
+                                            <label className="flex items-center justify-between min-h-[16px] text-[11px] font-black text-blue-800/70 dark:text-blue-200/50 uppercase tracking-widest pl-1 mb-2">
+                                                <span>Mobile Number</span>
+                                                <span className="text-[9px] lowercase bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded leading-none">tel</span>
+                                            </label>
+                                            <input type="tel" name="member_mobile_new" autoComplete="new-password" placeholder="Enter Mobile Number" value={mobile} onChange={(e) => setMobile(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-blue-200/50 dark:border-blue-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 outline-none backdrop-blur-xl transition-all shadow-inner" />
+                                        </div>
+                                        <div className="flex flex-col justify-end md:col-span-12 lg:col-span-6">
+                                            <label className="flex items-center justify-between min-h-[16px] text-[11px] font-black text-blue-800/70 dark:text-blue-200/50 uppercase tracking-widest pl-1 mb-2">
+                                                <span>Aadhaar No.</span>
+                                                <span className="text-[9px] lowercase opacity-50 px-1.5 rounded bg-slate-200/50 dark:bg-slate-800 leading-none py-0.5">optional</span>
+                                            </label>
+                                            <input type="text" name="member_aadhar" autoComplete="off" placeholder="Enter Aadhaar Number" value={aadharNo} onChange={(e) => setAadharNo(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-blue-200/50 dark:border-blue-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 outline-none backdrop-blur-xl transition-all shadow-inner" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -578,7 +636,7 @@ export default function Members() {
                                     <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-xs shadow-lg shadow-emerald-500/20">02</span>
                                     Address Details
                                 </h4>
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 relative z-10">
                                     <div className="space-y-2">
                                         <label className="block text-[11px] font-black text-emerald-800/70 dark:text-emerald-200/50 uppercase tracking-widest pl-1">District</label>
                                         <input type="text" name="member_district" autoComplete="off" placeholder="District" value={district} onChange={(e) => setDistrict(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-emerald-200/50 dark:border-emerald-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-emerald-500/50 outline-none backdrop-blur-xl transition-all shadow-inner" />
@@ -595,7 +653,7 @@ export default function Members() {
                                         <label className="block text-[11px] font-black text-emerald-800/70 dark:text-emerald-200/50 uppercase tracking-widest pl-1">Village</label>
                                         <input type="text" name="member_village" autoComplete="off" placeholder="Village" value={village} onChange={(e) => setVillage(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-emerald-200/50 dark:border-emerald-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-emerald-500/50 outline-none backdrop-blur-xl transition-all shadow-inner" />
                                     </div>
-                                    <div className="col-span-2 lg:col-span-4 space-y-2">
+                                    <div className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6 space-y-2">
                                         <label className="block text-[11px] font-black text-emerald-800/70 dark:text-emerald-200/50 uppercase tracking-widest pl-1">Full Address</label>
                                         <textarea name="member_address" autoComplete="off" value={address} onChange={(e) => setAddress(e.target.value)} className="w-full px-4 py-3 h-24 rounded-xl border border-emerald-200/50 dark:border-emerald-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-emerald-500/50 outline-none backdrop-blur-xl transition-all shadow-inner resize-none" placeholder="House/Street details (optional)"></textarea>
                                     </div>
@@ -647,26 +705,40 @@ export default function Members() {
                                     </div>
 
                                     {familyMembers.map((fm) => (
-                                        <div key={fm.id} className="flex flex-wrap lg:flex-nowrap gap-3 items-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-lg p-3 rounded-2xl border border-amber-200/50 dark:border-amber-800/40 shadow-sm hover:shadow-md hover:border-amber-300 dark:hover:border-amber-600/50 transition-all ring-1 ring-slate-900/5 dark:ring-white/5 relative">
-                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-400 dark:bg-amber-600/60 rounded-l-2xl"></div>
-                                            <div className="w-full lg:w-4/12 pl-3">
-                                                <input type="text" placeholder="Full Name" value={fm.name} onChange={(e) => updateFamilyMember(fm.id, 'name', e.target.value)} className="w-full px-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500/50 outline-none transition-all shadow-inner" />
+                                        <div key={fm.id} className="flex flex-col lg:flex-row gap-4 items-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-lg p-4 rounded-[2rem] border border-amber-200/50 dark:border-amber-800/40 shadow-sm hover:shadow-md hover:border-amber-300 dark:hover:border-amber-600/50 transition-all relative">
+                                            <div className="relative group cursor-pointer shrink-0">
+                                                <div className="w-16 h-16 rounded-[1.2rem] overflow-hidden border-2 border-white dark:border-slate-700 shadow-md bg-slate-100 dark:bg-slate-800 transition-transform group-hover:scale-105">
+                                                    {fm.profile_pic ? (
+                                                        <img src={fm.profile_pic} alt="FM" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500">
+                                                            <UserCircle2 size={28} />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <label className="absolute -bottom-2 -right-2 w-7 h-7 bg-amber-500 hover:bg-amber-600 text-white rounded-full shadow-lg flex items-center justify-center cursor-pointer transition-transform hover:scale-110">
+                                                    <Camera size={12} />
+                                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFamilyPhotoUpload(fm.id, e)} />
+                                                </label>
                                             </div>
-                                            <div className="w-full sm:w-[48%] lg:w-3/12">
-                                                <input type="text" placeholder="Relation (e.g. Son)" value={fm.relation} onChange={(e) => updateFamilyMember(fm.id, 'relation', e.target.value)} className="w-full px-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500/50 outline-none transition-all shadow-inner" />
-                                            </div>
-                                            <div className="w-full sm:w-[48%] lg:w-3/12">
-                                                <select value={fm.gender} onChange={(e) => updateFamilyMember(fm.id, 'gender', e.target.value)} className="w-full px-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500/50 outline-none transition-all shadow-inner">
+                                            <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                                                <input type="text" placeholder="Full Name" value={fm.name} onChange={(e) => updateFamilyMember(fm.id, 'name', e.target.value)} className="col-span-1 sm:col-span-2 md:col-span-1 px-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500/50 outline-none transition-all shadow-inner" />
+                                                <input type="text" placeholder="Relation" value={fm.relation} onChange={(e) => updateFamilyMember(fm.id, 'relation', e.target.value)} className="px-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500/50 outline-none transition-all shadow-inner" />
+                                                <select value={fm.gender} onChange={(e) => updateFamilyMember(fm.id, 'gender', e.target.value)} className="px-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500/50 outline-none transition-all shadow-inner">
                                                     <option value="">Gender</option>
                                                     <option value="Male">Male</option>
                                                     <option value="Female">Female</option>
                                                 </select>
-                                            </div>
-                                            <div className="w-full lg:w-2/12 flex gap-2 items-center pr-2">
-                                                <input type="number" placeholder="Age" value={fm.age} onChange={(e) => updateFamilyMember(fm.id, 'age', e.target.value)} className="w-1/2 flex-1 px-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 border-l-[3px] border-l-amber-400 dark:border-slate-700 dark:border-l-amber-500 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500/50 outline-none transition-all shadow-inner" />
-                                                <button type="button" onClick={() => removeFamilyMember(fm.id)} className="p-3 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white dark:bg-red-900/30 dark:hover:bg-red-600/80 rounded-xl border border-red-100 dark:border-red-800/40 hover:border-transparent transition-all shadow-sm shrink-0" title="Remove Member">
-                                                    <Trash2 size={16} />
-                                                </button>
+                                                <div className="relative">
+                                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                                                    <input type="tel" placeholder="Mobile" value={fm.mobile} onChange={(e) => updateFamilyMember(fm.id, 'mobile', e.target.value)} className="w-full pl-9 pr-3 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500/50 outline-none transition-all shadow-inner" />
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <input type="number" placeholder="Age" value={fm.age} onChange={(e) => updateFamilyMember(fm.id, 'age', e.target.value)} className="w-full px-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 border-l-[3px] border-l-amber-400 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500/50 outline-none transition-all shadow-inner" />
+                                                    <button type="button" onClick={() => removeFamilyMember(fm.id)} className="w-11 flex items-center justify-center shrink-0 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white dark:bg-red-900/30 dark:hover:bg-red-600/80 rounded-xl border border-red-100 dark:border-red-800/40 hover:border-transparent transition-all shadow-sm" title="Remove Member">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
