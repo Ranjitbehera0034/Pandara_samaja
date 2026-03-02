@@ -28,7 +28,7 @@ let allLeaders = [];
 async function initLeaders() {
   try {
     const baseUrl = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://localhost:5000';
-    const response = await fetch(`${baseUrl}/api/leaders`);
+    const response = await fetch(`${baseUrl}/api/v1/leaders`);
     const result = await response.json();
     if (result.success && result.data) {
       allLeaders = result.data;
@@ -531,7 +531,7 @@ function addTableDataLabels() {
   if (memberTable) memberTable.style.display = 'none';
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/members`);
+    const res = await fetch(`${API_BASE_URL}/api/v1/members`);
     if (!res.ok) throw new Error(`API Error: ${res.status}`);
     const result = await res.json();
     if (result.success && Array.isArray(result.members)) {
@@ -668,7 +668,7 @@ function addTableDataLabels() {
 
       if (confirm('Are you sure you want to delete this member?')) {
         try {
-          const res = await fetch(`${API_BASE_URL}/api/members/${id}`, {
+          const res = await fetch(`${API_BASE_URL}/api/v1/members${id}`, {
             method: 'DELETE',
             headers: getAuthHeaders()
           });
