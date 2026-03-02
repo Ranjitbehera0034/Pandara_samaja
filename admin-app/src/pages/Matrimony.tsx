@@ -1,521 +1,675 @@
 import { useState, useEffect } from 'react';
-import {
-    Heart, Search, CheckCircle, XCircle, Trash2, MapPin,
-    Briefcase, GraduationCap, Download, LayoutGrid, List,
-    Calendar, Phone, User, X, ChevronDown, Eye, Pencil, RotateCcw
-} from 'lucide-react';
-import api from '../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, MapPin, X, Heart, User, Eye, Info, Filter, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import api from '../services/api';
 
-type Status = 'all' | 'pending' | 'verified' | 'approved' | 'rejected';
-
-const STATUS_COLORS: Record<string, string> = {
-    approved: 'bg-emerald-500 text-white',
-    rejected: 'bg-red-500 text-white',
-    verified: 'bg-teal-500 text-white',
-    pending: 'bg-amber-400 text-white',
-};
-
-const STATUS_BADGE_BG: Record<string, string> = {
-    approved: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-    rejected: 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800',
-    verified: 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800',
-    pending: 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+type Candidate = {
+    id: number;
+    name: string;
+    gender: string;
+    date_of_birth: string;
+    dob?: string;
+    education: string;
+    occupation: string;
+    income: string | null;
+    height: string | null;
+    complexion: string | null;
+    gotra: string | null;
+    address: string;
+    father_name: string;
+    father?: string;
+    mobile: string;
+    phone?: string;
+    expectations: string | null;
+    photo: string | null;
+    status: string;
+    admin_comments?: string;
+    is_matched?: boolean;
+    matched_status?: string;
+    matched_partner_name?: string;
 };
 
 export default function Matrimony() {
-    const [candidates, setCandidates] = useState<any[]>([]);
+    const { t, i18n } = useTranslation();
+    const lang = i18n.language;
+    const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState<Status>('all');
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-    const [detailCandidate, setDetailCandidate] = useState<any | null>(null);
-    const [statusMenuId, setStatusMenuId] = useState<number | null>(null);
+    const [genderFilter, setGenderFilter] = useState('All');
+    const [sortBy, setSortBy] = useState<'Default' | 'Age' | 'Name'>('Default');
+    const [statusFilter, setStatusFilter] = useState<'All' | 'pending' | 'verified' | 'approved' | 'rejected' | 'evidence_requested'>('All');
+
+    // UI State
+    const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+    const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+
+    // Admin Specific Overlays
+    const [adminActionCandidate, setAdminActionCandidate] = useState<Candidate | null>(null);
+    const [actionType, setActionType] = useState<'status' | 'match' | null>(null);
+    const [adminComments, setAdminComments] = useState('');
+    const [newStatus, setNewStatus] = useState<string>('');
+    const [matchData, setMatchData] = useState({ status: 'Matched', partnerName: '', partnerGender: '' });
 
     useEffect(() => {
         fetchCandidates();
-    }, []);
+    }, [genderFilter, statusFilter]);
 
     const fetchCandidates = async () => {
         setLoading(true);
         try {
             const res = await api.get('/admin/candidates');
             if (res.data.success) {
-                setCandidates(res.data.candidates || []);
+                // We fetch all candidates for admin, apply filters locally for speed
+                setCandidates(res.data.candidates);
             }
         } catch {
-            toast.error('Failed to load candidate profiles');
+            toast.error(t('matrimony', 'failedLoad') || 'Could not load matrimony profiles');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleUpdateStatus = async (id: number, status: 'approved' | 'rejected' | 'pending' | 'verified') => {
+    const handleUpdateStatus = async (id: number, status: string, comments: string) => {
+        setSubmitting(true);
         try {
-            await api.put(`/admin/candidates/${id}/status`, { status });
-            setCandidates(candidates.map(c => c.id === id ? { ...c, status } : c));
-            if (detailCandidate?.id === id) setDetailCandidate((prev: any) => ({ ...prev, status }));
-            setStatusMenuId(null);
-            toast.success(`Candidate marked as ${status}`);
+            await api.put(`/admin/candidates/${id}/status`, { status, admin_comments: comments });
+            toast.success(`Candidate marked as ${status.replace('_', ' ')}`);
+            setAdminActionCandidate(null);
+            setActionType(null);
+            fetchCandidates();
         } catch {
             toast.error('Failed to update status');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleMarkMatched = async (id: number) => {
+        setSubmitting(true);
+        try {
+            await api.put(`/admin/candidates/${id}/match`, {
+                matched_status: matchData.status,
+                matched_partner_name: matchData.partnerName,
+                matched_partner_gender: matchData.partnerGender
+            });
+            toast.success(`Candidate marked as ${matchData.status}`);
+            setAdminActionCandidate(null);
+            setActionType(null);
+            fetchCandidates();
+        } catch {
+            toast.error('Failed to mark as matched');
+        } finally {
+            setSubmitting(false);
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!window.confirm('Permanently delete this profile?')) return;
+        if (!window.confirm('Are you sure you want to permanently delete this candidate?')) return;
         try {
             await api.delete(`/admin/candidates/${id}`);
-            setCandidates(candidates.filter(c => c.id !== id));
-            if (detailCandidate?.id === id) setDetailCandidate(null);
             toast.success('Candidate profile deleted');
+            if (selectedCandidate?.id === id) setSelectedCandidate(null);
+            fetchCandidates();
         } catch {
             toast.error('Failed to delete candidate');
         }
     };
 
-    const getImageUrl = (raw: string | null) => {
+    const calculateAge = (dob: string | undefined) => {
+        if (!dob) return null;
+        const birthDate = new Date(dob);
+        if (isNaN(birthDate.getTime())) return null;
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+        return age;
+    };
+
+    const getImageUrl = (raw: string | null, full: boolean = false) => {
         if (!raw) return '';
         const m = raw.match(/id=([^&]+)/);
-        return m ? `https://lh3.googleusercontent.com/d/${m[1]}=w1000` : raw;
+        if (m) {
+            return full ? `https://lh3.googleusercontent.com/d/${m[1]}=s0` : `https://lh3.googleusercontent.com/d/${m[1]}=w1000`;
+        }
+        return raw;
     };
 
-    const counts = {
-        all: candidates.length,
-        pending: candidates.filter(c => c.status === 'pending').length,
-        verified: candidates.filter(c => c.status === 'verified').length,
-        approved: candidates.filter(c => c.status === 'approved').length,
-        rejected: candidates.filter(c => c.status === 'rejected').length,
-    };
+    const sortedCandidates = [...candidates]
+        .filter(c => genderFilter === 'All' || c.gender === genderFilter)
+        .filter(c => statusFilter === 'All' || c.status === statusFilter)
+        .sort((a, b) => {
+            if (sortBy === 'Age') {
+                const ageA = calculateAge(a.date_of_birth || a.dob) || 0;
+                const ageB = calculateAge(b.date_of_birth || b.dob) || 0;
+                return ageA - ageB;
+            }
+            if (sortBy === 'Name') return a.name.localeCompare(b.name);
+            return 0;
+        });
 
-    const filteredCandidates = candidates.filter(c => {
-        const matchesSearch =
-            (c.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (c.phone || '').includes(searchQuery) ||
-            (c.id?.toString() || '').includes(searchQuery);
-        const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
-        return matchesSearch && matchesStatus;
+    const filteredCandidates = sortedCandidates.filter(c => {
+        const query = searchQuery.toLowerCase();
+        return (
+            c.name.toLowerCase().includes(query) ||
+            (c.education && c.education.toLowerCase().includes(query)) ||
+            (c.occupation && c.occupation.toLowerCase().includes(query)) ||
+            (c.address && c.address.toLowerCase().includes(query))
+        );
     });
 
-    const statusTabs: { key: Status; label: string }[] = [
-        { key: 'all', label: 'All' },
-        { key: 'pending', label: 'Pending' },
-        { key: 'verified', label: 'Verified' },
-        { key: 'approved', label: 'Approved' },
-        { key: 'rejected', label: 'Rejected' },
-    ];
-
-    const AvatarPlaceholder = ({ gender, size = 72 }: { gender?: string; size?: number }) => (
-        <div
-            className="rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center border-4 border-white dark:border-slate-900 shadow-md"
-            style={{ width: size, height: size, minWidth: size }}
-        >
-            <User size={size * 0.45} className={gender === 'Female' ? 'text-pink-400' : 'text-teal-500'} />
-        </div>
-    );
+    const getStatusStyle = (status: string) => {
+        switch (status) {
+            case 'approved': return { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30' };
+            case 'verified': return { bg: 'bg-teal-500/20', text: 'text-teal-400', border: 'border-teal-500/30' };
+            case 'pending': return { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/30' };
+            case 'rejected': return { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30' };
+            case 'evidence_requested': return { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30' };
+            default: return { bg: 'bg-slate-500/20', text: 'text-slate-400', border: 'border-slate-500/30' };
+        }
+    };
 
     return (
-        <div className="p-4 sm:p-6 pb-32 max-w-7xl mx-auto">
-
-            {/* ─── Header ──────────────────────────────────────────────── */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                        <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-pink-100 dark:bg-pink-900/30">
-                            <Heart className="text-pink-500" size={22} />
-                        </span>
-                        Matrimony Approval
-                    </h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
-                        Community Matrimony Submission &amp; Verification Portal
-                    </p>
-                </div>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setViewMode('list')}
-                        className={`p-2.5 rounded-xl border transition-all ${viewMode === 'list' ? 'bg-teal-600 border-teal-600 text-white shadow-lg' : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
-                    >
-                        <List size={18} />
-                    </button>
-                    <button
-                        onClick={() => setViewMode('grid')}
-                        className={`p-2.5 rounded-xl border transition-all ${viewMode === 'grid' ? 'bg-teal-600 border-teal-600 text-white shadow-lg' : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
-                    >
-                        <LayoutGrid size={18} />
-                    </button>
-                </div>
+        <div className="relative min-h-screen pb-20 bg-slate-900 overflow-hidden">
+            {/* Background Decorations */}
+            <div className="fixed inset-0 pointer-events-none opacity-20 z-0">
+                <div className="absolute top-1/4 -left-20 w-80 h-80 bg-pink-500/30 rounded-full blur-[120px] animate-pulse" />
+                <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-red-500/30 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
             </div>
 
-            {/* ─── Status Filter Tabs ───────────────────────────────────── */}
-            <div className="flex flex-wrap gap-2 mb-5 overflow-x-auto pb-1">
-                {statusTabs.map(({ key, label }) => (
-                    <button
-                        key={key}
-                        onClick={() => setStatusFilter(key)}
-                        className={`px-4 py-2 rounded-full font-semibold text-sm whitespace-nowrap transition-all flex items-center gap-1.5 border ${statusFilter === key
-                            ? 'bg-teal-600 border-teal-600 text-white shadow-md shadow-teal-500/20'
-                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-teal-400 hover:text-teal-600 dark:hover:text-teal-400'
-                            }`}
-                    >
-                        {label}
-                        <span className={`text-[11px] font-black px-1.5 py-0.5 rounded-md ${statusFilter === key ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                            }`}>
-                            {counts[key]}
-                        </span>
-                    </button>
-                ))}
-            </div>
-
-            {/* ─── Search & Count ───────────────────────────────────────── */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-8">
-                <div className="relative flex-1 w-full">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Search candidates by name, phone, ID..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm focus:border-teal-500"
-                    />
-                </div>
-                <p className="text-slate-400 dark:text-slate-500 text-sm whitespace-nowrap font-medium">
-                    Showing <span className="font-black text-slate-800 dark:text-slate-200">{filteredCandidates.length}</span> of <span className="font-black text-slate-800 dark:text-slate-200">{candidates.length}</span> candidates
-                </p>
-            </div>
-
-            {/* ─── Loading ─────────────────────────────────────────────── */}
-            {loading ? (
-                <div className="py-32 text-center">
-                    <div className="animate-spin w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full mx-auto mb-5"></div>
-                    <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Loading Profiles...</p>
-                </div>
-
-                /* ─── Empty State ─────────────────────────────────────────── */
-            ) : filteredCandidates.length === 0 ? (
-                <div className="text-center py-32 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl bg-slate-50 dark:bg-slate-900/50">
-                    <Heart className="text-pink-200 dark:text-pink-900 mx-auto mb-5" size={64} />
-                    <h3 className="text-xl font-black text-slate-800 dark:text-white">No Candidates Found</h3>
-                    <p className="text-slate-400 mt-2">Try adjusting your search or filter settings.</p>
-                </div>
-
-                /* ─── Card Grid ───────────────────────────────────────────── */
-            ) : viewMode === 'grid' ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    {filteredCandidates.map(candidate => {
-                        const status = candidate.status || 'pending';
-                        return (
-                            <div
-                                key={candidate.id}
-                                className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl dark:hover:shadow-slate-950/70 hover:-translate-y-1 transition-all duration-300 flex flex-col"
-                            >
-                                {/* ── Top: Avatar + Status Badge ── */}
-                                <div className="flex flex-col items-center pt-8 pb-4 px-5 border-b border-slate-100 dark:border-slate-800 relative">
-                                    <span className={`absolute top-3 right-3 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${STATUS_COLORS[status] || STATUS_COLORS.pending}`}>
-                                        {status}
-                                    </span>
-                                    {candidate.photo ? (
-                                        <img
-                                            src={getImageUrl(candidate.photo)}
-                                            alt={candidate.name}
-                                            className="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-slate-900 shadow-lg"
-                                        />
-                                    ) : (
-                                        <AvatarPlaceholder gender={candidate.gender} size={80} />
-                                    )}
-                                    <h3 className="mt-3 text-base font-black text-slate-900 dark:text-white text-center leading-tight">
-                                        {candidate.name || 'Unknown'}
-                                    </h3>
-                                    <p className="text-slate-400 text-xs mt-1 font-medium">
-                                        {[candidate.age && `${candidate.age} yrs`, candidate.gender, candidate.address].filter(Boolean).join(' • ')}
-                                    </p>
-                                </div>
-
-                                {/* ── Details ── */}
-                                <div className="px-5 py-4 space-y-2.5 flex-1">
-                                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                                        <Calendar size={14} className="text-slate-400 shrink-0" />
-                                        <span className="line-clamp-1">{candidate.dob || '--'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                                        <GraduationCap size={14} className="text-slate-400 shrink-0" />
-                                        <span className="line-clamp-1">Education: {candidate.education || '--'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                                        <Briefcase size={14} className="text-slate-400 shrink-0" />
-                                        <span className="line-clamp-1">Occupation: {candidate.occupation || '--'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                                        <MapPin size={14} className="text-slate-400 shrink-0" />
-                                        <span className="line-clamp-1">{candidate.address || '--'}</span>
-                                    </div>
-                                </div>
-
-                                {/* ── Actions ── */}
-                                <div className="px-5 py-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
-                                    <button
-                                        onClick={() => setDetailCandidate(candidate)}
-                                        className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-teal-500/20 flex items-center justify-center gap-2"
-                                    >
-                                        <Eye size={16} />
-                                        View Form Details
-                                    </button>
-                                    <div className="flex gap-2">
-                                        {status !== 'approved' ? (
-                                            <button
-                                                onClick={() => handleUpdateStatus(candidate.id, 'approved')}
-                                                className="flex-1 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl font-bold text-xs transition-colors border border-emerald-200 dark:border-emerald-800"
-                                            >
-                                                Approve
-                                            </button>
-                                        ) : (
-                                            <button
-                                                onClick={() => handleUpdateStatus(candidate.id, 'pending')}
-                                                className="flex-1 py-2 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-xl font-bold text-xs transition-colors border border-amber-200 dark:border-amber-800 flex items-center justify-center gap-1"
-                                            >
-                                                <RotateCcw size={12} /> Reset
-                                            </button>
-                                        )}
-                                        {status !== 'rejected' ? (
-                                            <button
-                                                onClick={() => handleUpdateStatus(candidate.id, 'rejected')}
-                                                className="flex-1 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-xl font-bold text-xs transition-colors border border-red-200 dark:border-red-800"
-                                            >
-                                                Reject
-                                            </button>
-                                        ) : (
-                                            <div className="flex-1 py-2 flex items-center justify-center text-xs font-black text-red-500 gap-1">
-                                                <XCircle size={13} /> Rejected
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => setDetailCandidate(candidate)}
-                                            className="flex-1 py-2 rounded-xl font-bold text-xs text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-1"
-                                        >
-                                            <Pencil size={12} /> Edit
-                                        </button>
-                                        {/* Change Status dropdown */}
-                                        <div className="relative flex-1">
-                                            <button
-                                                onClick={() => setStatusMenuId(statusMenuId === candidate.id ? null : candidate.id)}
-                                                className="w-full py-2 rounded-xl font-bold text-xs text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-1"
-                                            >
-                                                Status <ChevronDown size={12} />
-                                            </button>
-                                            {statusMenuId === candidate.id && (
-                                                <div className="absolute bottom-full mb-1 left-0 right-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-30 overflow-hidden">
-                                                    {(['pending', 'verified', 'approved', 'rejected'] as const).map(s => (
-                                                        <button
-                                                            key={s}
-                                                            onClick={() => handleUpdateStatus(candidate.id, s)}
-                                                            className="w-full text-left px-4 py-2.5 text-xs font-bold capitalize hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300"
-                                                        >
-                                                            {s}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <button
-                                            onClick={() => handleDelete(candidate.id)}
-                                            className="py-2 px-3 rounded-xl font-bold text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 border border-slate-200 dark:border-slate-700 transition-colors"
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </div>
-                                </div>
+            <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6">
+                {/* Header Section */}
+                <header className="py-10 md:py-16">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-pink-500/10 text-pink-500 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border border-pink-500/20">
+                                <Heart size={14} fill="currentColor" />
+                                Admin Matrimony Management
                             </div>
-                        );
-                    })}
-                </div>
+                            <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
+                                {lang === 'en' ? 'Manage' : 'ସମାଜ'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-red-500">Profiles</span>
+                            </h1>
+                            <p className="text-lg text-slate-400 max-w-2xl leading-relaxed">
+                                Review, approve, reject, or mark matrimony candidates as matched.
+                            </p>
+                        </motion.div>
+                    </div>
+                </header>
 
-                /* ─── List View ───────────────────────────────────────────── */
-            ) : (
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-                    {filteredCandidates.map((candidate, i) => {
-                        const status = candidate.status || 'pending';
-                        return (
-                            <div
-                                key={candidate.id}
-                                className={`flex flex-col sm:flex-row items-start sm:items-center gap-4 px-6 py-5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${i > 0 ? 'border-t border-slate-100 dark:border-slate-800' : ''}`}
-                            >
-                                {/* Avatar */}
-                                <div className="shrink-0">
-                                    {candidate.photo ? (
-                                        <img
-                                            src={getImageUrl(candidate.photo)}
-                                            alt={candidate.name}
-                                            className="w-14 h-14 rounded-2xl object-cover border-2 border-slate-100 dark:border-slate-800 shadow"
-                                        />
-                                    ) : (
-                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border-2 border-slate-100 dark:border-slate-800 ${candidate.gender === 'Female' ? 'bg-pink-50 dark:bg-pink-900/20' : 'bg-teal-50 dark:bg-teal-900/20'}`}>
-                                            <User size={26} className={candidate.gender === 'Female' ? 'text-pink-400' : 'text-teal-500'} />
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Info */}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        <span className="font-black text-slate-900 dark:text-white text-base">{candidate.name || 'Unknown'}</span>
-                                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${STATUS_COLORS[status] || STATUS_COLORS.pending}`}>
-                                            {status}
-                                        </span>
-                                    </div>
-                                    <div className="flex flex-wrap gap-4 mt-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                                        <span className="flex items-center gap-1"><Calendar size={12} />{candidate.age ? `${candidate.age} yrs` : '--'} • {candidate.gender}</span>
-                                        <span className="flex items-center gap-1"><GraduationCap size={12} />{candidate.education || '--'}</span>
-                                        <span className="flex items-center gap-1"><Briefcase size={12} />{candidate.occupation || '--'}</span>
-                                        <span className="flex items-center gap-1"><MapPin size={12} />{candidate.address || '--'}</span>
-                                        {candidate.phone && <span className="flex items-center gap-1"><Phone size={12} />{candidate.phone}</span>}
-                                    </div>
-                                </div>
-
-                                {/* Actions */}
-                                <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                                    <button
-                                        onClick={() => setDetailCandidate(candidate)}
-                                        className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 shadow"
-                                    >
-                                        <Eye size={14} /> View Details
-                                    </button>
-                                    {status !== 'approved' && (
-                                        <button
-                                            onClick={() => handleUpdateStatus(candidate.id, 'approved')}
-                                            className="px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 rounded-xl font-bold text-xs hover:bg-emerald-100 transition-colors flex items-center gap-1"
-                                        >
-                                            <CheckCircle size={13} /> Approve
-                                        </button>
-                                    )}
-                                    {status !== 'rejected' && (
-                                        <button
-                                            onClick={() => handleUpdateStatus(candidate.id, 'rejected')}
-                                            className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl font-bold text-xs hover:bg-red-100 transition-colors flex items-center gap-1"
-                                        >
-                                            <XCircle size={13} /> Reject
-                                        </button>
-                                    )}
-                                    <button
-                                        onClick={() => handleDelete(candidate.id)}
-                                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
-
-            {/* ─── Detail Modal ─────────────────────────────────────────── */}
-            {detailCandidate && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 backdrop-blur-xl p-0 sm:p-4">
-                    <div className="bg-white dark:bg-slate-900 w-full sm:rounded-3xl max-w-lg shadow-2xl overflow-hidden max-h-[92vh] flex flex-col border border-white/10 dark:border-slate-800 animate-in slide-in-from-bottom sm:zoom-in duration-300">
-
-                        {/* Modal Header */}
-                        <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 dark:border-slate-800">
-                            <div>
-                                <h2 className="text-xl font-black text-slate-900 dark:text-white">Candidate Profile</h2>
-                                <p className="text-slate-400 text-xs mt-0.5 font-medium">Full submission details</p>
-                            </div>
-                            <button
-                                onClick={() => setDetailCandidate(null)}
-                                className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-all"
-                            >
-                                <X size={20} />
-                            </button>
+                {/* Filters & Tools */}
+                <div className="sticky top-4 z-40 mb-12">
+                    <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-3 flex flex-col lg:flex-row gap-4 shadow-2xl">
+                        <div className="relative flex-1 group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-pink-500 transition-colors" size={20} />
+                            <input
+                                type="text"
+                                placeholder={"Search name, education, location..."}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-pink-500/50 text-white placeholder-slate-500 transition-all text-sm font-medium"
+                            />
                         </div>
-
-                        <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8 custom-scrollbar">
-
-                            {/* Avatar + Name */}
-                            <div className="flex items-center gap-6">
-                                {detailCandidate.photo ? (
-                                    <img src={getImageUrl(detailCandidate.photo)} alt={detailCandidate.name} className="w-24 h-24 rounded-[24px] object-cover border-4 border-slate-100 dark:border-slate-800 shadow-xl" />
-                                ) : (
-                                    <AvatarPlaceholder gender={detailCandidate.gender} size={96} />
-                                )}
-                                <div>
-                                    <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-tight">{detailCandidate.name}</h3>
-                                    <p className="text-slate-400 text-sm mt-1">{[detailCandidate.age && `${detailCandidate.age} yrs`, detailCandidate.gender].filter(Boolean).join(' • ')}</p>
-                                    <span className={`inline-block mt-2 text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${STATUS_COLORS[detailCandidate.status] || STATUS_COLORS.pending}`}>
-                                        {detailCandidate.status || 'pending'}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Details Grid */}
-                            <div className="grid grid-cols-2 gap-4">
-                                {[
-                                    { icon: <Calendar size={16} />, label: 'Date of Birth', value: detailCandidate.dob },
-                                    { icon: <User size={16} />, label: 'Gender', value: detailCandidate.gender },
-                                    { icon: <GraduationCap size={16} />, label: 'Education', value: detailCandidate.education },
-                                    { icon: <Briefcase size={16} />, label: 'Occupation', value: detailCandidate.occupation },
-                                    { icon: <Phone size={16} />, label: 'Phone', value: detailCandidate.phone },
-                                    { icon: <MapPin size={16} />, label: 'Location', value: detailCandidate.address },
-                                ].map(({ icon, label, value }) => (
-                                    <div key={label} className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
-                                        <div className="flex items-center gap-2 text-slate-400 mb-1.5">
-                                            {icon}
-                                            <span className="text-[10px] font-black uppercase tracking-wider">{label}</span>
-                                        </div>
-                                        <p className="text-sm font-bold text-slate-800 dark:text-white">{value || '--'}</p>
-                                    </div>
+                        <div className="flex flex-wrap items-center gap-4">
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value as any)}
+                                className="h-14 px-4 bg-white/5 text-xs font-bold text-slate-300 focus:outline-none uppercase tracking-widest cursor-pointer rounded-2xl border border-white/10 focus:border-pink-500/50 transition-all"
+                            >
+                                <option className="bg-slate-900" value="All">All Status</option>
+                                <option className="bg-slate-900" value="verified">Verified</option>
+                                <option className="bg-slate-900" value="approved">Approved</option>
+                                <option className="bg-slate-900" value="pending">Pending</option>
+                                <option className="bg-slate-900" value="evidence_requested">Evidence Req.</option>
+                                <option className="bg-slate-900" value="rejected">Rejected</option>
+                            </select>
+                            <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 h-14">
+                                {['All', 'Male', 'Female'].map(g => (
+                                    <button
+                                        key={g}
+                                        onClick={() => setGenderFilter(g)}
+                                        className={`px-4 xl:px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${genderFilter === g
+                                            ? 'bg-gradient-to-r from-pink-600 to-red-600 text-white shadow-lg'
+                                            : 'text-slate-400 hover:text-slate-200'
+                                            }`}
+                                    >
+                                        {g === 'All' ? <Filter size={14} /> : g === 'Male' ? <User size={14} /> : <Heart size={14} />}
+                                        <span className="hidden sm:inline">{g}</span>
+                                    </button>
                                 ))}
                             </div>
-
-                            {/* Manual Form download */}
-                            {detailCandidate.manual_form && (
-                                <a
-                                    href={getImageUrl(detailCandidate.manual_form)}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="flex items-center gap-3 px-5 py-4 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800 rounded-2xl text-pink-700 dark:text-pink-400 font-bold text-sm hover:bg-pink-100 transition-colors"
+                            <div className="relative h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center gap-3 w-full sm:w-auto">
+                                <ArrowUpDown size={16} className="text-slate-500 shrink-0" />
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value as any)}
+                                    className="w-full bg-transparent text-xs font-bold text-slate-300 focus:outline-none uppercase tracking-widest cursor-pointer pr-4"
                                 >
-                                    <Download size={18} /> View / Download Manual Form
-                                </a>
-                            )}
-
-                            {/* Change Status panel */}
-                            <div>
-                                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Update Status</p>
-                                <div className="flex flex-wrap gap-2">
-                                    {(['pending', 'verified', 'approved', 'rejected'] as const).map(s => (
-                                        <button
-                                            key={s}
-                                            onClick={() => handleUpdateStatus(detailCandidate.id, s)}
-                                            className={`px-5 py-2.5 rounded-xl font-bold text-sm capitalize transition-all border ${detailCandidate.status === s
-                                                ? STATUS_BADGE_BG[s] + ' border-current shadow-sm'
-                                                : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                                                }`}
-                                        >
-                                            {s}
-                                        </button>
-                                    ))}
-                                </div>
+                                    <option className="bg-slate-900" value="Default">Sort By</option>
+                                    <option className="bg-slate-900" value="Age">Age</option>
+                                    <option className="bg-slate-900" value="Name">Name (A-Z)</option>
+                                </select>
                             </div>
-                        </div>
-
-                        {/* Modal Footer */}
-                        <div className="flex items-center justify-between gap-3 px-8 py-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40">
-                            <button
-                                onClick={() => handleDelete(detailCandidate.id)}
-                                className="px-5 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors flex items-center gap-2"
-                            >
-                                <Trash2 size={16} /> Delete
-                            </button>
-                            <button
-                                onClick={() => setDetailCandidate(null)}
-                                className="px-8 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-teal-500/20 transition-all"
-                            >
-                                Done
-                            </button>
                         </div>
                     </div>
                 </div>
-            )}
+
+                {/* Content Grid */}
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[1, 2, 3, 4, 5, 6].map(i => (
+                            <div key={i} className="h-[500px] rounded-[32px] bg-white/5 animate-pulse border border-white/10 shadow-inner" />
+                        ))}
+                    </div>
+                ) : filteredCandidates.length === 0 ? (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                        className="text-center py-32 rounded-[40px] border-2 border-dashed border-white/10 bg-white/5"
+                    >
+                        <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Search size={32} className="text-slate-600" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-2">No Profiles Found</h3>
+                        <p className="text-slate-500 max-w-md mx-auto">Try adjusting your filters or search terms.</p>
+                        <button
+                            onClick={() => { setSearchQuery(''); setGenderFilter('All'); setStatusFilter('All'); }}
+                            className="mt-6 text-pink-500 font-bold hover:underline"
+                        >
+                            Reset Filters
+                        </button>
+                    </motion.div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {filteredCandidates.map((c, index) => {
+                            const statusStyle = getStatusStyle(c.status);
+                            return (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 30 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: Math.min(index * 0.05, 0.5) }}
+                                    key={c.id}
+                                    className={`group relative flex flex-col bg-slate-800 border ${c.is_matched ? 'border-amber-500/50 opacity-80' : 'border-white/10'} rounded-[32px] overflow-hidden hover:border-pink-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-pink-500/10 hover:-translate-y-2 backdrop-blur-sm shadow-inner`}
+                                >
+                                    {/* Card Media Header */}
+                                    <div className="h-[280px] relative overflow-hidden bg-slate-950">
+                                        {c.photo ? (
+                                            <img
+                                                src={getImageUrl(c.photo)}
+                                                alt={c.name}
+                                                className="w-full h-full object-cover object-top transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center border border-white/5">
+                                                    <User size={40} className="text-slate-700" />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+
+                                        <div className="absolute top-4 inset-x-4 flex justify-between items-start">
+                                            <div className="flex flex-col gap-2">
+                                                <div className="flex gap-2">
+                                                    <span className={`px-3 py-1.5 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border flex items-center gap-1 ${c.gender === 'Female' ? 'bg-pink-500/30 text-pink-200 border-pink-500/30' : 'bg-blue-500/30 text-blue-200 border-blue-500/30'}`}>
+                                                        {c.gender}
+                                                    </span>
+                                                    {calculateAge(c.date_of_birth || c.dob) && (
+                                                        <span className="px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/10">
+                                                            {calculateAge(c.date_of_birth || c.dob)} YRS
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <span className={`self-start px-3 py-1.5 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}>
+                                                    {c.status.replace('_', ' ')}
+                                                </span>
+                                            </div>
+                                            {c.is_matched && (
+                                                <span className="px-3 py-1.5 bg-amber-500/30 text-amber-200 rounded-xl backdrop-blur-md text-[10px] font-black uppercase tracking-widest border border-amber-500/30 flex items-center gap-1">
+                                                    <Heart size={12} fill="currentColor" /> {c.matched_status}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="absolute bottom-4 left-6 right-6">
+                                            <h3 className="text-2xl font-bold text-white line-clamp-1 drop-shadow-lg">
+                                                {c.name}
+                                            </h3>
+                                        </div>
+
+                                        {/* Image Preview Hover */}
+                                        <div className="absolute inset-0 bg-pink-600/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 pointer-events-none">
+                                            <button
+                                                onClick={() => setSelectedPhoto(getImageUrl(c.photo, true))}
+                                                className="w-14 h-14 rounded-2xl bg-white text-slate-900 flex items-center justify-center shadow-xl hover:bg-pink-50 transition-colors pointer-events-auto"
+                                            >
+                                                <Eye size={24} />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Content Details */}
+                                    <div className="p-6 space-y-5 flex-1 flex flex-col">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Education</p>
+                                                <p className="text-xs font-bold text-slate-200 line-clamp-1">{c.education || '---'}</p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Profession</p>
+                                                <p className="text-xs font-bold text-slate-200 line-clamp-1">{c.occupation || '---'}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-4 group/item mt-auto">
+                                            <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center shrink-0 border border-pink-500/10 group-hover/item:bg-pink-500/20 transition-colors">
+                                                <MapPin size={18} className="text-pink-500" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[1.5px]">Location</p>
+                                                <p className="text-xs font-bold text-slate-300 truncate">{c.address || 'Unknown'}</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Admin Action Buttons */}
+                                        <div className="grid grid-cols-2 gap-2 mt-4">
+                                            <button
+                                                onClick={() => { setAdminActionCandidate(c); setActionType('status'); setNewStatus(c.status); setAdminComments(c.admin_comments || ''); }}
+                                                className="px-4 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/10 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Pencil size={14} /> Update
+                                            </button>
+                                            {!c.is_matched && (
+                                                <button
+                                                    onClick={() => { setAdminActionCandidate(c); setActionType('match'); setMatchData({ status: 'Matched', partnerName: '', partnerGender: '' }); }}
+                                                    className="px-4 py-3 bg-pink-600/20 hover:bg-pink-600/40 rounded-xl text-[10px] font-black uppercase tracking-widest text-pink-300 border border-pink-500/30 transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    <Heart size={14} /> Match
+                                                </button>
+                                            )}
+                                            {c.is_matched && (
+                                                <button
+                                                    onClick={() => setSelectedCandidate(c)}
+                                                    className="px-4 py-3 bg-pink-600 hover:bg-pink-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-white transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    <Info size={14} /> Details
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
+            {/* Admin Action Modal (Status & Comments) */}
+            <AnimatePresence>
+                {adminActionCandidate && actionType === 'status' && (
+                    <div className="fixed inset-0 z-[160] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="bg-slate-900 rounded-[32px] w-full max-w-lg border border-white/10 overflow-hidden shadow-2xl p-8"
+                        >
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Update Status</h3>
+                                <button onClick={() => setAdminActionCandidate(null)} className="text-slate-500 hover:text-white"><X size={24} /></button>
+                            </div>
+
+                            <div className="flex items-center gap-4 p-4 bg-slate-800 rounded-2xl mb-6">
+                                <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-700">
+                                    {adminActionCandidate.photo ? (
+                                        <img src={getImageUrl(adminActionCandidate.photo)} className="w-full h-full object-cover" alt="" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center"><User size={20} className="text-slate-400" /></div>
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-white">{adminActionCandidate.name}</p>
+                                    <p className="text-xs text-slate-400">Current Status: {adminActionCandidate.status.replace('_', ' ')}</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">New Status</label>
+                                    <select
+                                        value={newStatus}
+                                        onChange={(e) => setNewStatus(e.target.value)}
+                                        className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-pink-500/50 outline-none text-white text-sm font-bold"
+                                    >
+                                        <option value="pending" className="bg-slate-900">Pending</option>
+                                        <option value="verified" className="bg-slate-900">Verified</option>
+                                        <option value="approved" className="bg-slate-900">Approved</option>
+                                        <option value="evidence_requested" className="bg-slate-900">Request Evidence</option>
+                                        <option value="rejected" className="bg-slate-900">Rejected</option>
+                                    </select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">Admin Comments (Sent to User)</label>
+                                    <textarea
+                                        value={adminComments}
+                                        onChange={(e) => setAdminComments(e.target.value)}
+                                        placeholder="E.g. Please upload a clearer photo, or submit Aadhar copy."
+                                        rows={4}
+                                        className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-pink-500/50 outline-none text-white text-sm font-bold resize-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mt-8 flex gap-4">
+                                <button
+                                    onClick={() => handleDelete(adminActionCandidate.id)}
+                                    className="px-6 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-2xl transition-colors flex items-center justify-center border border-red-500/20"
+                                    title="Delete Candidate"
+                                >
+                                    <Trash2 size={20} />
+                                </button>
+                                <button
+                                    onClick={() => handleUpdateStatus(adminActionCandidate.id, newStatus, adminComments)}
+                                    disabled={submitting}
+                                    className="flex-1 px-8 py-4 bg-gradient-to-r from-pink-600 to-red-600 hover:opacity-90 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-pink-500/20"
+                                >
+                                    {submitting ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Admin Action Modal (Mark Matched) */}
+            <AnimatePresence>
+                {adminActionCandidate && actionType === 'match' && (
+                    <div className="fixed inset-0 z-[160] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="bg-slate-900 rounded-[32px] w-full max-w-lg border border-white/10 overflow-hidden shadow-2xl p-8"
+                        >
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600 uppercase tracking-tighter">Mark Matched</h3>
+                                <button onClick={() => setAdminActionCandidate(null)} className="text-slate-500 hover:text-white"><X size={24} /></button>
+                            </div>
+
+                            <p className="text-sm text-slate-400 mb-6">Record a successful match for <strong className="text-white">{adminActionCandidate.name}</strong>. Their profile will be hidden from the public feed but kept in the record.</p>
+
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">Match Event</label>
+                                    <select
+                                        value={matchData.status}
+                                        onChange={(e) => setMatchData({ ...matchData, status: e.target.value })}
+                                        className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-amber-500/50 outline-none text-white text-sm font-bold"
+                                    >
+                                        <option value="Matched" className="bg-slate-900">Matched</option>
+                                        <option value="Engaged" className="bg-slate-900">Engaged</option>
+                                        <option value="Married" className="bg-slate-900">Married</option>
+                                    </select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">Partner Name (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={matchData.partnerName}
+                                        onChange={(e) => setMatchData({ ...matchData, partnerName: e.target.value })}
+                                        placeholder="Who did they match with?"
+                                        className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-amber-500/50 outline-none text-white text-sm font-bold"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mt-8">
+                                <button
+                                    onClick={() => handleMarkMatched(adminActionCandidate.id)}
+                                    disabled={submitting}
+                                    className="w-full px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-90 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-amber-500/20"
+                                >
+                                    {submitting ? 'Saving...' : 'Confirm Match ✨'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Candidate Details Modal */}
+            <AnimatePresence>
+                {selectedCandidate && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-slate-900 rounded-[40px] w-full max-w-4xl border border-white/10 overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]"
+                        >
+                            {/* Detailed view similar to user side */}
+                            <div className="md:w-5/12 relative h-64 md:h-auto bg-slate-800">
+                                {selectedCandidate.photo ? (
+                                    <img
+                                        src={getImageUrl(selectedCandidate.photo)}
+                                        className="w-full h-full object-cover"
+                                        alt={selectedCandidate.name}
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center"><User size={64} className="text-slate-700" /></div>
+                                )}
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 md:bg-gradient-to-r md:from-transparent md:to-slate-900" />
+                                <div className="absolute top-6 left-6 flex flex-col gap-2">
+                                    <span className="px-3 py-1 bg-white/10 backdrop-blur border border-white/20 rounded-lg text-[10px] font-black text-white uppercase tracking-widest">{selectedCandidate.status}</span>
+                                    {selectedCandidate.is_matched && (
+                                        <span className="px-3 py-1 bg-amber-500 border border-amber-400 rounded-lg text-[10px] font-black text-amber-950 uppercase tracking-widest">{selectedCandidate.matched_status || 'Matched'}</span>
+                                    )}
+                                </div>
+                                <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10">
+                                    <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-2 uppercase tracking-tighter shadow-sm">{selectedCandidate.name}</h2>
+                                    <div className="flex gap-2">
+                                        <span className="px-4 py-1.5 bg-pink-500 rounded-lg text-[10px] font-black text-white uppercase tracking-widest">{selectedCandidate.gender}</span>
+                                        <span className="px-4 py-1.5 bg-slate-800 rounded-lg text-[10px] font-black text-white uppercase tracking-widest">{calculateAge(selectedCandidate.date_of_birth || selectedCandidate.dob)} YRS</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="md:w-7/12 flex flex-col overflow-y-auto">
+                                <div className="p-6 md:p-10 space-y-8">
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-xs font-black text-pink-500 uppercase tracking-[4px]">Candidate Dossier</p>
+                                        <button onClick={() => setSelectedCandidate(null)} className="p-2 hover:bg-white/5 rounded-full transition-colors text-slate-400">
+                                            <X size={24} />
+                                        </button>
+                                    </div>
+
+                                    {selectedCandidate.is_matched && (
+                                        <div className="p-6 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-4">
+                                            <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0"><Heart size={20} fill="currentColor" /></div>
+                                            <div>
+                                                <h4 className="text-sm font-bold text-amber-400 uppercase tracking-widest mb-1">{selectedCandidate.matched_status || 'Matched'}</h4>
+                                                <p className="text-amber-200/70 text-sm">
+                                                    {selectedCandidate.matched_partner_name
+                                                        ? `Matched/Married/Engaged to ${selectedCandidate.matched_partner_name}`
+                                                        : 'Candidate has successfully found a match.'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {selectedCandidate.admin_comments && (
+                                        <div className="p-6 bg-slate-800/50 border border-slate-700/50 rounded-2xl">
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px] mb-2">Admin Comments</p>
+                                            <p className="text-slate-300 text-sm italic">"{selectedCandidate.admin_comments}"</p>
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Education</p>
+                                            <p className="text-sm font-bold text-slate-200">{selectedCandidate.education || '---'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Occupation</p>
+                                            <p className="text-sm font-bold text-slate-200">{selectedCandidate.occupation || '---'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Address</p>
+                                            <p className="text-sm font-bold text-slate-200">{selectedCandidate.address || '---'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Father</p>
+                                            <p className="text-sm font-bold text-slate-200">{selectedCandidate.father_name || selectedCandidate.father || '---'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Income</p>
+                                            <p className="text-sm font-bold text-slate-200">{selectedCandidate.income || '---'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">Mobile</p>
+                                            <p className="text-sm font-bold text-slate-200">{selectedCandidate.mobile || selectedCandidate.phone || '---'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-auto p-6 border-t border-white/5 bg-white/2 flex gap-4">
+                                    <button
+                                        onClick={() => { setSelectedCandidate(null); setAdminActionCandidate(selectedCandidate); setActionType('status'); setNewStatus(selectedCandidate.status); setAdminComments(selectedCandidate.admin_comments || ''); }}
+                                        className="flex-1 py-4 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black uppercase tracking-widest text-white transition-all shadow-lg flex items-center justify-center gap-2"
+                                    >
+                                        <Pencil size={18} /> Update / Edit
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Photo Preview Modal */}
+            <AnimatePresence>
+                {selectedPhoto && (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        onClick={() => setSelectedPhoto(null)}
+                        className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/95 backdrop-blur-2xl cursor-zoom-out"
+                    >
+                        <motion.button className="absolute top-8 right-8 w-14 h-14 bg-white/10 hover:bg-white/20 rounded-2xl text-white border border-white/20 transition-all flex items-center justify-center">
+                            <X size={32} />
+                        </motion.button>
+                        <motion.img
+                            initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                            src={selectedPhoto}
+                            alt="Full Preview"
+                            className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl"
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
         </div>
     );
 }
