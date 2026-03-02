@@ -23,9 +23,19 @@ export default function Announcements() {
             });
             if (!response.ok) throw new Error('Failed to fetch announcements');
             const data = await response.json();
-            setPosts(data);
+            // Handle both raw array and wrapped { success, posts } response
+            if (Array.isArray(data)) {
+                setPosts(data);
+            } else if (data && Array.isArray(data.posts)) {
+                setPosts(data.posts);
+            } else if (data && Array.isArray(data.data)) {
+                setPosts(data.data);
+            } else {
+                setPosts([]);
+            }
         } catch (error) {
             toast.error('Could not load announcements');
+            setPosts([]);
         } finally {
             setLoading(false);
         }

@@ -259,7 +259,7 @@ export default function Members() {
         <div className="p-4 sm:p-8 max-w-7xl mx-auto h-full flex flex-col relative">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{t('member_management')}</h1>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">{t('member_management')}</h1>
                     <p className="text-slate-500 mt-1 text-sm sm:text-base">View, add, and manage community members and their families.</p>
                 </div>
                 <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
@@ -343,7 +343,7 @@ export default function Members() {
                             ) : (
                                 displayMembers.map((m, i) => (
                                     <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{m.membership_no}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">{m.membership_no}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">{m.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{m.mobile}</td>
                                         <td className="px-6 py-4 text-sm text-slate-500 line-clamp-1">{[m.village, m.panchayat, m.taluka, m.district].filter(Boolean).join(', ')}</td>

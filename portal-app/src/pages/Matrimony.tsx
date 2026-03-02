@@ -59,10 +59,19 @@ export default function Matrimony() {
             });
             if (!res.ok) throw new Error('Failed');
             const data = await res.json();
-            // Backend already filters by approved status and is_matched=false
-            setCandidates(data);
+            // Handle both array response and wrapped { success, candidates } response
+            if (Array.isArray(data)) {
+                setCandidates(data);
+            } else if (data && Array.isArray(data.candidates)) {
+                setCandidates(data.candidates);
+            } else if (data && Array.isArray(data.data)) {
+                setCandidates(data.data);
+            } else {
+                setCandidates([]);
+            }
         } catch {
             toast.error(t('matrimony', 'failedLoad') || 'Could not load matrimony profiles');
+            setCandidates([]);
         } finally {
             setLoading(false);
         }
@@ -122,7 +131,7 @@ export default function Matrimony() {
         return raw;
     };
 
-    const sortedCandidates = [...candidates].sort((a, b) => {
+    const sortedCandidates = (Array.isArray(candidates) ? [...candidates] : []).sort((a, b) => {
         if (sortBy === 'Age') {
             const ageA = calculateAge(a.date_of_birth || a.dob) || 0;
             const ageB = calculateAge(b.date_of_birth || b.dob) || 0;

@@ -115,7 +115,7 @@ export default function Posts() {
         <div className="p-4 sm:p-8 max-w-7xl mx-auto h-full flex flex-col relative">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Blog Posts</h1>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">Blog Posts</h1>
                     <p className="text-slate-500 mt-1 text-sm sm:text-base">Manage announcements and articles for the community.</p>
                 </div>
                 <button

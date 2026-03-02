@@ -48,7 +48,7 @@ export default function AuditLog() {
         <div className="p-4 sm:p-8 pb-32 max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 sm:mb-8">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                         <Shield className="text-indigo-600" size={32} />
                         Audit Log
                     </h1>

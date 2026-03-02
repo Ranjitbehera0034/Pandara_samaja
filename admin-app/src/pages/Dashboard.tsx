@@ -49,7 +49,7 @@ export default function Dashboard() {
 
     return (
         <div className="p-4 sm:p-8 pb-32 max-w-7xl mx-auto">
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8 tracking-tight">{t('welcome_back')}</h1>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">{t('welcome_back')}</h1>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
                 {cards.map((card, i) => (
