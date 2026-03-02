@@ -160,4 +160,12 @@
         setupPageTransitions();
     }
 
+    // Hide loader when navigating back via bfcache
+    window.addEventListener('pageshow', (e) => {
+        if (e.persisted) {
+            const loader = document.getElementById('pageLoader');
+            if (loader) loader.classList.remove('active');
+        }
+    });
+
 })();

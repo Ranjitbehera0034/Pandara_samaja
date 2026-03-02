@@ -154,7 +154,7 @@
                 <!-- Photo side -->
                 <div class="president-photo-wrap">
                     <div class="president-photo-ring">
-                        <img class="president-photo-v2" src="assets/img/NOPS/Amar Kumar Behera.png"
+                        <img id="presidentImage" class="president-photo-v2" src="assets/img/leaders/placeholder.png"
                             alt="ସଭାପତି / President"
                             onerror="this.onerror=null;this.src='assets/img/leaders/placeholder.png'" />
                     </div>
@@ -446,6 +446,25 @@
                     const levels = ['State'];
                     const grouped = {};
                     result.data.forEach(leader => {
+                        // Check if this leader is the President
+                        if (leader.role && leader.role.toLowerCase() === 'president') {
+                            let pSrc = PLACEHOLDER;
+                            if (leader.image_url) {
+                                if (leader.image_url.includes('drive.google.com') || leader.image_url.includes('lh3.googleusercontent.com')) {
+                                    const pDriveIdMatch = leader.image_url.match(/([a-zA-Z0-9_-]{25,})/);
+                                    if (pDriveIdMatch && pDriveIdMatch[1]) {
+                                        pSrc = baseUrl + '/api/v1/image-proxy/' + pDriveIdMatch[1];
+                                    } else {
+                                        pSrc = leader.image_url;
+                                    }
+                                } else {
+                                    pSrc = leader.image_url;
+                                }
+                            }
+                            const pImg = document.getElementById('presidentImage');
+                            if (pImg) pImg.src = pSrc;
+                        }
+
                         const lvl = leader.level || 'State';
                         if (!grouped[lvl]) grouped[lvl] = [];
                         grouped[lvl].push(leader);
