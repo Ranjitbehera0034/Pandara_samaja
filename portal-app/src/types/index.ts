@@ -93,6 +93,7 @@ export interface Post {
     reactions?: ReactionCount;   // Per-reaction counts
     myReaction?: ReactionType | null;  // Current user's reaction
     comments: Comment[];
+    commentsCount?: number;
     timestamp: string;
     isLiked?: boolean;
     isBookmarked?: boolean;

@@ -600,9 +600,9 @@ export function PostCard({
                         ))}
                         <span className="ml-1">{totalReactions}</span>
                     </div>
-                    {post.comments.length > 0 && (
+                    {(post.commentsCount || 0) > 0 && (
                         <button onClick={() => setShowComments(!showComments)} className="hover:text-white transition-colors">
-                            {post.comments.length} {post.comments.length === 1 ? 'comment' : 'comments'}
+                            {post.commentsCount} {post.commentsCount === 1 ? 'comment' : 'comments'}
                         </button>
                     )}
                 </div>
@@ -668,7 +668,7 @@ export function PostCard({
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${showComments ? 'text-blue-400 bg-blue-500/10' : 'hover:text-blue-400 hover:bg-blue-500/5'}`}
                     >
                         <MessageSquare size={18} />
-                        <span className="text-sm font-medium">{post.comments.length || ''}</span>
+                        <span className="text-sm font-medium">{post.commentsCount || ''}</span>
                     </button>
 
                     <button
