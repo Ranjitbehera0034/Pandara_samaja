@@ -217,23 +217,43 @@ export default function Chat() {
         }
     };
 
-    const openAllMembers = async () => {
-        setShowNewChat(true);
-        if (allMembers.length > 0) return;
+    const searchMembers = useCallback(async (searchQuery: string) => {
         setMembersLoading(true);
         try {
             const token = localStorage.getItem('portalToken');
-            const res = await fetch(`${PORTAL_API_URL}/members`, { headers: { Authorization: `Bearer ${token}` } });
+            const url = new URL(`${PORTAL_API_URL}/members`);
+            url.searchParams.append('hasMobile', 'true');
+            if (searchQuery.trim()) {
+                url.searchParams.append('search', searchQuery.trim());
+            }
+            const res = await fetch(url.toString(), { headers: { Authorization: `Bearer ${token}` } });
             if (res.ok) {
                 const data = await res.json();
-                if (data.success) setAllMembers(data.members);
+                if (data.success) {
+                    setAllMembers(data.members);
+                }
             }
         } catch (error) {
             toast.error(t('chat', 'failedLoadMembers'));
         } finally {
             setMembersLoading(false);
         }
+    }, [t]);
+
+    const openAllMembers = () => {
+        setShowNewChat(true);
+        if (allMembers.length === 0) {
+            searchMembers('');
+        }
     };
+
+    useEffect(() => {
+        if (!showNewChat) return;
+        const timer = setTimeout(() => {
+            searchMembers(memberSearch);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [memberSearch, showNewChat, searchMembers]);
 
     const startNewChat = (m: MemberOption) => {
         const newContact: ChatContact = {
@@ -286,7 +306,7 @@ export default function Chat() {
 
     // Calculated
     const filteredContacts = useMemo(() => contacts.filter(c => c.contact_name.toLowerCase().includes(contactSearch.toLowerCase())), [contacts, contactSearch]);
-    const filteredMembers = useMemo(() => allMembers.filter(m => m.name.toLowerCase().includes(memberSearch.toLowerCase())), [allMembers, memberSearch]);
+    const filteredMembers = allMembers; // Now handled natively by the backend search API!
     const totalUnread = useMemo(() => contacts.reduce((sum, c) => sum + (c.unread_count || 0), 0), [contacts]);
 
     return (

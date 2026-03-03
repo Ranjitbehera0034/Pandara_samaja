@@ -10,6 +10,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { PollDisplay } from './Poll';
 import type { Post, ReactionType, Comment, MediaItem } from '../../types';
+import { PORTAL_API_URL } from '../../config/apiConfig';
 
 // ─── Content Moderation ──────────────────────────────
 const BANNED_WORDS = ['nude', 'naked', 'xxx', 'porn', 'sex', 'nsfw', 'adult content', 'explicit', 'obscene', 'vulgar'];
@@ -254,6 +255,10 @@ export function PostCard({
     const { member, user } = useAuth();
     const { t } = useLanguage();
     const [showComments, setShowComments] = useState(false);
+    const [localComments, setLocalComments] = useState<Comment[]>(post.comments || []);
+    const [loadingComments, setLoadingComments] = useState(false);
+    const [commentsPage, setCommentsPage] = useState(1);
+    const [hasMoreComments, setHasMoreComments] = useState(false);
     const [commentText, setCommentText] = useState('');
     const [showMenu, setShowMenu] = useState(false);
     const [showReactions, setShowReactions] = useState(false);
@@ -310,7 +315,49 @@ export function PostCard({
         handleReaction('like');
     };
 
-    const handleCommentSubmit = (e: React.FormEvent) => {
+    const fetchComments = async (page = 1) => {
+        try {
+            setLoadingComments(true);
+            const token = localStorage.getItem("portalToken");
+            const response = await fetch(`${PORTAL_API_URL}/posts/${post.id}/comments?page=${page}&limit=5`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (data.success) {
+                const mappedComments: Comment[] = data.comments.map((c: any) => ({
+                    id: c.id.toString(),
+                    authorId: c.member_id,
+                    authorName: c.author_name,
+                    authorAvatar: c.author_photo,
+                    content: c.text,
+                    timestamp: c.created_at,
+                    parentId: c.parent_id?.toString() || undefined,
+                    replies: [],
+                    likes: Number(c.likes_count) || 0,
+                    isLiked: false,
+                }));
+                if (page === 1) {
+                    setLocalComments(mappedComments);
+                } else {
+                    setLocalComments(prev => [...prev, ...mappedComments]);
+                }
+                setHasMoreComments(data.total > page * 5);
+                setCommentsPage(page);
+            }
+        } catch (error) {
+            console.error("Failed to load comments", error);
+        } finally {
+            setLoadingComments(false);
+        }
+    };
+
+    useEffect(() => {
+        if (showComments && localComments.length === 0) {
+            fetchComments(1);
+        }
+    }, [showComments]);
+
+    const handleCommentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!commentText.trim()) return;
         if (containsBannedContent(commentText)) {
@@ -651,25 +698,38 @@ export function PostCard({
                         className="overflow-hidden mt-3 pt-3 border-t border-slate-700/30"
                     >
                         <div className="space-y-3 mb-4 max-h-80 overflow-y-auto pr-2">
-                            {post.comments.length === 0 ? (
+                            {localComments.length === 0 && !loadingComments ? (
                                 <p className="text-center text-sm text-slate-500 py-2">{t('postCard', 'noComments')}</p>
                             ) : (
-                                (() => {
-                                    const buildTree = (parentId?: string): Comment[] => {
-                                        return post.comments
-                                            .filter(c => c.parentId === parentId)
-                                            .map(c => ({ ...c, replies: buildTree(c.id) }));
-                                    };
-                                    const nestedComments = buildTree(undefined);
-                                    return nestedComments.map(comment => (
-                                        <CommentItem
-                                            key={comment.id}
-                                            comment={comment}
-                                            onReply={handleReplyComment}
-                                            onLikeComment={onLikeComment}
-                                        />
-                                    ));
-                                })()
+                                <>
+                                    {(() => {
+                                        const buildTree = (parentId?: string): Comment[] => {
+                                            return localComments
+                                                .filter(c => c.parentId === parentId)
+                                                .map(c => ({ ...c, replies: buildTree(c.id) }));
+                                        };
+                                        const nestedComments = buildTree(undefined);
+                                        return nestedComments.map(comment => (
+                                            <CommentItem
+                                                key={comment.id}
+                                                comment={comment}
+                                                onReply={handleReplyComment}
+                                                onLikeComment={onLikeComment}
+                                            />
+                                        ));
+                                    })()}
+                                    {loadingComments && (
+                                        <div className="text-center py-2 text-slate-400 text-sm italic">Loading comments...</div>
+                                    )}
+                                    {hasMoreComments && !loadingComments && (
+                                        <button
+                                            onClick={() => fetchComments(commentsPage + 1)}
+                                            className="w-full text-center py-2 text-sm text-blue-400 hover:text-blue-300 transition-colors bg-blue-500/10 hover:bg-blue-500/20 rounded-lg font-medium"
+                                        >
+                                            View More Comments
+                                        </button>
+                                    )}
+                                </>
                             )}
                         </div>
 
