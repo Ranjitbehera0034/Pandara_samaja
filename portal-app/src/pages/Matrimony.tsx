@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Briefcase, GraduationCap, X, Plus, Upload, Heart, User, Download, Eye, Phone, Info, Filter, ArrowUpDown, Bookmark, Star } from 'lucide-react';
+import { Search, MapPin, Briefcase, GraduationCap, X, Plus, Heart, User, Download, Eye, Phone, Info, Filter, ArrowUpDown, Bookmark, Star, FileText, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
 
-import { API_BASE_URL } from '../config/apiConfig';
+import { API_BASE_URL, PORTAL_API_URL } from '../config/apiConfig';
+
+type MyApplication = {
+    id: number;
+    status: string;
+    admin_remarks?: string;
+    file_type?: string;
+    submitted_at: string;
+};
 
 type Candidate = {
     id: number;
@@ -42,12 +50,29 @@ export default function Matrimony() {
     const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
     const [shortlisted, setShortlisted] = useState<number[]>([]);
+    const [myApplication, setMyApplication] = useState<MyApplication | null>(null);
 
     useEffect(() => {
         const saved = localStorage.getItem('shortlisted_candidates');
         if (saved) setShortlisted(JSON.parse(saved));
         fetchCandidates();
+        fetchMyApplication();
     }, [genderFilter]);
+
+    const fetchMyApplication = async () => {
+        try {
+            const token = localStorage.getItem("portalToken");
+            const res = await fetch(`${PORTAL_API_URL}/matrimony/my-application`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success && data.application) {
+                setMyApplication(data.application);
+            }
+        } catch (error) {
+            console.error('Failed to fetch my matrimony application:', error);
+        }
+    };
 
     const fetchCandidates = async () => {
         setLoading(true);
@@ -84,19 +109,20 @@ export default function Matrimony() {
             const formData = new FormData(e.currentTarget);
             const token = localStorage.getItem("portalToken");
 
-            const res = await fetch(`${API_BASE_URL}/candidates`, {
+            const res = await fetch(`${PORTAL_API_URL}/matrimony/submit`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
             });
 
-            if (!res.ok) throw new Error('Submission failed');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Submission failed');
 
-            toast.success('Your profile has been submitted for verification!');
+            toast.success(data.message || 'Your form has been submitted for verification!');
             setIsAddModalOpen(false);
-            fetchCandidates();
-        } catch (error) {
-            toast.error('Failed to submit profile');
+            fetchMyApplication(); // Refresh to show tracking card
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to submit form');
         } finally {
             setSubmitting(false);
         }
@@ -199,6 +225,58 @@ export default function Matrimony() {
                         </div>
                     </div>
                 </header>
+
+                {/* Application Tracking Card */}
+                {myApplication && (
+                    <div className={`mb-8 p-6 rounded-[32px] border backdrop-blur-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 ${myApplication.status === 'approved' ? 'bg-green-500/10 border-green-500/20' :
+                        myApplication.status === 'rejected' ? 'bg-red-500/10 border-red-500/20' :
+                            myApplication.status === 'correction_needed' ? 'bg-amber-500/10 border-amber-500/20' :
+                                'bg-blue-500/10 border-blue-500/20'
+                        }`}>
+                        <div className="flex items-center gap-4">
+                            <div className={`w-14 h-14 rounded-full flex items-center justify-center ${myApplication.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                                myApplication.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                                    myApplication.status === 'correction_needed' ? 'bg-amber-500/20 text-amber-400' :
+                                        'bg-blue-500/20 text-blue-400'
+                                }`}>
+                                {myApplication.status === 'approved' ? <CheckCircle2 size={24} /> :
+                                    myApplication.status === 'rejected' ? <AlertCircle size={24} /> :
+                                        myApplication.status === 'correction_needed' ? <AlertCircle size={24} /> :
+                                            <Clock size={24} />}
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-white mb-1 tracking-tight">
+                                    {myApplication.status === 'approved' ? 'Profile Approved' :
+                                        myApplication.status === 'rejected' ? 'Application Rejected' :
+                                            myApplication.status === 'correction_needed' ? 'Correction Requested' :
+                                                'Verification Pending'}
+                                </h3>
+                                <p className="text-sm text-slate-300">
+                                    {myApplication.status === 'approved' ? 'Your profile is now live in the directory.' :
+                                        myApplication.status === 'rejected' ? 'Your application could not be approved.' :
+                                            myApplication.status === 'correction_needed' ? 'We need some changes to your form data.' :
+                                                'Your application is currently being reviewed by admins.'}
+                                </p>
+                            </div>
+                        </div>
+
+                        {myApplication.admin_remarks && (
+                            <div className="bg-slate-900/50 flex-1 p-4 rounded-2xl border border-white/5 mx-0 md:mx-6 max-w-lg">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Admin Feedback</p>
+                                <p className="text-sm text-slate-200">{myApplication.admin_remarks}</p>
+                            </div>
+                        )}
+
+                        {myApplication.status === 'correction_needed' && (
+                            <button
+                                onClick={() => setIsAddModalOpen(true)}
+                                className="px-6 py-3 bg-white text-slate-900 rounded-xl text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                            >
+                                Re-upload Form
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 {/* Filters & Tools */}
                 <div className="sticky top-4 z-40 mb-12">
@@ -511,7 +589,7 @@ export default function Matrimony() {
                 )}
             </AnimatePresence>
 
-            {/* Add Modal */}
+            {/* Add/Upload Modal */}
             <AnimatePresence>
                 {isAddModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-2xl">
@@ -519,79 +597,41 @@ export default function Matrimony() {
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="bg-slate-900 rounded-[40px] w-full max-w-2xl border border-white/10 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+                            className="bg-slate-900 rounded-[40px] w-full max-w-xl border border-white/10 overflow-hidden shadow-2xl flex flex-col"
                         >
                             <div className="px-10 py-8 border-b border-white/5 flex justify-between items-center bg-white/2 shrink-0">
                                 <div>
-                                    <h2 className="text-3xl font-black text-white tracking-tight uppercase tracking-widest">Register Profile</h2>
-                                    <p className="text-xs text-pink-500 font-bold mt-1 tracking-widest uppercase">Community Matrimony Network</p>
+                                    <h2 className="text-2xl font-black text-white tracking-tight uppercase tracking-widest">
+                                        {myApplication?.status === 'correction_needed' ? 'Re-upload Form' : 'Upload Matrimony Form'}
+                                    </h2>
+                                    <p className="text-xs text-pink-500 font-bold mt-1 tracking-widest uppercase">Community Verification</p>
                                 </div>
                                 <button onClick={() => setIsAddModalOpen(false)} className="text-slate-500 hover:text-white p-3 rounded-2xl hover:bg-white/5 transition-all">
                                     <X size={28} />
                                 </button>
                             </div>
 
-                            <form onSubmit={handleAddSubmit} className="flex-1 overflow-y-auto p-10 text-sm custom-scrollbar">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-slate-200">
-                                    <div className="md:col-span-2">
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[3px] mb-3">{t('matrimony', 'uploadPhoto')} *</label>
-                                        <div className="relative group">
-                                            <label className="flex flex-col items-center justify-center w-full h-44 bg-white/5 border-2 border-dashed border-white/10 hover:border-pink-500/50 rounded-[32px] cursor-pointer transition-all group-hover:bg-white/10 group-active:scale-[0.98]">
-                                                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-slate-400 group-hover:text-pink-400">
-                                                    <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-pink-500/10 transition-colors">
-                                                        <Upload size={28} />
-                                                    </div>
-                                                    <p className="text-sm font-black uppercase tracking-widest">{t('matrimony', 'selectFile')}</p>
-                                                    <p className="text-[10px] mt-2 opacity-50 tracking-wider font-bold">PNG, JPG or JPEG • Max 5MB</p>
-                                                </div>
-                                                <input type="file" name="photo" className="hidden" accept="image/*" required />
-                                            </label>
+                            <form onSubmit={handleAddSubmit} className="flex-1 p-10 text-sm flex flex-col gap-6">
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[3px]">Member Name *</label>
+                                    <input type="text" name="member_name" required placeholder="Enter the candidate's full name" className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-pink-500/50 focus:outline-none text-white font-bold transition-all" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[3px]">{t('matrimony', 'uploadForm')} *</label>
+                                    <label className="flex flex-col items-center justify-center w-full h-48 bg-white/5 border-2 border-dashed border-white/10 hover:border-pink-500/50 rounded-[32px] cursor-pointer transition-all hover:bg-white/10 active:scale-[0.98]">
+                                        <div className="flex flex-col items-center justify-center p-4 text-slate-400 hover:text-pink-400">
+                                            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-4 text-pink-500">
+                                                <FileText size={32} />
+                                            </div>
+                                            <p className="text-sm font-black uppercase tracking-widest">{t('matrimony', 'selectFile')}</p>
+                                            <p className="text-[10px] mt-2 opacity-50 tracking-wider font-bold">PDF, PNG, JPG (Max 5MB)</p>
                                         </div>
-                                    </div>
-
-                                    {/* Manual Form Upload */}
-                                    <div className="md:col-span-2">
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[3px] mb-3">{t('matrimony', 'uploadForm')}</label>
-                                        <div className="relative group">
-                                            <label className="flex flex-col items-center justify-center w-full h-32 bg-white/5 border-2 border-dashed border-white/10 hover:border-pink-500/50 rounded-[32px] cursor-pointer transition-all group-hover:bg-white/10 group-active:scale-[0.98]">
-                                                <div className="flex flex-col items-center justify-center p-4 text-slate-400 group-hover:text-pink-400">
-                                                    <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center mb-2 group-hover:bg-pink-500/10 transition-colors">
-                                                        <Upload size={20} />
-                                                    </div>
-                                                    <p className="text-[10px] font-black uppercase tracking-widest">{t('matrimony', 'selectFile')}</p>
-                                                </div>
-                                                <input type="file" name="manual_form" className="hidden" accept="image/*" />
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <FormInput label={t('matrimony', 'fullName')} name="name" required />
-                                    <div className="space-y-2">
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">{t('matrimony', 'gender')}</label>
-                                        <select name="gender" required className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-pink-500/50 focus:outline-none text-slate-200 text-sm font-bold transition-all appearance-none">
-                                            <option value="" className="bg-slate-900">{t('matrimony', 'all')}</option>
-                                            <option value="Male" className="bg-slate-900">{t('matrimony', 'male')}</option>
-                                            <option value="Female" className="bg-slate-900">{t('matrimony', 'female')}</option>
-                                        </select>
-                                    </div>
-                                    <FormInput label={t('matrimony', 'dob')} name="date_of_birth" type="date" required />
-                                    <FormInput label={t('matrimony', 'education')} name="education" placeholder="e.g. M.Tech, IIT-B" required />
-                                    <FormInput label={t('matrimony', 'occupation')} name="occupation" placeholder="e.g. Architect" required />
-                                    <FormInput label={t('matrimony', 'income')} name="income" placeholder="e.g. 5.11' • 15 LPA" />
-                                    <FormInput label={t('matrimony', 'fatherName')} name="father_name" required />
-                                    <FormInput label={t('matrimony', 'mobileNumber')} name="mobile" type="tel" required />
-
-                                    <div className="md:col-span-2 space-y-2">
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">{t('matrimony', 'address')}</label>
-                                        <textarea name="address" required rows={3} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-pink-500/50 focus:outline-none resize-none transition-all text-sm font-bold"></textarea>
-                                    </div>
-
-                                    <div className="md:col-span-2 space-y-2">
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">{t('matrimony', 'partnerExpectations')}</label>
-                                        <textarea name="expectations" placeholder="Tell us about the partner you are looking for..." rows={3} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-pink-500/50 focus:outline-none resize-none transition-all text-sm font-bold"></textarea>
-                                    </div>
+                                        <input type="file" name="form_file" className="hidden" accept=".pdf,image/*" required />
+                                    </label>
                                 </div>
                             </form>
+
                             <div className="p-10 border-t border-white/5 bg-white/2 shrink-0 flex justify-end gap-4">
                                 <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-8 py-3.5 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">
                                     {t('common', 'cancel')}
@@ -603,7 +643,7 @@ export default function Matrimony() {
                                         form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
                                     }
                                 }} disabled={submitting} className="px-10 py-4 bg-gradient-to-r from-pink-600 to-red-600 hover:opacity-90 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-pink-500/20 flex items-center gap-3">
-                                    {submitting ? t('common', 'loading') : t('matrimony', 'submitProfile')}
+                                    {submitting ? t('common', 'loading') : 'Submit for Verification'}
                                 </button>
                             </div>
                         </motion.div>
@@ -635,17 +675,3 @@ function DetailItem({ icon, label, value }: { icon: React.ReactNode, label: stri
     );
 }
 
-function FormInput({ label, name, type = 'text', required = false, placeholder = '' }: { label: string, name: string, type?: string, required?: boolean, placeholder?: string }) {
-    return (
-        <div className="space-y-2">
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">{label} {required && '*'}</label>
-            <input
-                type={type}
-                name={name}
-                required={required}
-                placeholder={placeholder}
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-pink-500/50 focus:ring-4 focus:ring-pink-500/10 focus:outline-none transition-all text-white text-sm font-bold placeholder:text-slate-700"
-            />
-        </div>
-    );
-}

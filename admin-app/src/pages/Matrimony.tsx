@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, X, Heart, User, Eye, Info, Filter, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
+import { Search, MapPin, X, Heart, User, Eye, Info, Filter, ArrowUpDown, Pencil, Trash2, ShieldCheck, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import { BACKEND_URL } from '../config/apiConfig';
+import MatrimonyVerificationQueue from '../components/MatrimonyVerificationQueue';
 
 type Candidate = {
     id: number;
@@ -41,6 +42,9 @@ export default function Matrimony() {
     const [genderFilter, setGenderFilter] = useState('All');
     const [sortBy, setSortBy] = useState<'Default' | 'Age' | 'Name'>('Default');
     const [statusFilter, setStatusFilter] = useState<'All' | 'pending' | 'verified' | 'approved' | 'rejected' | 'evidence_requested'>('All');
+
+    // View Mode State
+    const [viewMode, setViewMode] = useState<'directory' | 'queue'>('queue');
 
     // UI State
     const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
@@ -200,216 +204,240 @@ export default function Matrimony() {
                             </p>
                         </motion.div>
                     </div>
+
+                    {/* View Mode Tabs */}
+                    <div className="mt-8 flex bg-slate-200 dark:bg-slate-800/50 p-1 rounded-2xl w-fit">
+                        <button
+                            onClick={() => setViewMode('queue')}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${viewMode === 'queue' ? 'bg-white dark:bg-slate-700 text-pink-600 dark:text-pink-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                        >
+                            <ShieldCheck size={18} />
+                            Verification Queue
+                        </button>
+                        <button
+                            onClick={() => setViewMode('directory')}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${viewMode === 'directory' ? 'bg-white dark:bg-slate-700 text-pink-600 dark:text-pink-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                        >
+                            <Users size={18} />
+                            Live Directory
+                        </button>
+                    </div>
                 </header>
 
-                {/* Filters & Tools */}
-                <div className="sticky top-4 z-40 mb-12">
-                    <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-3 flex flex-col lg:flex-row gap-4 shadow-xl dark:shadow-2xl transition-colors">
-                        <div className="relative flex-1 group">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-pink-500 transition-colors" size={20} />
-                            <input
-                                type="text"
-                                placeholder={lang === 'or' ? 'ନାମ, ଶିକ୍ଷା, ସ୍ଥାନ ଖୋଜନ୍ତୁ...' : "Search name, education, location..."}
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-12 pr-4 py-4 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:outline-none focus:border-pink-500 text-slate-900 dark:text-white placeholder-slate-500 transition-all text-sm font-medium"
-                            />
-                        </div>
-                        <div className="flex flex-wrap items-center gap-4">
-                            <select
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value as any)}
-                                className="h-14 px-4 bg-slate-100 dark:bg-white/5 text-xs font-bold text-slate-600 dark:text-slate-300 focus:outline-none uppercase tracking-widest cursor-pointer rounded-2xl border border-slate-200 dark:border-white/10 focus:border-pink-500 transition-all"
-                            >
-                                <option className="bg-white dark:bg-slate-900" value="All">{lang === 'or' ? 'ସମସ୍ତ ସ୍ଥିତି' : 'All Status'}</option>
-                                <option className="bg-white dark:bg-slate-900" value="verified">{lang === 'or' ? 'ଯାଞ୍ଚ ହୋଇଛି' : 'Verified'}</option>
-                                <option className="bg-white dark:bg-slate-900" value="approved">{lang === 'or' ? 'ଅନୁମୋଦିତ' : 'Approved'}</option>
-                                <option className="bg-white dark:bg-slate-900" value="pending">{lang === 'or' ? 'ବିଚାରାଧୀନ' : 'Pending'}</option>
-                                <option className="bg-white dark:bg-slate-900" value="evidence_requested">{lang === 'or' ? 'ପ୍ରମାଣ ଆବଶ୍ୟକ' : 'Evidence Req.'}</option>
-                                <option className="bg-white dark:bg-slate-900" value="rejected">{lang === 'or' ? 'ନାକଚ' : 'Rejected'}</option>
-                            </select>
-                            <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-2xl border border-slate-200 dark:border-white/10 h-14">
-                                {['All', 'Male', 'Female'].map(g => (
-                                    <button
-                                        key={g}
-                                        onClick={() => setGenderFilter(g)}
-                                        className={`px-4 xl:px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${genderFilter === g
-                                            ? 'bg-gradient-to-r from-pink-600 to-red-600 text-white shadow-lg shadow-pink-500/30'
-                                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                                            }`}
+                {viewMode === 'queue' ? (
+                    <MatrimonyVerificationQueue />
+                ) : (
+                    <>
+                        {/* Filters & Tools */}
+                        <div className="sticky top-4 z-40 mb-12">
+                            <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-3 flex flex-col lg:flex-row gap-4 shadow-xl dark:shadow-2xl transition-colors">
+                                <div className="relative flex-1 group">
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-pink-500 transition-colors" size={20} />
+                                    <input
+                                        type="text"
+                                        placeholder={lang === 'or' ? 'ନାମ, ଶିକ୍ଷା, ସ୍ଥାନ ଖୋଜନ୍ତୁ...' : "Search name, education, location..."}
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pl-12 pr-4 py-4 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:outline-none focus:border-pink-500 text-slate-900 dark:text-white placeholder-slate-500 transition-all text-sm font-medium"
+                                    />
+                                </div>
+                                <div className="flex flex-wrap items-center gap-4">
+                                    <select
+                                        value={statusFilter}
+                                        onChange={(e) => setStatusFilter(e.target.value as any)}
+                                        className="h-14 px-4 bg-slate-100 dark:bg-white/5 text-xs font-bold text-slate-600 dark:text-slate-300 focus:outline-none uppercase tracking-widest cursor-pointer rounded-2xl border border-slate-200 dark:border-white/10 focus:border-pink-500 transition-all"
                                     >
-                                        {g === 'All' ? <Filter size={14} /> : g === 'Male' ? <User size={14} /> : <Heart size={14} />}
-                                        <span className="hidden sm:inline">
-                                            {g === 'All' ? (lang === 'or' ? 'ସମସ୍ତ' : 'All') :
-                                                g === 'Male' ? (lang === 'or' ? 'ପୁରୁଷ' : 'Male') :
-                                                    (lang === 'or' ? 'ମହିଳା' : 'Female')}
-                                        </span>
-                                    </button>
+                                        <option className="bg-white dark:bg-slate-900" value="All">{lang === 'or' ? 'ସମସ୍ତ ସ୍ଥିତି' : 'All Status'}</option>
+                                        <option className="bg-white dark:bg-slate-900" value="verified">{lang === 'or' ? 'ଯାଞ୍ଚ ହୋଇଛି' : 'Verified'}</option>
+                                        <option className="bg-white dark:bg-slate-900" value="approved">{lang === 'or' ? 'ଅନୁମୋଦିତ' : 'Approved'}</option>
+                                        <option className="bg-white dark:bg-slate-900" value="pending">{lang === 'or' ? 'ବିଚାରାଧୀନ' : 'Pending'}</option>
+                                        <option className="bg-white dark:bg-slate-900" value="evidence_requested">{lang === 'or' ? 'ପ୍ରମାଣ ଆବଶ୍ୟକ' : 'Evidence Req.'}</option>
+                                        <option className="bg-white dark:bg-slate-900" value="rejected">{lang === 'or' ? 'ନାକଚ' : 'Rejected'}</option>
+                                    </select>
+                                    <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-2xl border border-slate-200 dark:border-white/10 h-14">
+                                        {['All', 'Male', 'Female'].map(g => (
+                                            <button
+                                                key={g}
+                                                onClick={() => setGenderFilter(g)}
+                                                className={`px-4 xl:px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${genderFilter === g
+                                                    ? 'bg-gradient-to-r from-pink-600 to-red-600 text-white shadow-lg shadow-pink-500/30'
+                                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                                                    }`}
+                                            >
+                                                {g === 'All' ? <Filter size={14} /> : g === 'Male' ? <User size={14} /> : <Heart size={14} />}
+                                                <span className="hidden sm:inline">
+                                                    {g === 'All' ? (lang === 'or' ? 'ସମସ୍ତ' : 'All') :
+                                                        g === 'Male' ? (lang === 'or' ? 'ପୁରୁଷ' : 'Male') :
+                                                            (lang === 'or' ? 'ମହିଳା' : 'Female')}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="relative h-14 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 px-4 flex items-center gap-3 w-full sm:w-auto">
+                                        <ArrowUpDown size={16} className="text-slate-400 shrink-0" />
+                                        <select
+                                            value={sortBy}
+                                            onChange={(e) => setSortBy(e.target.value as any)}
+                                            className="w-full bg-transparent text-xs font-bold text-slate-600 dark:text-slate-300 focus:outline-none uppercase tracking-widest cursor-pointer pr-4"
+                                        >
+                                            <option className="bg-white dark:bg-slate-900" value="Default">{lang === 'or' ? 'ସଜାଡନ୍ତୁ' : 'Sort By'}</option>
+                                            <option className="bg-white dark:bg-slate-900" value="Age">{lang === 'or' ? 'ବୟସ' : 'Age'}</option>
+                                            <option className="bg-white dark:bg-slate-900" value="Name">{lang === 'or' ? 'ନାମ' : 'Name (A-Z)'}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Content Grid */}
+                        {loading ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {[1, 2, 3, 4, 5, 6].map(i => (
+                                    <div key={i} className="h-[500px] rounded-[32px] bg-white dark:bg-white/5 animate-pulse border border-slate-200 dark:border-white/10 shadow-sm" />
                                 ))}
                             </div>
-                            <div className="relative h-14 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 px-4 flex items-center gap-3 w-full sm:w-auto">
-                                <ArrowUpDown size={16} className="text-slate-400 shrink-0" />
-                                <select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value as any)}
-                                    className="w-full bg-transparent text-xs font-bold text-slate-600 dark:text-slate-300 focus:outline-none uppercase tracking-widest cursor-pointer pr-4"
+                        ) : filteredCandidates.length === 0 ? (
+                            <motion.div
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                                className="text-center py-32 rounded-[40px] border-2 border-dashed border-slate-300 dark:border-white/10 bg-white dark:bg-white/5"
+                            >
+                                <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Search size={32} className="text-slate-400 dark:text-slate-600" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{lang === 'or' ? 'କୌଣସି ପ୍ରୋଫାଇଲ୍ ମିଳିଲା ନାହିଁ' : 'No Profiles Found'}</h3>
+                                <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">Try adjusting your filters or search terms.</p>
+                                <button
+                                    onClick={() => { setSearchQuery(''); setGenderFilter('All'); setStatusFilter('All'); }}
+                                    className="mt-6 text-pink-500 font-bold hover:underline"
                                 >
-                                    <option className="bg-white dark:bg-slate-900" value="Default">{lang === 'or' ? 'ସଜାଡନ୍ତୁ' : 'Sort By'}</option>
-                                    <option className="bg-white dark:bg-slate-900" value="Age">{lang === 'or' ? 'ବୟସ' : 'Age'}</option>
-                                    <option className="bg-white dark:bg-slate-900" value="Name">{lang === 'or' ? 'ନାମ' : 'Name (A-Z)'}</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                    {lang === 'or' ? 'ଫିଲ୍ଟର୍ ରିସେଟ୍ କରନ୍ତୁ' : 'Reset Filters'}
+                                </button>
+                            </motion.div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {filteredCandidates.map((c, index) => {
+                                    const statusStyle = getStatusStyle(c.status);
+                                    return (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 30 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: Math.min(index * 0.05, 0.5) }}
+                                            key={c.id}
+                                            className={`group relative flex flex-col bg-white dark:bg-slate-800 border ${c.is_matched ? 'border-amber-400 dark:border-amber-500/50 opacity-80' : 'border-slate-200 dark:border-white/10'} rounded-[32px] overflow-hidden hover:border-pink-500/50 dark:hover:border-pink-500/40 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-pink-500/10 hover:-translate-y-2`}
+                                        >
+                                            {/* Card Media Header */}
+                                            <div className="h-[280px] relative overflow-hidden bg-slate-100 dark:bg-slate-950">
+                                                {c.photo ? (
+                                                    <img
+                                                        src={getImageUrl(c.photo)}
+                                                        alt={c.name}
+                                                        className="w-full h-full object-cover object-top transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <div className="w-20 h-20 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center border border-slate-200 dark:border-white/5 shadow-sm">
+                                                            <User size={40} className="text-slate-300 dark:text-slate-700" />
+                                                        </div>
+                                                    </div>
+                                                )}
 
-                {/* Content Grid */}
-                {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {[1, 2, 3, 4, 5, 6].map(i => (
-                            <div key={i} className="h-[500px] rounded-[32px] bg-white dark:bg-white/5 animate-pulse border border-slate-200 dark:border-white/10 shadow-sm" />
-                        ))}
-                    </div>
-                ) : filteredCandidates.length === 0 ? (
-                    <motion.div
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                        className="text-center py-32 rounded-[40px] border-2 border-dashed border-slate-300 dark:border-white/10 bg-white dark:bg-white/5"
-                    >
-                        <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <Search size={32} className="text-slate-400 dark:text-slate-600" />
-                        </div>
-                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{lang === 'or' ? 'କୌଣସି ପ୍ରୋଫାଇଲ୍ ମିଳିଲା ନାହିଁ' : 'No Profiles Found'}</h3>
-                        <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">Try adjusting your filters or search terms.</p>
-                        <button
-                            onClick={() => { setSearchQuery(''); setGenderFilter('All'); setStatusFilter('All'); }}
-                            className="mt-6 text-pink-500 font-bold hover:underline"
-                        >
-                            {lang === 'or' ? 'ଫିଲ୍ଟର୍ ରିସେଟ୍ କରନ୍ତୁ' : 'Reset Filters'}
-                        </button>
-                    </motion.div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {filteredCandidates.map((c, index) => {
-                            const statusStyle = getStatusStyle(c.status);
-                            return (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 30 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: Math.min(index * 0.05, 0.5) }}
-                                    key={c.id}
-                                    className={`group relative flex flex-col bg-white dark:bg-slate-800 border ${c.is_matched ? 'border-amber-400 dark:border-amber-500/50 opacity-80' : 'border-slate-200 dark:border-white/10'} rounded-[32px] overflow-hidden hover:border-pink-500/50 dark:hover:border-pink-500/40 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-pink-500/10 hover:-translate-y-2`}
-                                >
-                                    {/* Card Media Header */}
-                                    <div className="h-[280px] relative overflow-hidden bg-slate-100 dark:bg-slate-950">
-                                        {c.photo ? (
-                                            <img
-                                                src={getImageUrl(c.photo)}
-                                                alt={c.name}
-                                                className="w-full h-full object-cover object-top transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <div className="w-20 h-20 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center border border-slate-200 dark:border-white/5 shadow-sm">
-                                                    <User size={40} className="text-slate-300 dark:text-slate-700" />
-                                                </div>
-                                            </div>
-                                        )}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent opacity-80" />
 
-                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent opacity-80" />
-
-                                        <div className="absolute top-4 inset-x-4 flex justify-between items-start">
-                                            <div className="flex flex-col gap-2">
-                                                <div className="flex gap-2">
-                                                    <span className={`px-3 py-1.5 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border flex items-center gap-1 ${c.gender === 'Female' ? 'bg-pink-100/80 dark:bg-pink-500/30 text-pink-700 dark:text-pink-200 border-pink-200 dark:border-pink-500/30' : 'bg-blue-100/80 dark:bg-blue-500/30 text-blue-700 dark:text-blue-200 border-blue-200 dark:border-blue-500/30'}`}>
-                                                        {c.gender === 'Female' ? (lang === 'or' ? 'ମହିଳା' : 'Female') : (lang === 'or' ? 'ପୁରୁଷ' : 'Male')}
-                                                    </span>
-                                                    {calculateAge(c.date_of_birth || c.dob) && (
-                                                        <span className="px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/20">
-                                                            {calculateAge(c.date_of_birth || c.dob)} {lang === 'or' ? 'ବର୍ଷ' : 'YRS'}
+                                                <div className="absolute top-4 inset-x-4 flex justify-between items-start">
+                                                    <div className="flex flex-col gap-2">
+                                                        <div className="flex gap-2">
+                                                            <span className={`px-3 py-1.5 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border flex items-center gap-1 ${c.gender === 'Female' ? 'bg-pink-100/80 dark:bg-pink-500/30 text-pink-700 dark:text-pink-200 border-pink-200 dark:border-pink-500/30' : 'bg-blue-100/80 dark:bg-blue-500/30 text-blue-700 dark:text-blue-200 border-blue-200 dark:border-blue-500/30'}`}>
+                                                                {c.gender === 'Female' ? (lang === 'or' ? 'ମହିଳା' : 'Female') : (lang === 'or' ? 'ପୁରୁଷ' : 'Male')}
+                                                            </span>
+                                                            {calculateAge(c.date_of_birth || c.dob) && (
+                                                                <span className="px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/20">
+                                                                    {calculateAge(c.date_of_birth || c.dob)} {lang === 'or' ? 'ବର୍ଷ' : 'YRS'}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <span className={`self-start px-3 py-1.5 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}>
+                                                            {lang === 'or' ? (c.status === 'approved' ? 'ଅନୁମୋଦିତ' : c.status === 'pending' ? 'ବିଚାରାଧୀନ' : c.status === 'evidence_requested' ? 'ପ୍ରମାଣ ଆବଶ୍ୟକ' : c.status === 'rejected' ? 'ନାକଚ' : c.status === 'verified' ? 'ଯାଞ୍ଚ ହୋଇଛି' : c.status) : c.status.replace('_', ' ')}
+                                                        </span>
+                                                    </div>
+                                                    {c.is_matched && (
+                                                        <span className="px-3 py-1.5 bg-amber-500/90 dark:bg-amber-500/70 text-amber-950 dark:text-amber-100 rounded-xl backdrop-blur-md text-[10px] font-black uppercase tracking-widest border border-amber-400 dark:border-amber-500 flex items-center gap-1">
+                                                            <Heart size={12} fill="currentColor" /> {c.matched_status}
                                                         </span>
                                                     )}
                                                 </div>
-                                                <span className={`self-start px-3 py-1.5 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}>
-                                                    {lang === 'or' ? (c.status === 'approved' ? 'ଅନୁମୋଦିତ' : c.status === 'pending' ? 'ବିଚାରାଧୀନ' : c.status === 'evidence_requested' ? 'ପ୍ରମାଣ ଆବଶ୍ୟକ' : c.status === 'rejected' ? 'ନାକଚ' : c.status === 'verified' ? 'ଯାଞ୍ଚ ହୋଇଛି' : c.status) : c.status.replace('_', ' ')}
-                                                </span>
-                                            </div>
-                                            {c.is_matched && (
-                                                <span className="px-3 py-1.5 bg-amber-500/90 dark:bg-amber-500/70 text-amber-950 dark:text-amber-100 rounded-xl backdrop-blur-md text-[10px] font-black uppercase tracking-widest border border-amber-400 dark:border-amber-500 flex items-center gap-1">
-                                                    <Heart size={12} fill="currentColor" /> {c.matched_status}
-                                                </span>
-                                            )}
-                                        </div>
 
-                                        <div className="absolute bottom-4 left-6 right-6">
-                                            <h3 className="text-2xl font-bold text-white line-clamp-1 drop-shadow-md">
-                                                {c.name}
-                                            </h3>
-                                        </div>
+                                                <div className="absolute bottom-4 left-6 right-6">
+                                                    <h3 className="text-2xl font-bold text-white line-clamp-1 drop-shadow-md">
+                                                        {c.name}
+                                                    </h3>
+                                                </div>
 
-                                        {/* Image Preview Hover */}
-                                        <div className="absolute inset-0 bg-pink-600/10 dark:bg-pink-600/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 pointer-events-none">
-                                            <button
-                                                onClick={() => setSelectedPhoto(getImageUrl(c.photo))}
-                                                className="w-14 h-14 rounded-2xl bg-white text-slate-900 flex items-center justify-center shadow-xl hover:bg-pink-50 hover:text-pink-600 transition-colors pointer-events-auto"
-                                            >
-                                                <Eye size={24} />
-                                            </button>
-                                        </div>
-                                    </div>
+                                                {/* Image Preview Hover */}
+                                                <div className="absolute inset-0 bg-pink-600/10 dark:bg-pink-600/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 pointer-events-none">
+                                                    <button
+                                                        onClick={() => setSelectedPhoto(getImageUrl(c.photo))}
+                                                        className="w-14 h-14 rounded-2xl bg-white text-slate-900 flex items-center justify-center shadow-xl hover:bg-pink-50 hover:text-pink-600 transition-colors pointer-events-auto"
+                                                    >
+                                                        <Eye size={24} />
+                                                    </button>
+                                                </div>
+                                            </div>
 
-                                    {/* Content Details */}
-                                    <div className="p-6 space-y-5 flex-1 flex flex-col">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-1">
-                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{lang === 'or' ? 'ଶିକ୍ଷା' : 'Education'}</p>
-                                                <p className="text-xs font-bold text-slate-900 dark:text-slate-200 line-clamp-1">{c.education || '---'}</p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{lang === 'or' ? 'ବୃତ୍ତି / ପେଷା' : 'Profession'}</p>
-                                                <p className="text-xs font-bold text-slate-900 dark:text-slate-200 line-clamp-1">{c.occupation || '---'}</p>
-                                            </div>
-                                        </div>
+                                            {/* Content Details */}
+                                            <div className="p-6 space-y-5 flex-1 flex flex-col">
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1">
+                                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{lang === 'or' ? 'ଶିକ୍ଷା' : 'Education'}</p>
+                                                        <p className="text-xs font-bold text-slate-900 dark:text-slate-200 line-clamp-1">{c.education || '---'}</p>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[2px]">{lang === 'or' ? 'ବୃତ୍ତି / ପେଷା' : 'Profession'}</p>
+                                                        <p className="text-xs font-bold text-slate-900 dark:text-slate-200 line-clamp-1">{c.occupation || '---'}</p>
+                                                    </div>
+                                                </div>
 
-                                        <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-4 flex items-center gap-4 group/item mt-auto border border-slate-100 dark:border-transparent">
-                                            <div className="w-10 h-10 rounded-xl bg-pink-100 dark:bg-pink-500/10 flex items-center justify-center shrink-0 border border-pink-200 dark:border-pink-500/10 group-hover/item:bg-pink-200 dark:group-hover/item:bg-pink-500/20 transition-colors">
-                                                <MapPin size={18} className="text-pink-600 dark:text-pink-500" />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[1.5px]">{lang === 'or' ? 'ସ୍ଥାନ' : 'Location'}</p>
-                                                <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{c.address || 'Unknown'}</p>
-                                            </div>
-                                        </div>
+                                                <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-4 flex items-center gap-4 group/item mt-auto border border-slate-100 dark:border-transparent">
+                                                    <div className="w-10 h-10 rounded-xl bg-pink-100 dark:bg-pink-500/10 flex items-center justify-center shrink-0 border border-pink-200 dark:border-pink-500/10 group-hover/item:bg-pink-200 dark:group-hover/item:bg-pink-500/20 transition-colors">
+                                                        <MapPin size={18} className="text-pink-600 dark:text-pink-500" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[1.5px]">{lang === 'or' ? 'ସ୍ଥାନ' : 'Location'}</p>
+                                                        <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{c.address || 'Unknown'}</p>
+                                                    </div>
+                                                </div>
 
-                                        {/* Admin Action Buttons */}
-                                        <div className="grid grid-cols-2 gap-2 mt-4">
-                                            <button
-                                                onClick={() => { setAdminActionCandidate(c); setActionType('status'); setNewStatus(c.status); setAdminComments(c.admin_comments || ''); }}
-                                                className="px-4 py-3 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-white border border-slate-200 dark:border-white/10 transition-all flex items-center justify-center gap-2"
-                                            >
-                                                <Pencil size={14} /> Update
-                                            </button>
-                                            {!c.is_matched && (
-                                                <button
-                                                    onClick={() => { setAdminActionCandidate(c); setActionType('match'); setMatchData({ status: 'Matched', partnerName: '', partnerGender: '' }); }}
-                                                    className="px-4 py-3 bg-pink-50 dark:bg-pink-600/20 hover:bg-pink-100 dark:hover:bg-pink-600/40 rounded-xl text-[10px] font-black uppercase tracking-widest text-pink-600 dark:text-pink-300 border border-pink-200 dark:border-pink-500/30 transition-all flex items-center justify-center gap-2"
-                                                >
-                                                    <Heart size={14} /> Match
-                                                </button>
-                                            )}
-                                            {c.is_matched && (
-                                                <button
-                                                    onClick={() => setSelectedCandidate(c)}
-                                                    className="px-4 py-3 bg-pink-600 hover:bg-pink-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-white transition-all flex items-center justify-center gap-2"
-                                                >
-                                                    <Info size={14} /> Details
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            );
-                        })}
-                    </div>
+                                                {/* Admin Action Buttons */}
+                                                <div className="grid grid-cols-2 gap-2 mt-4">
+                                                    <button
+                                                        onClick={() => { setAdminActionCandidate(c); setActionType('status'); setNewStatus(c.status); setAdminComments(c.admin_comments || ''); }}
+                                                        className="px-4 py-3 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-white border border-slate-200 dark:border-white/10 transition-all flex items-center justify-center gap-2"
+                                                    >
+                                                        <Pencil size={14} /> Update
+                                                    </button>
+                                                    {!c.is_matched && (
+                                                        <button
+                                                            onClick={() => { setAdminActionCandidate(c); setActionType('match'); setMatchData({ status: 'Matched', partnerName: '', partnerGender: '' }); }}
+                                                            className="px-4 py-3 bg-pink-50 dark:bg-pink-600/20 hover:bg-pink-100 dark:hover:bg-pink-600/40 rounded-xl text-[10px] font-black uppercase tracking-widest text-pink-600 dark:text-pink-300 border border-pink-200 dark:border-pink-500/30 transition-all flex items-center justify-center gap-2"
+                                                        >
+                                                            <Heart size={14} /> Match
+                                                        </button>
+                                                    )}
+                                                    {c.is_matched && (
+                                                        <button
+                                                            onClick={() => setSelectedCandidate(c)}
+                                                            className="px-4 py-3 bg-pink-600 hover:bg-pink-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-white transition-all flex items-center justify-center gap-2"
+                                                        >
+                                                            <Info size={14} /> Details
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
