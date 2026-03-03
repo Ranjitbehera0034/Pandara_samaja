@@ -88,13 +88,21 @@ export default function Feed() {
                     id: c.id.toString(),
                     authorId: c.member_id,
                     authorName: c.author_name,
+                    authorAvatar: c.author_photo,
                     content: c.text,
-                    timestamp: c.created_at
+                    timestamp: c.created_at,
+                    parentId: c.parent_id?.toString() || undefined,
+                    replies: [],
+                    likes: Number(c.likes_count) || 0,
+                    isLiked: false,
                 } as Comment)),
                 timestamp: newPost.created_at,
                 isLiked: false
             };
-            setPosts(prev => [mappedPost, ...prev]);
+            setPosts(prev => {
+                if (prev.some(p => p.id === mappedPost.id)) return prev;
+                return [mappedPost, ...prev];
+            });
             toast.info(t('feed', 'newPostAvailable'));
         });
 
@@ -104,13 +112,25 @@ export default function Feed() {
             ));
         });
 
+        socket.on('comment_like_updated', (data: { commentId: string, likes: number }) => {
+            setPosts(prev => prev.map(p => ({
+                ...p,
+                comments: p.comments.map(c => c.id === data.commentId.toString() ? { ...c, likes: data.likes } : c)
+            })));
+        });
+
         socket.on('new_comment', (data: { postId: string, comment: any }) => {
             const mappedComment: Comment = {
                 id: data.comment.id.toString(),
                 authorId: data.comment.member_id,
                 authorName: data.comment.author_name,
+                authorAvatar: data.comment.author_photo,
                 content: data.comment.text,
-                timestamp: data.comment.created_at
+                timestamp: data.comment.created_at,
+                parentId: data.comment.parent_id?.toString() || undefined,
+                replies: [],
+                likes: Number(data.comment.likes_count) || 0,
+                isLiked: false,
             };
             setPosts(prev => prev.map(p =>
                 p.id === data.postId
@@ -153,9 +173,10 @@ export default function Feed() {
                         authorAvatar: c.author_photo,
                         content: c.text,
                         timestamp: c.created_at,
+                        parentId: c.parent_id?.toString() || undefined,
                         replies: [],
-                        likes: 0,
-                        isLiked: false,
+                        likes: Number(c.likes_count) || 0,
+                        isLiked: c.liked_by_me || false,
                     } as Comment)),
                     timestamp: p.created_at,
                     isLiked: p.liked_by_me || false,
@@ -335,7 +356,7 @@ export default function Feed() {
     };
 
     // ─── Nested Replies ──────────────────────────────
-    const handleReply = (postId: string, parentCommentId: string, text: string) => {
+    const handleReply = async (postId: string, parentCommentId: string, text: string) => {
         const reply: Comment = {
             id: Date.now().toString(),
             authorId: member?.id || 'me',
@@ -351,21 +372,40 @@ export default function Feed() {
 
         setPosts(posts.map(post => {
             if (post.id !== postId) return post;
-
-            const addReply = (comments: Comment[]): Comment[] => {
-                return comments.map(c => {
-                    if (c.id === parentCommentId) {
-                        return { ...c, replies: [...(c.replies || []), reply] };
-                    }
-                    if (c.replies && c.replies.length > 0) {
-                        return { ...c, replies: addReply(c.replies) };
-                    }
-                    return c;
-                });
-            };
-
-            return { ...post, comments: addReply(post.comments) };
+            return { ...post, comments: [...post.comments, reply] };
         }));
+
+        try {
+            const token = getToken();
+            await fetch(`${PORTAL_API_URL}/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, parentId: parentCommentId })
+            });
+        } catch { /* silent */ }
+    };
+
+    // ─── Like Comment ────────────────────────────────
+    const handleLikeComment = async (postId: string, commentId: string) => {
+        setPosts(posts.map(post => {
+            if (post.id !== postId) return post;
+            return {
+                ...post,
+                comments: post.comments.map(c =>
+                    c.id === commentId
+                        ? { ...c, isLiked: !c.isLiked, likes: c.isLiked ? Math.max(0, (c.likes || 1) - 1) : (c.likes || 0) + 1 }
+                        : c
+                )
+            };
+        }));
+
+        try {
+            const token = getToken();
+            await fetch(`${PORTAL_API_URL}/comments/${commentId}/like`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        } catch { /* silent */ }
     };
 
     // ─── Delete / Edit / Report ──────────────────────
@@ -493,6 +533,7 @@ export default function Feed() {
                             onReact={handleReact}
                             onComment={handleComment}
                             onReply={handleReply}
+                            onLikeComment={(commentId) => handleLikeComment(post.id, commentId)}
                             onDelete={handleDelete}
                             onEdit={handleEdit}
                             onReport={handleReport}
