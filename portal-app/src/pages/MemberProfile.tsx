@@ -232,6 +232,7 @@ export default function MemberProfile() {
                                     post={post}
                                     onLike={() => { }}
                                     onComment={() => { }}
+                                    onLikeComment={() => { }}
                                 />
                             ))
                         ) : (

@@ -238,6 +238,7 @@ interface PostCardProps {
     onReact?: (id: string, reaction: ReactionType) => void;
     onComment: (id: string, text: string) => void;
     onReply?: (postId: string, parentCommentId: string, text: string) => void;
+    onLikeComment: (commentId: string) => void;
     onDelete?: (id: string) => void;
     onEdit?: (id: string, newContent: string) => void;
     onReport?: (id: string, reason: string) => void;
@@ -247,7 +248,7 @@ interface PostCardProps {
 }
 
 export function PostCard({
-    post, onLike, onReact, onComment, onReply,
+    post, onLike, onReact, onComment, onReply, onLikeComment,
     onDelete, onEdit, onReport, onShare, onBookmark, onPollVote
 }: PostCardProps) {
     const { member, user } = useAuth();
@@ -327,11 +328,6 @@ export function PostCard({
             // Fallback: just add as regular comment
             onComment(post.id, text);
         }
-    };
-
-    const handleLikeComment = (_commentId: string) => {
-        // Could wire to backend; for now local toggle
-        // This is a placeholder for Phase 1
     };
 
     const handleDelete = () => {
@@ -658,16 +654,22 @@ export function PostCard({
                             {post.comments.length === 0 ? (
                                 <p className="text-center text-sm text-slate-500 py-2">{t('postCard', 'noComments')}</p>
                             ) : (
-                                post.comments
-                                    .filter(c => !c.parentId)
-                                    .map(comment => (
+                                (() => {
+                                    const buildTree = (parentId?: string): Comment[] => {
+                                        return post.comments
+                                            .filter(c => c.parentId === parentId)
+                                            .map(c => ({ ...c, replies: buildTree(c.id) }));
+                                    };
+                                    const nestedComments = buildTree(undefined);
+                                    return nestedComments.map(comment => (
                                         <CommentItem
                                             key={comment.id}
                                             comment={comment}
                                             onReply={handleReplyComment}
-                                            onLikeComment={handleLikeComment}
+                                            onLikeComment={onLikeComment}
                                         />
-                                    ))
+                                    ));
+                                })()
                             )}
                         </div>
 
