@@ -315,6 +315,33 @@ function TableView({ members, expandedRows, onToggleRow, subscribing, onSubscrib
     );
 }
 
+// ─── Search Bar ─────────────────────────────────────────────────────────────────
+function SearchBar({ initialValue, onSearch }: { initialValue: string, onSearch: (val: string) => void }) {
+    const [val, setVal] = useState(initialValue);
+    const debouncedVal = useDebounce(val, 400);
+
+    useEffect(() => {
+        onSearch(debouncedVal);
+    }, [debouncedVal, onSearch]);
+
+    return (
+        <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+            <input type="text"
+                placeholder="Name · #no · village · mobile…"
+                value={val}
+                onChange={e => setVal(e.target.value)}
+                className="bg-slate-800 border border-slate-700 text-white pl-9 pr-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 w-56 text-sm"
+            />
+            {val && (
+                <button onClick={() => setVal('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+                    <X size={14} />
+                </button>
+            )}
+        </div>
+    );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const PAGE_SIZE = 30;
 
@@ -323,12 +350,11 @@ export default function Members() {
     const { t } = useLanguage();
     const getToken = () => localStorage.getItem('portalToken');
 
-    // Filter state (raw — search debounced separately)
-    const [searchInput, setSearchInput] = useState('');
+    // Filter state (debounced state from SearchBar)
+    const [searchQuery, setSearchQuery] = useState('');
     const [filterDistrict, setFilterDistrict] = useState('');
     const [filterVillage, setFilterVillage] = useState('');
     const [filterGender, setFilterGender] = useState('');
-    const debouncedSearch = useDebounce(searchInput, 400);
 
     // Pagination + data
     const [members, setMembers] = useState<Member[]>([]);
@@ -366,7 +392,7 @@ export default function Members() {
             page: String(pageNum),
             limit: String(PAGE_SIZE),
         });
-        if (debouncedSearch) params.set('search', debouncedSearch);
+        if (searchQuery) params.set('search', searchQuery);
         if (filterDistrict) params.set('district', filterDistrict);
         if (filterVillage) params.set('village', filterVillage);
         if (filterGender) params.set('gender', filterGender);
@@ -386,12 +412,12 @@ export default function Members() {
         } catch {
             toast.error('Failed to load members');
         }
-    }, [debouncedSearch, filterDistrict, filterVillage, filterGender]);
+    }, [searchQuery, filterDistrict, filterVillage, filterGender]);
 
     // Reset + reload whenever filters/search change
     useEffect(() => {
         setLoading(true);
-        setMembers([]);
+        // We do NOT call setMembers([]) here to prevent flickering and maintain previous results until new ones arrive.
         setPage(1);
         setExpandedCards(new Set());
         fetchMembers(1, true).finally(() => setLoading(false));
@@ -440,7 +466,7 @@ export default function Members() {
     const activeFilterCount = [filterDistrict, filterVillage, filterGender].filter(Boolean).length;
     const villages = filterDistrict ? (filterOptions[filterDistrict] || []) : [];
 
-    if (loading) return (
+    if (loading && members.length === 0) return (
         <div className="flex flex-col items-center justify-center h-64 gap-3">
             <Loader2 className="animate-spin text-blue-500" size={36} />
             <p className="text-slate-400 text-sm">Loading members…</p>
@@ -452,30 +478,22 @@ export default function Members() {
 
             {/* ── Header ── */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                    <h1 className="text-2xl font-bold text-white">{t('members', 'title')}</h1>
-                    <p className="text-sm text-slate-400">
-                        {members.length} / {total.toLocaleString()} members
-                        {debouncedSearch && <span className="ml-1 text-blue-400">matching "{debouncedSearch}"</span>}
-                    </p>
+                <div className="flex items-center gap-3">
+                    <div>
+                        <h1 className="text-2xl font-bold text-white">{t('members', 'title')}</h1>
+                        <p className="text-sm text-slate-400">
+                            {members.length} / {total.toLocaleString()} members
+                            {searchQuery && <span className="ml-1 text-blue-400">matching "{searchQuery}"</span>}
+                        </p>
+                    </div>
+                    {loading && members.length > 0 && (
+                        <Loader2 className="animate-spin text-blue-500" size={20} />
+                    )}
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
                     {/* Search box */}
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
-                        <input type="text"
-                            placeholder="Name · #no · village · mobile…"
-                            value={searchInput}
-                            onChange={e => setSearchInput(e.target.value)}
-                            className="bg-slate-800 border border-slate-700 text-white pl-9 pr-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 w-56 text-sm"
-                        />
-                        {searchInput && (
-                            <button onClick={() => setSearchInput('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
-                                <X size={14} />
-                            </button>
-                        )}
-                    </div>
+                    <SearchBar initialValue={searchQuery} onSearch={setSearchQuery} />
 
                     {/* Filters toggle */}
                     <button onClick={() => setShowFilters(s => !s)}
