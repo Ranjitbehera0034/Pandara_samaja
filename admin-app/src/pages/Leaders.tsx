@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Users, Search, Plus, Trash2, Edit2, Save, X, Image as ImageIcon, Briefcase, Layers } from 'lucide-react';
 import api from '../services/api';
 import { toast } from 'sonner';
-import { BACKEND_URL } from '../config/apiConfig';
+import { getImageUrl } from '../utils/imageUtils';
 
 export default function Leaders() {
     const [leaders, setLeaders] = useState<any[]>([]);
@@ -30,17 +30,6 @@ export default function Leaders() {
     const levels = ['All', 'State', 'District', 'Taluka', 'Panchayat'];
     const formLevels = ['State', 'District', 'Taluka', 'Panchayat'];
 
-    const getImageUrl = (url: string | null) => {
-        if (!url) return '';
-        if (url.includes('drive.google.com') || url.includes('lh3.googleusercontent.com')) {
-            const driveIdMatch = url.match(/([a-zA-Z0-9_-]{25,})/);
-            if (driveIdMatch && driveIdMatch[1]) {
-                return `${BACKEND_URL}/api/v1/image-proxy/${driveIdMatch[1]}`;
-            }
-        }
-        if (url.startsWith('http') || url.startsWith('blob:')) return url;
-        return `${BACKEND_URL}/${url.replace(/^\//, '')}`;
-    };
 
     const [allMembers, setAllMembers] = useState<any[]>([]);
 

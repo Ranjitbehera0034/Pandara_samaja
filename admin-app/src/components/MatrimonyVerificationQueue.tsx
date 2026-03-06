@@ -4,7 +4,7 @@ import { CheckCircle, XCircle, Eye, Maximize2, User, FileText, UserPlus } from '
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
-import { BACKEND_URL } from '../config/apiConfig';
+import { getImageUrl } from '../utils/imageUtils';
 
 type VerificationApp = {
     id: number;
@@ -81,14 +81,6 @@ export default function MatrimonyVerificationQueue() {
         }
     };
 
-    const getImageUrl = (url: string | null) => {
-        if (!url) return '';
-        if (url.includes('drive.google.com') || url.includes('lh3.googleusercontent.com')) {
-            const match = url.match(/([a-zA-Z0-9_-]{25,})/);
-            if (match?.[1]) return `${BACKEND_URL}/api/v1/image-proxy/${match[1]}`;
-        }
-        return url;
-    };
 
     const handleReviewAction = async (action: 'approve' | 'reject' | 'correction_needed') => {
         if (!reviewApp) return;

@@ -4,7 +4,7 @@ import { Search, MapPin, X, Heart, User, Eye, Info, Filter, ArrowUpDown, Pencil,
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
-import { BACKEND_URL } from '../config/apiConfig';
+import { getImageUrl } from '../utils/imageUtils';
 import MatrimonyVerificationQueue from '../components/MatrimonyVerificationQueue';
 
 type Candidate = {
@@ -168,16 +168,6 @@ export default function Matrimony() {
         return age;
     };
 
-    const getImageUrl = (url: string | null) => {
-        if (!url) return '';
-        if (url.includes('drive.google.com') || url.includes('lh3.googleusercontent.com')) {
-            const driveIdMatch = url.match(/([a-zA-Z0-9_-]{25,})/);
-            if (driveIdMatch && driveIdMatch[1]) {
-                return `${BACKEND_URL}/api/v1/image-proxy/${driveIdMatch[1]}`;
-            }
-        }
-        return url;
-    };
 
     const sortedCandidates = [...candidates]
         .filter(c => genderFilter === 'All' || c.gender?.toLowerCase() === genderFilter.toLowerCase())
