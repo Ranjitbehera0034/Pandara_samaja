@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Briefcase, GraduationCap, X, Plus, Heart, User, Download, Eye, Phone, Info, Filter, ArrowUpDown, Bookmark, Star, FileText, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import { Search, MapPin, Briefcase, GraduationCap, X, Heart, User, Download, Eye, Phone, Info, Filter, ArrowUpDown, Bookmark, Star, FileText, CheckCircle2, AlertCircle, Clock, Upload, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -51,6 +51,12 @@ export default function Matrimony() {
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
     const [shortlisted, setShortlisted] = useState<number[]>([]);
     const [myApplication, setMyApplication] = useState<MyApplication | null>(null);
+
+    // Determine if current member is Head of Family
+    const memberStr = localStorage.getItem('portalMember');
+    const memberObj = memberStr ? JSON.parse(memberStr) : null;
+    const relation = (memberObj?.relation || '').toLowerCase();
+    const isHoF = relation === 'self/head' || relation === 'self' || relation === 'head' || relation === '';
 
     useEffect(() => {
         const saved = localStorage.getItem('shortlisted_candidates');
@@ -203,26 +209,49 @@ export default function Matrimony() {
                                 {t('matrimony', 'tagline')}
                             </p>
                         </motion.div>
-                        <div className="flex items-center gap-4 shrink-0">
-                            <motion.a
+
+                        {/* HoF Action Buttons */}
+                        {isHoF ? (
+                            <div className="flex items-center gap-4 shrink-0">
+                                <motion.a
+                                    initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                    href="/assets/forms/matrimony_form.jpg"
+                                    download
+                                    className="group flex items-center gap-2 px-6 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-slate-200 rounded-2xl text-sm font-bold border border-white/5 transition-all backdrop-blur-md"
+                                >
+                                    <div className="p-1.5 bg-slate-900 rounded-lg group-hover:bg-slate-800 transition-colors">
+                                        <Download size={16} />
+                                    </div>
+                                    Step 1: Download Form
+                                </motion.a>
+
+                                {(!myApplication || myApplication.status === 'correction_needed' || myApplication.status === 'rejected') && (
+                                    <motion.button
+                                        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                        onClick={() => setIsAddModalOpen(true)}
+                                        className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-pink-600 to-red-600 text-white rounded-2xl font-bold shadow-2xl shadow-pink-500/20 hover:shadow-pink-500/40 transition-all border border-pink-400/20"
+                                    >
+                                        <Upload size={20} />
+                                        {myApplication?.status === 'correction_needed' ? 'Re-upload Form' : 'Step 2: Upload Filled Form'}
+                                    </motion.button>
+                                )}
+
+                                {myApplication && myApplication.status !== 'correction_needed' && myApplication.status !== 'rejected' && (
+                                    <div className="px-6 py-3 bg-slate-800/50 text-slate-400 rounded-2xl text-sm font-bold border border-white/5 backdrop-blur-md flex items-center gap-2">
+                                        <Clock size={16} />
+                                        Form Submitted
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                href="/assets/forms/matrimony_form.jpg"
-                                download
-                                className="group flex items-center gap-2 px-6 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-slate-200 rounded-2xl text-sm font-bold border border-white/5 transition-all backdrop-blur-md"
+                                className="flex items-center gap-3 px-6 py-4 bg-slate-800/40 border border-white/5 rounded-2xl backdrop-blur-md text-sm text-slate-400 max-w-xs"
                             >
-                                <div className="p-1.5 bg-slate-900 rounded-lg group-hover:bg-slate-800 transition-colors">
-                                    <Download size={16} />
-                                </div>
-                                {t('matrimony', 'getForm')}
-                            </motion.a>
-                            <motion.button
-                                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                onClick={() => setIsAddModalOpen(true)}
-                                className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-pink-600 to-red-600 text-white rounded-2xl font-bold shadow-2xl shadow-pink-500/20 hover:shadow-pink-500/40 transition-all border border-pink-400/20"
-                            >
-                                <Plus size={20} /> {t('matrimony', 'addProfile')}
-                            </motion.button>
-                        </div>
+                                <ShieldAlert size={20} className="text-amber-500 shrink-0" />
+                                <span>Only the <strong className="text-white">Head of Family</strong> can submit the matrimony form for family members.</span>
+                            </motion.div>
+                        )}
                     </div>
                 </header>
 
@@ -589,9 +618,9 @@ export default function Matrimony() {
                 )}
             </AnimatePresence>
 
-            {/* Add/Upload Modal */}
+            {/* Add/Upload Modal - HoF only */}
             <AnimatePresence>
-                {isAddModalOpen && (
+                {isAddModalOpen && isHoF && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-2xl">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -602,9 +631,9 @@ export default function Matrimony() {
                             <div className="px-10 py-8 border-b border-white/5 flex justify-between items-center bg-white/2 shrink-0">
                                 <div>
                                     <h2 className="text-2xl font-black text-white tracking-tight uppercase tracking-widest">
-                                        {myApplication?.status === 'correction_needed' ? 'Re-upload Form' : 'Upload Matrimony Form'}
+                                        {myApplication?.status === 'correction_needed' ? 'Re-upload Corrected Form' : 'Upload Matrimony Form'}
                                     </h2>
-                                    <p className="text-xs text-pink-500 font-bold mt-1 tracking-widest uppercase">Community Verification</p>
+                                    <p className="text-xs text-pink-500 font-bold mt-1 tracking-widest uppercase">Step 2 of 2 — Submit for Admin Verification</p>
                                 </div>
                                 <button onClick={() => setIsAddModalOpen(false)} className="text-slate-500 hover:text-white p-3 rounded-2xl hover:bg-white/5 transition-all">
                                     <X size={28} />
@@ -612,10 +641,12 @@ export default function Matrimony() {
                             </div>
 
                             <form onSubmit={handleAddSubmit} className="flex-1 p-10 text-sm flex flex-col gap-6">
-                                <div className="space-y-2">
-                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[3px]">Member Name *</label>
-                                    <input type="text" name="member_name" required placeholder="Enter the candidate's full name" className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-pink-500/50 focus:outline-none text-white font-bold transition-all" />
-                                </div>
+                                {myApplication?.status === 'correction_needed' && myApplication.admin_remarks && (
+                                    <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+                                        <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1">Admin Feedback</p>
+                                        <p className="text-sm text-amber-200">{myApplication.admin_remarks}</p>
+                                    </div>
+                                )}
 
                                 <div className="space-y-2">
                                     <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[3px]">{t('matrimony', 'uploadForm')} *</label>
@@ -630,6 +661,10 @@ export default function Matrimony() {
                                         <input type="file" name="form_file" className="hidden" accept=".pdf,image/*" required />
                                     </label>
                                 </div>
+
+                                <p className="text-[10px] text-slate-500 leading-relaxed">
+                                    ⓘ Download the matrimony form (Step 1), fill it manually, and then upload the scanned/photographed copy here. Admin will review and verify before publishing.
+                                </p>
                             </form>
 
                             <div className="p-10 border-t border-white/5 bg-white/2 shrink-0 flex justify-end gap-4">
