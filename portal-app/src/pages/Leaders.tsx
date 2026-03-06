@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Crown, MapPin, Loader2, Users, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../config/apiConfig';
+import { getImageUrl } from '../utils/imageUtils';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Leader {
@@ -30,19 +31,12 @@ function getInitial(name: string) {
     return name ? name.charAt(0).toUpperCase() : '?';
 }
 
-function cleanImageUrl(url?: string | null): string | undefined {
-    if (!url) return undefined;
-    if (url.includes('drive.google.com/uc?id='))
-        return url.replace('drive.google.com/uc?id=', 'lh3.googleusercontent.com/d/');
-    // Handle relative asset paths (from seed data)
-    if (url.startsWith('assets/')) return `https://nikhilaodishapandarasamaja.in/${url}`;
-    return url;
-}
+
 
 // ─── Leader Card ──────────────────────────────────────────────────────────────
 function LeaderCard({ leader, levelMeta }: { leader: Leader; levelMeta: typeof LEVELS[0] }) {
     const [imgError, setImgError] = useState(false);
-    const photoUrl = cleanImageUrl(leader.image_url);
+    const photoUrl = getImageUrl(leader.image_url);
 
     return (
         <motion.div

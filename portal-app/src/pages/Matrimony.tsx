@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
 
 import { API_BASE_URL, PORTAL_API_URL } from '../config/apiConfig';
+import { getImageUrl } from '../utils/imageUtils';
 
 type MyApplication = {
     id: number;
@@ -154,16 +155,6 @@ export default function Matrimony() {
         return age;
     };
 
-    const getImageUrl = (url: string | null) => {
-        if (!url) return '';
-        if (url.includes('drive.google.com') || url.includes('lh3.googleusercontent.com')) {
-            const driveIdMatch = url.match(/([a-zA-Z0-9_-]{25,})/);
-            if (driveIdMatch && driveIdMatch[1]) {
-                return `${API_BASE_URL}/image-proxy/${driveIdMatch[1]}`;
-            }
-        }
-        return url;
-    };
 
     const sortedCandidates = (Array.isArray(candidates) ? [...candidates] : []).sort((a, b) => {
         if (sortBy === 'Age') {
