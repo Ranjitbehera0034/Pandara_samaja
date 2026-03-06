@@ -128,6 +128,10 @@ export default function Sidebar({ isMobileOpen = false, setIsMobileOpen }: Sideb
                         <div className="shrink-0 px-2 flex justify-center w-10"><BellRing size={20} /></div>
                         <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('notifications')}</span>
                     </NavLink>
+                    <NavLink to="/broadcasts" className={linkClasses} onClick={handleLinkClick}>
+                        <div className="shrink-0 px-2 flex justify-center w-10"><Megaphone size={20} /></div>
+                        <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Broadcasts</span>
+                    </NavLink>
                     <div className="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
                         <NavLink to="/settings" className={linkClasses} onClick={handleLinkClick}>
                             <div className="shrink-0 px-2 flex justify-center w-10"><Settings size={20} /></div>
