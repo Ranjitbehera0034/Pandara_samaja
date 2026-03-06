@@ -3,7 +3,7 @@ import { HashRouter, Routes, Route, Link, Navigate, useLocation } from 'react-ro
 import {
   Home, Users, Image as ImageIcon, MessageSquare, Menu, Bell, Loader2, LogOut,
   User, Search, Compass, Settings, X, ChevronsLeft, ChevronsRight, Globe,
-  UsersRound, Calendar, Radio, Megaphone, Heart
+  UsersRound, Calendar, Radio, Megaphone, Heart, Crown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'sonner';
@@ -30,6 +30,7 @@ import FamilyEvents from './pages/FamilyEvents';
 import FamilyLogin from './pages/FamilyLogin';
 import Matrimony from './pages/Matrimony';
 import Announcements from './pages/Announcements';
+import Leaders from './pages/Leaders';
 import { GlobalSearch } from './components/GlobalSearch';
 
 import { PORTAL_API_URL } from './config/apiConfig';
@@ -105,6 +106,7 @@ function ProtectedLayout() {
   const navLinks = [
     { to: '/', icon: <Home size={20} />, label: t('nav', 'home') },
     { to: '/announcements', icon: <Megaphone size={20} />, label: 'Updates' },
+    { to: '/leaders', icon: <Crown size={20} />, label: 'Leaders' },
     { to: '/explore', icon: <Compass size={20} />, label: t('nav', 'explore') },
     { to: '/matrimony', icon: <Heart size={20} />, label: 'Matrimony' },
     { to: '/live', icon: <Radio size={20} />, label: 'Live' },
@@ -365,6 +367,7 @@ function ProtectedLayout() {
                 <Route path="/feed" element={<Navigate to="/" replace />} />
                 <Route path="/dashboard" element={<Navigate to="/" replace />} />
                 <Route path="/announcements" element={<Announcements />} />
+                <Route path="/leaders" element={<Leaders />} />
                 <Route path="/explore" element={<Explore />} />
                 <Route path="/matrimony" element={<Matrimony />} />
                 <Route path="/live" element={<LiveStream />} />
