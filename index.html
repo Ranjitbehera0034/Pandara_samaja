@@ -455,13 +455,8 @@
                         if (leader.role && leader.role.toLowerCase() === 'president') {
                             let pSrc = PLACEHOLDER;
                             if (leader.image_url) {
-                                if (leader.image_url.includes('drive.google.com') || leader.image_url.includes('lh3.googleusercontent.com')) {
-                                    const pDriveIdMatch = leader.image_url.match(/([a-zA-Z0-9_-]{25,})/);
-                                    if (pDriveIdMatch && pDriveIdMatch[1]) {
-                                        pSrc = baseUrl + '/api/v1/image-proxy/' + pDriveIdMatch[1];
-                                    } else {
-                                        pSrc = leader.image_url;
-                                    }
+                                if (leader.image_url.includes('drive.google.com/uc?id=')) {
+                                    pSrc = leader.image_url.replace('drive.google.com/uc?id=', 'lh3.googleusercontent.com/d/');
                                 } else {
                                     pSrc = leader.image_url;
                                 }
@@ -503,15 +498,8 @@
 
                                 let src = PLACEHOLDER;
                                 if (image_url) {
-                                    // Route Google Drive images through our backend proxy
-                                    // to avoid 403 hotlink-protection errors in the browser.
-                                    if (image_url.includes('drive.google.com') || image_url.includes('lh3.googleusercontent.com')) {
-                                        const driveIdMatch = image_url.match(/([a-zA-Z0-9_-]{25,})/);
-                                        if (driveIdMatch && driveIdMatch[1]) {
-                                            src = baseUrl + '/api/v1/image-proxy/' + driveIdMatch[1];
-                                        } else {
-                                            src = image_url;
-                                        }
+                                    if (image_url.includes('drive.google.com/uc?id=')) {
+                                        src = image_url.replace('drive.google.com/uc?id=', 'lh3.googleusercontent.com/d/');
                                     } else if (image_url.startsWith('http') || image_url.startsWith('blob') || image_url.startsWith('assets/')) {
                                         src = image_url;
                                     } else {
