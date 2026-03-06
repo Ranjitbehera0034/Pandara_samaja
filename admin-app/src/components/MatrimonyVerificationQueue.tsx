@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, Eye, Maximize2, User, FileText } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, Maximize2, User, FileText, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
@@ -27,6 +27,20 @@ type VerificationApp = {
     profile_photo_url?: string;
 };
 
+type CandidateForm = {
+    name: string;
+    gender: string;
+    date_of_birth: string;
+    education: string;
+    occupation: string;
+    income: string;
+    height: string;
+    gotra: string;
+    address: string;
+    mobile: string;
+    expectations: string;
+};
+
 export default function MatrimonyVerificationQueue() {
     const { } = useTranslation();
     const [queue, setQueue] = useState<VerificationApp[]>([]);
@@ -37,6 +51,16 @@ export default function MatrimonyVerificationQueue() {
     const [reviewApp, setReviewApp] = useState<VerificationApp | null>(null);
     const [remarks, setRemarks] = useState('');
     const [actioning, setActioning] = useState(false);
+
+    // Post-Approval Candidate Creation Modal
+    const [showCandidateModal, setShowCandidateModal] = useState(false);
+    const [candidateForm, setCandidateForm] = useState<CandidateForm>({
+        name: '', gender: '', date_of_birth: '', education: '',
+        occupation: '', income: '', height: '', gotra: '',
+        address: '', mobile: '', expectations: '',
+    });
+    const [candidatePhoto, setCandidatePhoto] = useState<File | null>(null);
+    const [publishing, setPublishing] = useState(false);
 
     useEffect(() => {
         fetchQueue();
@@ -60,10 +84,8 @@ export default function MatrimonyVerificationQueue() {
     const getImageUrl = (url: string | null) => {
         if (!url) return '';
         if (url.includes('drive.google.com') || url.includes('lh3.googleusercontent.com')) {
-            const driveIdMatch = url.match(/([a-zA-Z0-9_-]{25,})/);
-            if (driveIdMatch && driveIdMatch[1]) {
-                return `${BACKEND_URL}/api/v1/image-proxy/${driveIdMatch[1]}`;
-            }
+            const match = url.match(/([a-zA-Z0-9_-]{25,})/);
+            if (match?.[1]) return `${BACKEND_URL}/api/v1/image-proxy/${match[1]}`;
         }
         return url;
     };
@@ -72,6 +94,26 @@ export default function MatrimonyVerificationQueue() {
         if (!reviewApp) return;
         if (['reject', 'correction_needed'].includes(action) && !remarks.trim()) {
             toast.error('Please provide reasons/remarks for this action.');
+            return;
+        }
+
+        // For approve, open the candidate creation modal instead of directly calling API
+        if (action === 'approve') {
+            setCandidateForm({
+                name: reviewApp.member_name,
+                gender: '',
+                date_of_birth: '',
+                education: '',
+                occupation: '',
+                income: '',
+                height: '',
+                gotra: '',
+                address: `${reviewApp.village || ''}, ${reviewApp.district || ''}`.replace(/^, /, '').replace(/, $/, ''),
+                mobile: reviewApp.hof_mobile || '',
+                expectations: '',
+            });
+            setCandidatePhoto(null);
+            setShowCandidateModal(true);
             return;
         }
 
@@ -94,10 +136,64 @@ export default function MatrimonyVerificationQueue() {
         }
     };
 
+    const handlePublishCandidate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!reviewApp) return;
+        if (!candidateForm.name.trim()) {
+            toast.error('Candidate name is required');
+            return;
+        }
+
+        setPublishing(true);
+        try {
+            // Step 1: Approve the matrimony form
+            await api.put(`/admin/matrimony-forms/${reviewApp.id}/review`, {
+                action: 'approve',
+                remarks: remarks.trim() || 'Approved'
+            });
+
+            // Step 2: Create the candidate profile
+            const formData = new FormData();
+            Object.entries(candidateForm).forEach(([key, value]) => {
+                if (value) formData.append(key, value);
+            });
+            if (candidatePhoto) {
+                formData.append('photo', candidatePhoto);
+            }
+
+            await api.post('/candidates', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            toast.success(`✅ Form approved and "${candidateForm.name}" published to matrimony directory!`);
+            setShowCandidateModal(false);
+            setReviewApp(null);
+            setRemarks('');
+            fetchQueue();
+        } catch (e: any) {
+            toast.error(e.response?.data?.message || e.response?.data?.error || 'Failed to publish candidate');
+        } finally {
+            setPublishing(false);
+        }
+    };
+
+    const formField = (label: string, key: keyof CandidateForm, type = 'text', placeholder = '') => (
+        <div>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</label>
+            <input
+                type={type}
+                value={candidateForm[key]}
+                onChange={e => setCandidateForm(f => ({ ...f, [key]: e.target.value }))}
+                placeholder={placeholder}
+                className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:border-pink-500 outline-none transition-colors font-medium"
+            />
+        </div>
+    );
+
     return (
         <div className="space-y-6">
             {/* Queue Filters */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 flex-wrap">
                 {['pending', 'correction_needed', 'approved', 'rejected', 'all'].map(s => (
                     <button
                         key={s}
@@ -170,7 +266,7 @@ export default function MatrimonyVerificationQueue() {
                                     onClick={() => setReviewApp(app)}
                                     className="w-full py-3 bg-pink-50 dark:bg-pink-500/10 hover:bg-pink-100 dark:hover:bg-pink-500/20 text-pink-600 dark:text-pink-400 rounded-xl text-xs font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
                                 >
-                                    <Eye size={16} /> Review Data & Form
+                                    <Eye size={16} /> Review & Verify
                                 </button>
                             </div>
                         </div>
@@ -181,12 +277,12 @@ export default function MatrimonyVerificationQueue() {
             {/* Split Screen Review Modal */}
             <AnimatePresence>
                 {reviewApp && (
-                    <div className="fixed inset-0 z-[150] flex items-center justify-center p-0 md:p-6 bg-slate-900/90 backdrop-blur-xl">
+                    <div className="fixed inset-0 z-[150] flex items-end md:items-center justify-center p-0 md:p-6 bg-slate-900/90 backdrop-blur-xl">
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white dark:bg-slate-900 w-full h-full md:rounded-[40px] flex flex-col md:flex-row overflow-hidden shadow-2xl border border-white/10"
+                            initial={{ opacity: 0, y: 60 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 60 }}
+                            className="bg-white dark:bg-slate-900 w-full h-[95vh] md:h-full md:rounded-[40px] flex flex-col md:flex-row overflow-hidden shadow-2xl border border-white/10"
                         >
                             {/* Left Panel: Form Image */}
                             <div className="w-full md:w-1/2 h-1/2 md:h-full bg-slate-200 dark:bg-black relative border-b md:border-b-0 md:border-r border-slate-300 dark:border-slate-800">
@@ -205,20 +301,20 @@ export default function MatrimonyVerificationQueue() {
                                 </button>
                             </div>
 
-                            {/* Right Panel: Verification DB Data & Action Input */}
+                            {/* Right Panel */}
                             <div className="w-full md:w-1/2 h-1/2 md:h-full flex flex-col bg-slate-50 dark:bg-slate-900">
                                 <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-950 shrink-0">
                                     <div>
                                         <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-widest uppercase">Verification Panel</h2>
-                                        <p className="text-xs text-slate-500 font-bold mt-1">Cross-check form data with DB</p>
+                                        <p className="text-xs text-slate-500 font-bold mt-1">Cross-check form with DB records</p>
                                     </div>
-                                    <button onClick={() => setReviewApp(null)} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full bg-slate-100 dark:bg-slate-800">
+                                    <button onClick={() => { setReviewApp(null); setRemarks(''); }} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full bg-slate-100 dark:bg-slate-800">
                                         <XCircle size={24} />
                                     </button>
                                 </div>
 
                                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                                    {/* DB Data Comparison Box */}
+                                    {/* DB Data */}
                                     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
                                         <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><User size={14} /> DB Records (HoF)</h3>
                                         <div className="grid grid-cols-2 gap-4">
@@ -260,20 +356,20 @@ export default function MatrimonyVerificationQueue() {
                                         </div>
                                     </div>
 
-                                    {/* Action Input Area */}
+                                    {/* Remarks */}
                                     <div className="space-y-3">
                                         <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Admin Remarks / Reason</label>
                                         <textarea
                                             value={remarks}
                                             onChange={(e) => setRemarks(e.target.value)}
-                                            placeholder="E.g. Approved. / Photo is blurry, please re-upload clear photo."
-                                            className="w-full p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:border-pink-500 outline-none text-sm transition-colors text-slate-900 dark:text-slate-200 resize-none h-32"
+                                            placeholder="E.g. Photo is blurry, please re-upload a clear photo."
+                                            className="w-full p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:border-pink-500 outline-none text-sm transition-colors text-slate-900 dark:text-slate-200 resize-none h-28"
                                         />
                                         <p className="text-[10px] text-slate-400 font-bold uppercase">Required for Reject or Ask Correction</p>
                                     </div>
                                 </div>
 
-                                <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex gap-3 shrink-0">
+                                <div className="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
                                     <button
                                         onClick={() => handleReviewAction('reject')}
                                         disabled={actioning}
@@ -291,11 +387,127 @@ export default function MatrimonyVerificationQueue() {
                                     <button
                                         onClick={() => handleReviewAction('approve')}
                                         disabled={actioning}
-                                        className="flex-1 py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-colors shadow-lg shadow-green-500/20"
+                                        className="flex-1 py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-colors shadow-lg shadow-green-500/20 flex items-center justify-center gap-2"
                                     >
-                                        Approve
+                                        <UserPlus size={16} /> Approve
                                     </button>
                                 </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Post-Approval Candidate Creation Modal */}
+            <AnimatePresence>
+                {showCandidateModal && (
+                    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xl">
+                        <motion.div
+                            initial={{ opacity: 0, y: 60 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 60 }}
+                            className="bg-slate-900 rounded-t-[40px] sm:rounded-[40px] w-full sm:max-w-2xl border border-white/10 overflow-hidden shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[90vh]"
+                        >
+                            <div className="px-5 sm:px-8 py-5 sm:py-6 border-b border-white/5 flex justify-between items-center shrink-0">
+                                <div>
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 text-green-400 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 border border-green-500/20">
+                                        <CheckCircle size={12} /> Form Approved
+                                    </div>
+                                    <h2 className="text-xl font-black text-white tracking-tight">Create Candidate Profile</h2>
+                                    <p className="text-xs text-slate-400 mt-1">Fill in profile details to publish to the matrimony directory. Only name is required.</p>
+                                </div>
+                                <button onClick={() => setShowCandidateModal(false)} className="p-2 text-slate-400 hover:text-white rounded-full bg-slate-800">
+                                    <XCircle size={22} />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handlePublishCandidate} className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-5">
+                                {/* Name - Required */}
+                                <div>
+                                    <label className="block text-[10px] font-black text-pink-400 uppercase tracking-widest mb-1">Candidate Name <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="text"
+                                        value={candidateForm.name}
+                                        onChange={e => setCandidateForm(f => ({ ...f, name: e.target.value }))}
+                                        required
+                                        placeholder="Full name of the candidate"
+                                        className="w-full px-4 py-3 bg-slate-950 border border-pink-500/40 rounded-xl text-sm text-white focus:border-pink-500 outline-none font-bold"
+                                    />
+                                </div>
+
+                                <div className="border-t border-white/5 pt-5">
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Optional Details</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Gender</label>
+                                            <select
+                                                value={candidateForm.gender}
+                                                onChange={e => setCandidateForm(f => ({ ...f, gender: e.target.value }))}
+                                                className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:border-pink-500 outline-none"
+                                            >
+                                                <option value="">Select gender</option>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                            </select>
+                                        </div>
+                                        {formField('Date of Birth', 'date_of_birth', 'date')}
+                                        {formField('Education', 'education', 'text', 'e.g. B.Tech, MBA')}
+                                        {formField('Occupation', 'occupation', 'text', 'e.g. Software Engineer')}
+                                        {formField('Income (Annual)', 'income', 'text', 'e.g. ₹5 LPA')}
+                                        {formField('Height', 'height', 'text', 'e.g. 5\'6"')}
+                                        {formField('Gotra', 'gotra', 'text', 'e.g. Kashyap')}
+                                        {formField('Mobile', 'mobile', 'tel', '10-digit mobile number')}
+                                    </div>
+                                    <div className="mt-4">
+                                        {formField('Address / Village', 'address', 'text', 'Village, District, State')}
+                                    </div>
+                                    <div className="mt-4">
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Partner Expectations</label>
+                                        <textarea
+                                            value={candidateForm.expectations}
+                                            onChange={e => setCandidateForm(f => ({ ...f, expectations: e.target.value }))}
+                                            placeholder="Optional notes about partner expectations"
+                                            rows={3}
+                                            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:border-pink-500 outline-none resize-none"
+                                        />
+                                    </div>
+                                    <div className="mt-4">
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Candidate Photo (optional)</label>
+                                        <label className="flex items-center gap-3 px-4 py-3 bg-slate-950 border border-dashed border-slate-700 rounded-xl cursor-pointer hover:border-pink-500/50 transition-colors">
+                                            <FileText size={18} className="text-pink-400 shrink-0" />
+                                            <span className="text-sm text-slate-400 truncate">
+                                                {candidatePhoto ? candidatePhoto.name : 'Click to upload photo (JPG, PNG, WebP)'}
+                                            </span>
+                                            <input
+                                                type="file"
+                                                className="hidden"
+                                                accept="image/*"
+                                                onChange={e => setCandidatePhoto(e.target.files?.[0] || null)}
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div className="px-5 sm:px-8 py-4 sm:py-6 border-t border-white/5 flex flex-col sm:flex-row gap-3 shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCandidateModal(false)}
+                                    className="px-6 py-3 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handlePublishCandidate}
+                                    disabled={publishing || !candidateForm.name.trim()}
+                                    className="flex-1 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:opacity-90 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-green-500/20 flex items-center justify-center gap-2"
+                                >
+                                    {publishing ? (
+                                        <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Publishing...</>
+                                    ) : (
+                                        <><UserPlus size={16} /> Approve & Publish to Directory</>
+                                    )}
+                                </button>
                             </div>
                         </motion.div>
                     </div>

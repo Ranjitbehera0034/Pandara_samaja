@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, X, Heart, User, Eye, Info, Filter, ArrowUpDown, Pencil, Trash2, ShieldCheck, Users } from 'lucide-react';
+import { Search, MapPin, X, Heart, User, Eye, Info, Filter, ArrowUpDown, Pencil, Trash2, ShieldCheck, Users, Plus, Upload, FileText, Download, GraduationCap, Briefcase, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
@@ -58,6 +58,17 @@ export default function Matrimony() {
     const [newStatus, setNewStatus] = useState<string>('');
     const [matchData, setMatchData] = useState({ status: 'Matched', partnerName: '', partnerGender: '' });
 
+    // Direct Admin Add Candidate State
+    const [showDirectModal, setShowDirectModal] = useState(false);
+    const [directForm, setDirectForm] = useState({
+        name: '', gender: '', date_of_birth: '', education: '',
+        occupation: '', income: '', height: '', gotra: '',
+        address: '', mobile: '', expectations: '', father_name: '',
+    });
+    const [directPhoto, setDirectPhoto] = useState<File | null>(null);
+    const [directFormFile, setDirectFormFile] = useState<File | null>(null);
+    const [directSubmitting, setDirectSubmitting] = useState(false);
+
     useEffect(() => {
         fetchCandidates();
     }, [genderFilter, statusFilter]);
@@ -107,6 +118,29 @@ export default function Matrimony() {
             toast.error('Failed to mark as matched');
         } finally {
             setSubmitting(false);
+        }
+    };
+
+    const handleDirectAddCandidate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!directForm.name.trim()) { toast.error('Candidate name is required'); return; }
+        setDirectSubmitting(true);
+        try {
+            const formData = new FormData();
+            Object.entries(directForm).forEach(([k, v]) => { if (v) formData.append(k, v); });
+            if (directPhoto) formData.append('photo', directPhoto);
+            if (directFormFile) formData.append('manual_form', directFormFile);
+            await api.post('/candidates', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            toast.success(`✅ "${directForm.name}" published to the matrimony directory!`);
+            setShowDirectModal(false);
+            setDirectForm({ name: '', gender: '', date_of_birth: '', education: '', occupation: '', income: '', height: '', gotra: '', address: '', mobile: '', expectations: '', father_name: '' });
+            setDirectPhoto(null);
+            setDirectFormFile(null);
+            fetchCandidates();
+        } catch (e: any) {
+            toast.error(e.response?.data?.message || e.response?.data?.error || 'Failed to add candidate');
+        } finally {
+            setDirectSubmitting(false);
         }
     };
 
@@ -189,38 +223,49 @@ export default function Matrimony() {
 
             <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6">
                 {/* Header Section */}
-                <header className="py-10 md:py-16">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-500 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border border-pink-200 dark:border-pink-500/20">
-                                <Heart size={14} fill="currentColor" />
-                                {lang === 'or' ? 'ଆଡମିନ୍ ବିବାହ ପରିଚାଳନା' : 'Admin Matrimony Management'}
-                            </div>
-                            <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 dark:text-white mb-4 tracking-tight">
-                                {lang === 'en' ? 'Manage' : 'ପରିଚାଳନା'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-red-500">{lang === 'or' ? 'ପ୍ରୋଫାଇଲ୍‍' : 'Profiles'}</span>
-                            </h1>
-                            <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
-                                {lang === 'or' ? 'ବିବାହ ପ୍ରାର୍ଥୀମାନଙ୍କୁ ସମୀକ୍ଷା, ଅନୁମୋଦନ କିମ୍ବା ମ୍ୟାଚ୍ ହୋଇଥିବା ଚିହ୍ନଟ କରନ୍ତୁ।' : 'Review, approve, reject, or mark matrimony candidates as matched.'}
-                            </p>
-                        </motion.div>
-                    </div>
+                <header className="py-8 md:py-14">
+                    <div className="flex flex-col gap-5">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 min-w-0">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-500 rounded-full text-xs font-bold uppercase tracking-wider mb-3 border border-pink-200 dark:border-pink-500/20">
+                                    <Heart size={14} fill="currentColor" />
+                                    {lang === 'or' ? 'ଆଡମିନ୍ ବିବାହ ପରିଚାଳନା' : 'Admin Matrimony Management'}
+                                </div>
+                                <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 dark:text-white mb-3 tracking-tight">
+                                    {lang === 'en' ? 'Manage' : 'ପରିଚାଳନା'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-red-500">{lang === 'or' ? 'ପ୍ରୋଫାଇଲ୍‍' : 'Profiles'}</span>
+                                </h1>
+                                <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
+                                    {lang === 'or' ? 'ବିବାହ ପ୍ରାର୍ଥୀମାନଙ୍କୁ ସମୀକ୍ଷା, ଅନୁମୋଦନ କିମ୍ବା ମ୍ୟାଚ୍ ହୋଇଥିବା ଚିହ୍ନଟ କରନ୍ତୁ।' : 'Review, approve, reject, or mark matrimony candidates as matched.'}
+                                </p>
+                            </motion.div>
 
-                    {/* View Mode Tabs */}
-                    <div className="mt-8 flex bg-slate-200 dark:bg-slate-800/50 p-1 rounded-2xl w-fit">
-                        <button
-                            onClick={() => setViewMode('queue')}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${viewMode === 'queue' ? 'bg-white dark:bg-slate-700 text-pink-600 dark:text-pink-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
-                        >
-                            <ShieldCheck size={18} />
-                            Verification Queue
-                        </button>
-                        <button
-                            onClick={() => setViewMode('directory')}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${viewMode === 'directory' ? 'bg-white dark:bg-slate-700 text-pink-600 dark:text-pink-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
-                        >
-                            <Users size={18} />
-                            Live Directory
-                        </button>
+                            {/* Admin Direct Add Button */}
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                onClick={() => setShowDirectModal(true)}
+                                className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-pink-600 to-red-600 text-white rounded-2xl font-bold shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 transition-all border border-pink-400/20 text-sm w-full sm:w-auto shrink-0"
+                            >
+                                <Plus size={18} /> Add Candidate Directly
+                            </motion.button>
+                        </div>
+
+                        {/* View Mode Tabs */}
+                        <div className="flex bg-slate-200 dark:bg-slate-800/50 p-1 rounded-2xl w-full sm:w-fit overflow-x-auto">
+                            <button
+                                onClick={() => setViewMode('queue')}
+                                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${viewMode === 'queue' ? 'bg-white dark:bg-slate-700 text-pink-600 dark:text-pink-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                            >
+                                <ShieldCheck size={16} />
+                                Verification Queue
+                            </button>
+                            <button
+                                onClick={() => setViewMode('directory')}
+                                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${viewMode === 'directory' ? 'bg-white dark:bg-slate-700 text-pink-600 dark:text-pink-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                            >
+                                <Users size={16} />
+                                Live Directory
+                            </button>
+                        </div>
                     </div>
                 </header>
 
@@ -702,6 +747,147 @@ export default function Matrimony() {
                             className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl"
                         />
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Direct Admin Add Candidate Modal (bottom-sheet on mobile) */}
+            <AnimatePresence>
+                {showDirectModal && (
+                    <div className="fixed inset-0 z-[170] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xl">
+                        <motion.div
+                            initial={{ opacity: 0, y: 80 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 80 }}
+                            className="bg-slate-900 rounded-t-[40px] sm:rounded-[40px] w-full sm:max-w-2xl border border-white/10 overflow-hidden shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[90vh]"
+                        >
+                            <div className="px-5 sm:px-8 py-5 sm:py-6 border-b border-white/5 flex justify-between items-center shrink-0">
+                                <div>
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-pink-500/10 text-pink-400 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 border border-pink-500/20">
+                                        <Heart size={12} fill="currentColor" /> Admin Direct Entry
+                                    </div>
+                                    <h2 className="text-xl font-black text-white tracking-tight">Add Candidate Directly</h2>
+                                    <p className="text-xs text-slate-400 mt-1">Admin-created candidates are auto-approved and immediately visible in the directory.</p>
+                                </div>
+                                <button onClick={() => setShowDirectModal(false)} className="p-2 text-slate-400 hover:text-white rounded-full bg-slate-800">
+                                    <X size={22} />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleDirectAddCandidate} className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-5">
+                                {/* Candidate Name — required */}
+                                <div>
+                                    <label className="block text-[10px] font-black text-pink-400 uppercase tracking-widest mb-1">Candidate Name <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="text" required
+                                        value={directForm.name}
+                                        onChange={e => setDirectForm(f => ({ ...f, name: e.target.value }))}
+                                        placeholder="Full legal name of the candidate"
+                                        className="w-full px-4 py-3 bg-slate-950 border border-pink-500/40 rounded-xl text-sm text-white focus:border-pink-500 outline-none font-bold"
+                                    />
+                                </div>
+
+                                {/* Optional Profile Fields */}
+                                <div className="border-t border-white/5 pt-4">
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Profile Details (Optional)</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Gender</label>
+                                            <select value={directForm.gender} onChange={e => setDirectForm(f => ({ ...f, gender: e.target.value }))} className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:border-pink-500 outline-none">
+                                                <option value="">Select gender</option>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Date of Birth</label>
+                                            <input type="date" value={directForm.date_of_birth} onChange={e => setDirectForm(f => ({ ...f, date_of_birth: e.target.value }))} className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:border-pink-500 outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1"><GraduationCap size={12} className="inline mr-1" />Education</label>
+                                            <input type="text" value={directForm.education} onChange={e => setDirectForm(f => ({ ...f, education: e.target.value }))} placeholder="e.g. B.Tech, MBA" className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:border-pink-500 outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1"><Briefcase size={12} className="inline mr-1" />Occupation</label>
+                                            <input type="text" value={directForm.occupation} onChange={e => setDirectForm(f => ({ ...f, occupation: e.target.value }))} placeholder="e.g. Software Engineer" className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:border-pink-500 outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Income (Annual)</label>
+                                            <input type="text" value={directForm.income} onChange={e => setDirectForm(f => ({ ...f, income: e.target.value }))} placeholder="e.g. ₹5 LPA" className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:border-pink-500 outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Height</label>
+                                            <input type="text" value={directForm.height} onChange={e => setDirectForm(f => ({ ...f, height: e.target.value }))} placeholder={`e.g. 5'6"`} className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:border-pink-500 outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Gotra</label>
+                                            <input type="text" value={directForm.gotra} onChange={e => setDirectForm(f => ({ ...f, gotra: e.target.value }))} placeholder="e.g. Kashyap" className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:border-pink-500 outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1"><Phone size={12} className="inline mr-1" />Mobile</label>
+                                            <input type="tel" value={directForm.mobile} onChange={e => setDirectForm(f => ({ ...f, mobile: e.target.value }))} placeholder="10-digit mobile" className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:border-pink-500 outline-none" />
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 space-y-4">
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1"><MapPin size={12} className="inline mr-1" />Address / Village</label>
+                                            <input type="text" value={directForm.address} onChange={e => setDirectForm(f => ({ ...f, address: e.target.value }))} placeholder="Village, District, State" className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:border-pink-500 outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Partner Expectations</label>
+                                            <textarea value={directForm.expectations} onChange={e => setDirectForm(f => ({ ...f, expectations: e.target.value }))} placeholder="Optional notes about partner expectations" rows={2} className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:border-pink-500 outline-none resize-none" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* File Uploads */}
+                                <div className="border-t border-white/5 pt-4 space-y-4">
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Uploads (Optional)</p>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1"><Upload size={12} className="inline mr-1" />Candidate Photo</label>
+                                        <label className="flex items-center gap-3 px-4 py-3 bg-slate-950 border border-dashed border-slate-700 rounded-xl cursor-pointer hover:border-pink-500/50 transition-colors">
+                                            <User size={16} className="text-pink-400 shrink-0" />
+                                            <span className="text-sm text-slate-400 truncate">{directPhoto ? directPhoto.name : 'Click to upload candidate photo (JPG, PNG)'}</span>
+                                            <input type="file" className="hidden" accept="image/*" onChange={e => setDirectPhoto(e.target.files?.[0] || null)} />
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1"><FileText size={12} className="inline mr-1" />Filled Matrimony Form (Scan/Photo)</label>
+                                        <label className="flex items-center gap-3 px-4 py-3 bg-slate-950 border border-dashed border-slate-700 rounded-xl cursor-pointer hover:border-pink-500/50 transition-colors">
+                                            <FileText size={16} className="text-pink-400 shrink-0" />
+                                            <span className="text-sm text-slate-400 truncate">{directFormFile ? directFormFile.name : 'Upload scanned form (PDF, JPG, PNG)'}</span>
+                                            <input type="file" className="hidden" accept=".pdf,image/*" onChange={e => setDirectFormFile(e.target.files?.[0] || null)} />
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <a
+                                            href="/assets/forms/matrimony_form.jpg"
+                                            download
+                                            className="inline-flex items-center gap-2 text-xs text-pink-400 hover:text-pink-300 font-bold transition-colors"
+                                        >
+                                            <Download size={14} /> Download blank matrimony form
+                                        </a>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div className="px-5 sm:px-8 py-4 sm:py-6 border-t border-white/5 flex flex-col sm:flex-row gap-3 shrink-0">
+                                <button type="button" onClick={() => setShowDirectModal(false)} className="px-6 py-3 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleDirectAddCandidate as any}
+                                    disabled={directSubmitting || !directForm.name.trim()}
+                                    className="flex-1 py-4 bg-gradient-to-r from-pink-600 to-red-600 hover:opacity-90 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-pink-500/20 flex items-center justify-center gap-2"
+                                >
+                                    {directSubmitting ? (
+                                        <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Publishing...</>
+                                    ) : (
+                                        <><Plus size={16} /> Publish to Directory</>
+                                    )}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
 
