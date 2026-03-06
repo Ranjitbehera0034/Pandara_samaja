@@ -277,12 +277,12 @@ export default function MatrimonyVerificationQueue() {
             {/* Split Screen Review Modal */}
             <AnimatePresence>
                 {reviewApp && (
-                    <div className="fixed inset-0 z-[150] flex items-center justify-center p-0 md:p-6 bg-slate-900/90 backdrop-blur-xl">
+                    <div className="fixed inset-0 z-[150] flex items-end md:items-center justify-center p-0 md:p-6 bg-slate-900/90 backdrop-blur-xl">
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white dark:bg-slate-900 w-full h-full md:rounded-[40px] flex flex-col md:flex-row overflow-hidden shadow-2xl border border-white/10"
+                            initial={{ opacity: 0, y: 60 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 60 }}
+                            className="bg-white dark:bg-slate-900 w-full h-[95vh] md:h-full md:rounded-[40px] flex flex-col md:flex-row overflow-hidden shadow-2xl border border-white/10"
                         >
                             {/* Left Panel: Form Image */}
                             <div className="w-full md:w-1/2 h-1/2 md:h-full bg-slate-200 dark:bg-black relative border-b md:border-b-0 md:border-r border-slate-300 dark:border-slate-800">
@@ -369,7 +369,7 @@ export default function MatrimonyVerificationQueue() {
                                     </div>
                                 </div>
 
-                                <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex gap-3 shrink-0">
+                                <div className="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
                                     <button
                                         onClick={() => handleReviewAction('reject')}
                                         disabled={actioning}
@@ -401,14 +401,14 @@ export default function MatrimonyVerificationQueue() {
             {/* Post-Approval Candidate Creation Modal */}
             <AnimatePresence>
                 {showCandidateModal && (
-                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+                    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xl">
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="bg-slate-900 rounded-[40px] w-full max-w-2xl border border-white/10 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+                            initial={{ opacity: 0, y: 60 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 60 }}
+                            className="bg-slate-900 rounded-t-[40px] sm:rounded-[40px] w-full sm:max-w-2xl border border-white/10 overflow-hidden shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[90vh]"
                         >
-                            <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center shrink-0">
+                            <div className="px-5 sm:px-8 py-5 sm:py-6 border-b border-white/5 flex justify-between items-center shrink-0">
                                 <div>
                                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 text-green-400 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 border border-green-500/20">
                                         <CheckCircle size={12} /> Form Approved
@@ -421,7 +421,7 @@ export default function MatrimonyVerificationQueue() {
                                 </button>
                             </div>
 
-                            <form onSubmit={handlePublishCandidate} className="flex-1 overflow-y-auto p-8 space-y-5">
+                            <form onSubmit={handlePublishCandidate} className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-5">
                                 {/* Name - Required */}
                                 <div>
                                     <label className="block text-[10px] font-black text-pink-400 uppercase tracking-widest mb-1">Candidate Name <span className="text-red-400">*</span></label>
@@ -489,7 +489,7 @@ export default function MatrimonyVerificationQueue() {
                                 </div>
                             </form>
 
-                            <div className="px-8 py-6 border-t border-white/5 flex gap-3 shrink-0">
+                            <div className="px-5 sm:px-8 py-4 sm:py-6 border-t border-white/5 flex flex-col sm:flex-row gap-3 shrink-0">
                                 <button
                                     type="button"
                                     onClick={() => setShowCandidateModal(false)}

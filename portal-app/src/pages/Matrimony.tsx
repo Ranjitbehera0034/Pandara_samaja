@@ -212,12 +212,12 @@ export default function Matrimony() {
 
                         {/* HoF Action Buttons */}
                         {isHoF ? (
-                            <div className="flex items-center gap-4 shrink-0">
+                            <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 w-full md:w-auto">
                                 <motion.a
                                     initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
                                     href="/assets/forms/matrimony_form.jpg"
                                     download
-                                    className="group flex items-center gap-2 px-6 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-slate-200 rounded-2xl text-sm font-bold border border-white/5 transition-all backdrop-blur-md"
+                                    className="group flex items-center gap-2 px-5 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-slate-200 rounded-2xl text-sm font-bold border border-white/5 transition-all backdrop-blur-md w-full sm:w-auto justify-center sm:justify-start"
                                 >
                                     <div className="p-1.5 bg-slate-900 rounded-lg group-hover:bg-slate-800 transition-colors">
                                         <Download size={16} />
@@ -229,15 +229,15 @@ export default function Matrimony() {
                                     <motion.button
                                         initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
                                         onClick={() => setIsAddModalOpen(true)}
-                                        className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-pink-600 to-red-600 text-white rounded-2xl font-bold shadow-2xl shadow-pink-500/20 hover:shadow-pink-500/40 transition-all border border-pink-400/20"
+                                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-600 to-red-600 text-white rounded-2xl font-bold shadow-2xl shadow-pink-500/20 hover:shadow-pink-500/40 transition-all border border-pink-400/20 w-full sm:w-auto justify-center sm:justify-start"
                                     >
-                                        <Upload size={20} />
+                                        <Upload size={18} />
                                         {myApplication?.status === 'correction_needed' ? 'Re-upload Form' : 'Step 2: Upload Filled Form'}
                                     </motion.button>
                                 )}
 
                                 {myApplication && myApplication.status !== 'correction_needed' && myApplication.status !== 'rejected' && (
-                                    <div className="px-6 py-3 bg-slate-800/50 text-slate-400 rounded-2xl text-sm font-bold border border-white/5 backdrop-blur-md flex items-center gap-2">
+                                    <div className="px-5 py-3 bg-slate-800/50 text-slate-400 rounded-2xl text-sm font-bold border border-white/5 backdrop-blur-md flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
                                         <Clock size={16} />
                                         Form Submitted
                                     </div>
@@ -246,9 +246,9 @@ export default function Matrimony() {
                         ) : (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                className="flex items-center gap-3 px-6 py-4 bg-slate-800/40 border border-white/5 rounded-2xl backdrop-blur-md text-sm text-slate-400 max-w-xs"
+                                className="flex items-start gap-3 px-5 py-4 bg-slate-800/40 border border-white/5 rounded-2xl backdrop-blur-md text-sm text-slate-400 w-full md:max-w-xs"
                             >
-                                <ShieldAlert size={20} className="text-amber-500 shrink-0" />
+                                <ShieldAlert size={20} className="text-amber-500 shrink-0 mt-0.5" />
                                 <span>Only the <strong className="text-white">Head of Family</strong> can submit the matrimony form for family members.</span>
                             </motion.div>
                         )}
@@ -621,14 +621,14 @@ export default function Matrimony() {
             {/* Add/Upload Modal - HoF only */}
             <AnimatePresence>
                 {isAddModalOpen && isHoF && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-2xl">
+                    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/90 backdrop-blur-2xl">
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="bg-slate-900 rounded-[40px] w-full max-w-xl border border-white/10 overflow-hidden shadow-2xl flex flex-col"
+                            initial={{ opacity: 0, y: 60 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 60 }}
+                            className="bg-slate-900 rounded-t-[40px] sm:rounded-[40px] w-full sm:max-w-xl border border-white/10 overflow-hidden shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[85vh]"
                         >
-                            <div className="px-10 py-8 border-b border-white/5 flex justify-between items-center bg-white/2 shrink-0">
+                            <div className="px-6 sm:px-10 py-6 sm:py-8 border-b border-white/5 flex justify-between items-center bg-white/2 shrink-0">
                                 <div>
                                     <h2 className="text-2xl font-black text-white tracking-tight uppercase tracking-widest">
                                         {myApplication?.status === 'correction_needed' ? 'Re-upload Corrected Form' : 'Upload Matrimony Form'}
@@ -640,7 +640,7 @@ export default function Matrimony() {
                                 </button>
                             </div>
 
-                            <form onSubmit={handleAddSubmit} className="flex-1 p-10 text-sm flex flex-col gap-6">
+                            <form onSubmit={handleAddSubmit} className="flex-1 overflow-y-auto p-6 sm:p-10 text-sm flex flex-col gap-6">
                                 {myApplication?.status === 'correction_needed' && myApplication.admin_remarks && (
                                     <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
                                         <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1">Admin Feedback</p>
@@ -667,7 +667,7 @@ export default function Matrimony() {
                                 </p>
                             </form>
 
-                            <div className="p-10 border-t border-white/5 bg-white/2 shrink-0 flex justify-end gap-4">
+                            <div className="p-6 sm:p-10 border-t border-white/5 bg-white/2 shrink-0 flex flex-col sm:flex-row justify-end gap-3">
                                 <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-8 py-3.5 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">
                                     {t('common', 'cancel')}
                                 </button>
