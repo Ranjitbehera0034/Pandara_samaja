@@ -116,11 +116,11 @@ function MemberCard({ member, expanded, onToggle, subscribing, onSubscribe, onMe
                             {member.mobile}
                         </a>
                     )}
-                    {(member.village || member.district) && (
+                    {(member.panchayat || member.taluka || member.district) && (
                         <div className="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5">
                             <MapPin size={10} className="shrink-0" />
                             <span className="uppercase tracking-wide truncate">
-                                {[member.village, member.taluka, member.district].filter(Boolean).join(', ')}
+                                {[member.panchayat, member.taluka, member.district].filter(Boolean).join(', ')}
                             </span>
                         </div>
                     )}
@@ -246,7 +246,7 @@ function TableView({ members, expandedRows, onToggleRow, subscribing, onSubscrib
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 text-xs text-slate-400">{[m.village, m.district].filter(Boolean).join(', ') || '—'}</td>
+                                    <td className="px-4 py-3 text-xs text-slate-400">{[m.panchayat, m.taluka, m.district].filter(Boolean).join(', ') || '—'}</td>
                                     <td className="px-3 py-3 text-center">
                                         <span className={`text-xs font-semibold ${isFemale(m.head_gender) ? 'text-pink-400' : 'text-blue-400'}`}>
                                             {isFemale(m.head_gender) ? '♀ F' : '♂ M'}
@@ -353,7 +353,8 @@ export default function Members() {
     // Filter state (debounced state from SearchBar)
     const [searchQuery, setSearchQuery] = useState('');
     const [filterDistrict, setFilterDistrict] = useState('');
-    const [filterVillage, setFilterVillage] = useState('');
+    const [filterTaluka, setFilterTaluka] = useState('');
+    const [filterPanchayat, setFilterPanchayat] = useState('');
     const [filterGender, setFilterGender] = useState('');
 
     // Pagination + data
@@ -369,7 +370,11 @@ export default function Members() {
     const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
     const [showFilters, setShowFilters] = useState(false);
     const [subscribing, setSubscribing] = useState<string | null>(null);
-    const [filterOptions, setFilterOptions] = useState<Record<string, string[]>>({});
+    const [filterOptions, setFilterOptions] = useState<{
+        districts: string[];
+        talukas: Record<string, string[]>;
+        panchayats: Record<string, string[]>;
+    }>({ districts: [], talukas: {}, panchayats: {} });
 
     const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -379,7 +384,7 @@ export default function Members() {
         if (!token) return;
         fetch(`${PORTAL_API_URL}/members/filters`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(r => r.json())
-            .then(d => { if (d.success) setFilterOptions(d.districts || {}); })
+            .then(d => { if (d.success) setFilterOptions(d.filters || {}); })
             .catch(() => { });
     }, []);
 
@@ -394,7 +399,8 @@ export default function Members() {
         });
         if (searchQuery) params.set('search', searchQuery);
         if (filterDistrict) params.set('district', filterDistrict);
-        if (filterVillage) params.set('village', filterVillage);
+        if (filterTaluka) params.set('taluka', filterTaluka);
+        if (filterPanchayat) params.set('panchayat', filterPanchayat);
         if (filterGender) params.set('gender', filterGender);
 
         try {
@@ -412,7 +418,7 @@ export default function Members() {
         } catch {
             toast.error('Failed to load members');
         }
-    }, [searchQuery, filterDistrict, filterVillage, filterGender]);
+    }, [searchQuery, filterDistrict, filterTaluka, filterPanchayat, filterGender]);
 
     // Reset + reload whenever filters/search change
     useEffect(() => {
@@ -461,10 +467,11 @@ export default function Members() {
     };
 
     const resetFilters = () => {
-        setFilterDistrict(''); setFilterVillage(''); setFilterGender('');
+        setFilterDistrict(''); setFilterTaluka(''); setFilterPanchayat(''); setFilterGender('');
     };
-    const activeFilterCount = [filterDistrict, filterVillage, filterGender].filter(Boolean).length;
-    const villages = filterDistrict ? (filterOptions[filterDistrict] || []) : [];
+    const activeFilterCount = [filterDistrict, filterTaluka, filterPanchayat, filterGender].filter(Boolean).length;
+    const talukas: string[] = filterDistrict ? (filterOptions.talukas?.[filterDistrict] || []) : [];
+    const panchayats: string[] = filterTaluka ? (filterOptions.panchayats?.[filterTaluka] || []) : [];
 
     if (loading && members.length === 0) return (
         <div className="flex flex-col items-center justify-center h-64 gap-3">
@@ -529,16 +536,22 @@ export default function Members() {
                 {showFilters && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                         <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-4 flex flex-wrap items-center gap-3">
-                            <select value={filterDistrict} onChange={e => { setFilterDistrict(e.target.value); setFilterVillage(''); }}
+                            <select value={filterDistrict} onChange={e => { setFilterDistrict(e.target.value); setFilterTaluka(''); setFilterPanchayat(''); }}
                                 className="bg-slate-900 border border-slate-700 text-sm text-white px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-36">
                                 <option value="">All Districts</option>
-                                {Object.keys(filterOptions).sort().map(d => <option key={d} value={d}>{d}</option>)}
+                                {(filterOptions.districts || []).sort().map((d: string) => <option key={d} value={d}>{d}</option>)}
                             </select>
-                            <select value={filterVillage} onChange={e => setFilterVillage(e.target.value)}
-                                disabled={!filterDistrict}
+                            <select value={filterTaluka} onChange={e => { setFilterTaluka(e.target.value); setFilterPanchayat(''); }}
+                                disabled={!filterDistrict || talukas.length === 0}
                                 className="bg-slate-900 border border-slate-700 text-sm text-white px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-36 disabled:opacity-40">
-                                <option value="">All Villages</option>
-                                {villages.map(v => <option key={v} value={v}>{v}</option>)}
+                                <option value="">All Talukas</option>
+                                {talukas.map((v: string) => <option key={v} value={v}>{v}</option>)}
+                            </select>
+                            <select value={filterPanchayat} onChange={e => setFilterPanchayat(e.target.value)}
+                                disabled={!filterTaluka || panchayats.length === 0}
+                                className="bg-slate-900 border border-slate-700 text-sm text-white px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-36 disabled:opacity-40">
+                                <option value="">All Panchayats</option>
+                                {panchayats.map((v: string) => <option key={v} value={v}>{v}</option>)}
                             </select>
                             <select value={filterGender} onChange={e => setFilterGender(e.target.value)}
                                 className="bg-slate-900 border border-slate-700 text-sm text-white px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
