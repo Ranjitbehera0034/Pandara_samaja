@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Crown, MapPin, Loader2, Users, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { API_BASE_URL } from '../config/apiConfig';
+import api from '../services/api';
 import { getImageUrl } from '../utils/imageUtils';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -113,9 +113,8 @@ export default function Leaders() {
         }
         setLocationsLoading(true);
         setSelectedLocation('');
-        fetch(`${API_BASE_URL}/leaders/locations?level=${activeLevel}`)
-            .then(r => r.json())
-            .then(d => { if (d.success) setLocations(d.data); })
+        api.get(`/leaders/locations?level=${activeLevel}`)
+            .then(r => { if (r.data.success) setLocations(r.data.data); })
             .catch(() => setLocations([]))
             .finally(() => setLocationsLoading(false));
     }, [activeLevel, needsLocation]);
@@ -123,11 +122,10 @@ export default function Leaders() {
     // Fetch leaders
     useEffect(() => {
         setLoading(true);
-        const params = new URLSearchParams({ level: activeLevel });
-        if (selectedLocation) params.set('location', selectedLocation);
-        fetch(`${API_BASE_URL}/leaders?${params}`)
-            .then(r => r.json())
-            .then(d => { if (d.success) setLeaders(d.data); })
+        const params: Record<string, string> = { level: activeLevel };
+        if (selectedLocation) params.location = selectedLocation;
+        api.get('/leaders', { params })
+            .then(r => { if (r.data.success) setLeaders(r.data.data); })
             .catch(() => setLeaders([]))
             .finally(() => setLoading(false));
     }, [activeLevel, selectedLocation]);
