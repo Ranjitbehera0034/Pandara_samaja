@@ -23,22 +23,21 @@ export function getImageUrl(url: string | null | undefined): string {
     // Phase 3 (Cloudinary): already a CDN URL — serve as-is
     if (url.includes('res.cloudinary.com')) return url;
 
-    // Google Drive: extract file ID and route through our proxy
+    // Google Drive: rewrite to direct CDN URL (lh3.googleusercontent.com)
     if (url.includes('drive.google.com/uc?id=')) {
         try {
             const fileId = new URL(url).searchParams.get('id');
-            if (fileId) return `${BACKEND_URL}/api/v1/image-proxy/${fileId}`;
+            if (fileId) return `https://lh3.googleusercontent.com/d/${fileId}`;
         } catch {
             // URL parse failed, fall through to regex
             const match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-            if (match?.[1]) return `${BACKEND_URL}/api/v1/image-proxy/${match[1]}`;
+            if (match?.[1]) return `https://lh3.googleusercontent.com/d/${match[1]}`;
         }
     }
 
-    // lh3.googleusercontent.com (already proxied or remapped) — extract file ID
+    // Already an lh3.googleusercontent.com URL — return it directly
     if (url.includes('lh3.googleusercontent.com')) {
-        const id = url.split('/d/')?.[1]?.split('?')?.[0] ?? url.match(/[a-zA-Z0-9_-]{25,}/)?.[0];
-        if (id) return `${BACKEND_URL}/api/v1/image-proxy/${id}`;
+        return url;
     }
 
     // Relative seed data path (e.g. "assets/leaders/photo.jpg")
