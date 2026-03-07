@@ -174,7 +174,6 @@ export default function Members() {
         setDistrict(m.district || '');
         setTaluka(m.taluka || '');
         setPanchayat(m.panchayat || '');
-        setVillage(m.village || '');
         setAddress(m.address || '');
         setStateLocation(m.state || m.stateLocation || '');
         setHeadProfilePic(m.profile_photo_url || null);
@@ -410,7 +409,7 @@ export default function Members() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">{m.membership_no}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">{m.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{m.mobile}</td>
-                                        <td className="px-6 py-4 text-sm text-slate-500 line-clamp-1">{[m.village, m.panchayat, m.taluka, m.district].filter(Boolean).join(', ')}</td>
+                                        <td className="px-6 py-4 text-sm text-slate-500 line-clamp-1">{[m.panchayat, m.taluka, m.district].filter(Boolean).join(', ')}</td>
                                         {activeTab === 'all' && (
                                             <td className="px-6 py-4 whitespace-nowrap text-center">
                                                 {m.is_banned ? (
@@ -457,8 +456,8 @@ export default function Members() {
                                                 <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight">{m.name}</h3>
                                                 <div className="text-sm text-slate-500 mt-1 space-y-0.5">
                                                     <p>{m.mobile || 'No Mobile'}</p>
-                                                    <p className="line-clamp-1" title={[m.village, m.panchayat, m.taluka, m.district].filter(Boolean).join(', ')}>
-                                                        {[m.village, m.panchayat, m.taluka, m.district].filter(Boolean).join(', ') || 'No Address'}
+                                                    <p className="line-clamp-1" title={[m.panchayat, m.taluka, m.district].filter(Boolean).join(', ')}>
+                                                        {[m.panchayat, m.taluka, m.district].filter(Boolean).join(', ') || 'No Address'}
                                                     </p>
                                                 </div>
                                             </div>
@@ -648,10 +647,6 @@ export default function Members() {
                                     <div className="space-y-2">
                                         <label className="block text-[11px] font-black text-emerald-800/70 dark:text-emerald-200/50 uppercase tracking-widest pl-1">Panchayat</label>
                                         <input type="text" name="member_panchayat" autoComplete="off" placeholder="Panchayat" value={panchayat} onChange={(e) => setPanchayat(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-emerald-200/50 dark:border-emerald-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-emerald-500/50 outline-none backdrop-blur-xl transition-all shadow-inner" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="block text-[11px] font-black text-emerald-800/70 dark:text-emerald-200/50 uppercase tracking-widest pl-1">Village</label>
-                                        <input type="text" name="member_village" autoComplete="off" placeholder="Village" value={village} onChange={(e) => setVillage(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-emerald-200/50 dark:border-emerald-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-emerald-500/50 outline-none backdrop-blur-xl transition-all shadow-inner" />
                                     </div>
                                     <div className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6 space-y-2">
                                         <label className="block text-[11px] font-black text-emerald-800/70 dark:text-emerald-200/50 uppercase tracking-widest pl-1">Full Address</label>

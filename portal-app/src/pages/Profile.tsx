@@ -55,7 +55,6 @@ export default function Profile() {
         district: member?.district || '',
         taluka: member?.taluka || '',
         panchayat: member?.panchayat || '',
-        village: member?.village || '',
         address: member?.address || '',
         aadhar_no: member?.aadhar_no || '',
         head_gender: isHoF ? (member?.head_gender || '') : (myFmProfile?.gender || ''),
@@ -263,8 +262,8 @@ export default function Profile() {
                                 {myDisplayMobile && (
                                     <span className="flex items-center gap-1.5"><Phone size={13} />{myDisplayMobile}</span>
                                 )}
-                                {member?.village && (
-                                    <span className="flex items-center gap-1.5"><MapPin size={13} />{member.village}{member.district ? `, ${member.district}` : ''}</span>
+                                {member?.panchayat && (
+                                    <span className="flex items-center gap-1.5"><MapPin size={13} />{[member.panchayat, member.taluka, member.district].filter(Boolean).join(', ')}</span>
                                 )}
                                 {myDisplayGender && (
                                     <span className="flex items-center gap-1.5">
@@ -329,11 +328,6 @@ export default function Profile() {
                                             <div>
                                                 <label className="block text-xs text-slate-400 mb-1">Panchayat</label>
                                                 <input type="text" value={form.panchayat} onChange={e => handleFormChange('panchayat', e.target.value)}
-                                                    className="w-full bg-slate-900/60 text-white px-3 py-2 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs text-slate-400 mb-1">Village</label>
-                                                <input type="text" value={form.village} onChange={e => handleFormChange('village', e.target.value)}
                                                     className="w-full bg-slate-900/60 text-white px-3 py-2 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm" />
                                             </div>
                                             <div className="sm:col-span-2">
@@ -423,10 +417,10 @@ export default function Profile() {
                                             <span>{member.address}</span>
                                         </div>
                                     )}
-                                    {member?.village && (
+                                    {(member?.panchayat || member?.taluka) && (
                                         <div className="flex items-center gap-2 text-sm text-slate-400 bg-slate-900/30 rounded-xl p-3">
                                             <MapPin size={14} className="shrink-0 text-slate-500" />
-                                            <span className="truncate">{[member.village, member.district].filter(Boolean).join(', ')}</span>
+                                            <span className="truncate">{[member.panchayat, member.taluka, member.district].filter(Boolean).join(', ')}</span>
                                         </div>
                                     )}
                                     <div className="flex items-center gap-2 text-sm text-slate-400 bg-slate-900/30 rounded-xl p-3">
