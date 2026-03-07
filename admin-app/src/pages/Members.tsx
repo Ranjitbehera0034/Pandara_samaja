@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
-import { Search, Plus, Upload, Edit2, Trash2, X, Ban, CheckCircle, LayoutGrid, List, ChevronDown, ChevronUp, Camera, UserCircle2, Phone } from 'lucide-react';
+import { Search, Plus, Upload, Edit2, Trash2, X, Ban, CheckCircle, LayoutGrid, List, ChevronDown, ChevronUp, Camera, UserCircle2, Phone, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -25,6 +25,25 @@ export default function Members() {
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { t } = useTranslation();
+
+    // Advanced Filters
+    const [showFilters, setShowFilters] = useState(false);
+    const [filterDistrict, setFilterDistrict] = useState('');
+    const [filterTaluka, setFilterTaluka] = useState('');
+    const [filterPanchayat, setFilterPanchayat] = useState('');
+    const [filterGender, setFilterGender] = useState('');
+    const [filterHasPhoto, setFilterHasPhoto] = useState('');
+    const [filterHasAadhar, setFilterHasAadhar] = useState('');
+    const [filterOptions, setFilterOptions] = useState<{
+        districts: string[];
+        talukas: Record<string, string[]>;
+        panchayats: Record<string, string[]>;
+    }>({ districts: [], talukas: {}, panchayats: {} });
+
+    // Pagination
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -64,16 +83,55 @@ export default function Members() {
         } else {
             fetchPendingMembers();
         }
-    }, [activeTab]);
+    }, [activeTab, page, filterDistrict, filterTaluka, filterPanchayat, filterGender, filterHasPhoto, filterHasAadhar]);
+
+    // Fetch Filter Options
+    useEffect(() => {
+        const fetchFilters = async () => {
+            try {
+                const res = await api.get('/members/filters');
+                if (res.data.success && res.data.filters) {
+                    setFilterOptions(res.data.filters);
+                }
+            } catch (error) {
+                console.error('Failed to load filters', error);
+            }
+        };
+        fetchFilters();
+    }, []);
+
+    // Custom debounce logic if search term changes without hitting enter immediately
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (activeTab === 'all') fetchMembers();
+        }, 500);
+        return () => clearTimeout(timeoutId);
+    }, [search]);
 
     const fetchMembers = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/members?limit=10000&page=1');
+            const params = new URLSearchParams({
+                limit: '50',
+                page: String(page)
+            });
+            if (search) params.append('search', search);
+            if (filterDistrict) params.append('district', filterDistrict);
+            if (filterTaluka) params.append('taluka', filterTaluka);
+            if (filterPanchayat) params.append('panchayat', filterPanchayat);
+            if (filterGender) params.append('gender', filterGender);
+            if (filterHasPhoto) params.append('has_photo', filterHasPhoto);
+            if (filterHasAadhar) params.append('has_aadhar', filterHasAadhar);
+
+            const res = await api.get(`/members?${params.toString()}`);
             if (res.data.success) {
                 setMembers(res.data.members || []);
+                setTotalItems(res.data.meta?.totalItems || 0);
+                setTotalPages(res.data.meta?.totalPages || 1);
             } else if (Array.isArray(res.data)) {
                 setMembers(res.data);
+                setTotalItems(res.data.length);
+                setTotalPages(1);
             } else {
                 setMembers([]);
             }
@@ -296,12 +354,7 @@ export default function Members() {
         setFamilyMembers(familyMembers.filter(fm => fm.id !== id));
     };
 
-    const membersToFilter = activeTab === 'all' ? members : pendingMembers;
-    const displayMembers = (Array.isArray(membersToFilter) ? membersToFilter : []).filter(m =>
-        (m.name?.toLowerCase().includes(search.toLowerCase())) ||
-        (m.membership_no?.toLowerCase().includes(search.toLowerCase())) ||
-        (m.mobile?.includes(search))
-    );
+    const displayMembers = activeTab === 'all' ? members : pendingMembers;
 
     return (
         <div className="p-4 sm:p-8 max-w-7xl mx-auto h-full flex flex-col relative">
@@ -373,17 +426,117 @@ export default function Members() {
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden flex-1 flex flex-col">
-                <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
-                    <div className="relative max-w-md w-full">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Search by name, membership no, or mobile..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5"
-                        />
+                <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col gap-4 bg-slate-50/50 dark:bg-slate-900/50">
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="relative max-w-md w-full">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                            <input
+                                type="text"
+                                placeholder="Search by name, membership no, or mobile..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            />
+                        </div>
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl font-medium transition-colors text-sm shrink-0 ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                        >
+                            <Filter size={16} className={showFilters ? 'text-blue-500' : 'text-slate-400'} />
+                            <span className="hidden sm:inline">Filters</span>
+                        </button>
                     </div>
+
+                    {showFilters && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 pt-4 border-t border-slate-200 dark:border-slate-700/50">
+                            {/* District Filter */}
+                            <select
+                                value={filterDistrict}
+                                onChange={e => {
+                                    setFilterDistrict(e.target.value);
+                                    setFilterTaluka('');
+                                    setFilterPanchayat('');
+                                }}
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                            >
+                                <option value="">All Districts</option>
+                                {(filterOptions.districts || []).map(d => <option key={d} value={d}>{d}</option>)}
+                            </select>
+
+                            {/* Taluka Filter */}
+                            <select
+                                value={filterTaluka}
+                                onChange={e => {
+                                    setFilterTaluka(e.target.value);
+                                    setFilterPanchayat('');
+                                }}
+                                disabled={!filterDistrict}
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <option value="">All Talukas</option>
+                                {filterDistrict && (filterOptions.talukas[filterDistrict] || []).map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+
+                            {/* Panchayat Filter */}
+                            <select
+                                value={filterPanchayat}
+                                onChange={e => setFilterPanchayat(e.target.value)}
+                                disabled={!filterTaluka}
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <option value="">All Panchayats</option>
+                                {filterTaluka && (filterOptions.panchayats[filterTaluka] || []).map(p => <option key={p} value={p}>{p}</option>)}
+                            </select>
+
+                            {/* Gender Filter */}
+                            <select
+                                value={filterGender}
+                                onChange={e => setFilterGender(e.target.value)}
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                            >
+                                <option value="">All Genders</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+
+                            {/* Has Photo Filter */}
+                            <select
+                                value={filterHasPhoto}
+                                onChange={e => setFilterHasPhoto(e.target.value)}
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                            >
+                                <option value="">Photo: Any</option>
+                                <option value="true">Has Photo</option>
+                                <option value="false">No Photo</option>
+                            </select>
+
+                            {/* Has Aadhar Filter */}
+                            <select
+                                value={filterHasAadhar}
+                                onChange={e => setFilterHasAadhar(e.target.value)}
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                            >
+                                <option value="">Aadhar: Any</option>
+                                <option value="true">Has Aadhar</option>
+                                <option value="false">Missing Aadhar</option>
+                            </select>
+
+                            <button
+                                onClick={() => {
+                                    setFilterDistrict('');
+                                    setFilterTaluka('');
+                                    setFilterPanchayat('');
+                                    setFilterGender('');
+                                    setFilterHasPhoto('');
+                                    setFilterHasAadhar('');
+                                    setSearch('');
+                                }}
+                                className="col-span-full sm:col-span-2 md:col-span-3 lg:col-span-full flex items-center justify-center sm:justify-end gap-2 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 mt-2 font-medium"
+                            >
+                                Clear all filters
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="overflow-x-auto flex-1">
@@ -546,6 +699,32 @@ export default function Members() {
                             })}
                         </div>
                     )}
+                </div>
+
+                {/* Pagination Footer */}
+                <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
+                    <div className="text-sm text-slate-500">
+                        Showing <span className="font-medium text-slate-900 dark:text-white">{displayMembers.length > 0 ? (page - 1) * 50 + 1 : 0}</span> to <span className="font-medium text-slate-900 dark:text-white">{Math.min(page * 50, totalItems)}</span> of <span className="font-medium text-slate-900 dark:text-white">{totalItems}</span> members
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                            className="p-2 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronLeft size={18} />
+                        </button>
+                        <div className="text-sm font-medium px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                            Page {page} of {totalPages}
+                        </div>
+                        <button
+                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                            disabled={page === totalPages || totalPages === 0}
+                            className="p-2 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronRight size={18} />
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -760,7 +939,8 @@ export default function Members() {
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }
