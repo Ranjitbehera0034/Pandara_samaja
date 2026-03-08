@@ -39,11 +39,12 @@ textarea {
   @apply bg-white text-slate-900 border-slate-200 placeholder-slate-400;
 }
 
-/* Inversion hack removal - replaced with proper classes above */
-/* keeping for reference if needed but commented out */
-/* 
-html.light-mode {
-  filter: invert(1) hue-rotate(180deg) brightness(1.05);
-  background: white;
+/* ─── Animations ────────────────────────────────────────────────────────── */
+@keyframes scale-in-center {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
-*/
+
+.scale-in-center {
+  animation: scale-in-center 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
