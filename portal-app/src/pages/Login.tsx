@@ -249,9 +249,9 @@ export default function Login() {
             {showLookup && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl scale-in-center">
-                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
+                        <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
                             <div>
-                                <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                     <Search className="text-blue-500" size={24} />
                                     {t('login', 'findTitle')}
                                 </h2>
@@ -269,7 +269,7 @@ export default function Login() {
                             </button>
                         </div>
 
-                        <div className="p-6 overflow-y-auto space-y-6 flex-1">
+                        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1">
                             {/* Filter Section */}
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div className="space-y-1.5">
@@ -310,7 +310,7 @@ export default function Login() {
                             </div>
 
                             {/* Name Search */}
-                            <div className="flex gap-3">
+                            <div className="flex flex-col sm:flex-row gap-3">
                                 <div className="relative flex-1">
                                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                     <input
@@ -325,7 +325,7 @@ export default function Login() {
                                 <button
                                     onClick={handleLookup}
                                     disabled={lookupLoading}
-                                    className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3.5 rounded-xl font-semibold transition-all shadow-lg shadow-blue-500/25 disabled:opacity-50 flex items-center gap-2"
+                                    className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3.5 rounded-xl font-semibold transition-all shadow-lg shadow-blue-500/25 disabled:opacity-50 flex items-center justify-center gap-2 w-full sm:w-auto"
                                 >
                                     {lookupLoading ? <Loader2 className="animate-spin" size={18} /> : "Search"}
                                 </button>
@@ -336,7 +336,7 @@ export default function Login() {
                                 {lookupResults.length > 0 ? (
                                     <div className="grid grid-cols-1 gap-3">
                                         {lookupResults.map((res: any) => (
-                                            <div key={res.membership_no} className="p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center justify-between hover:border-blue-500/30 transition-all group">
+                                            <div key={res.membership_no} className="p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl flex flex-col sm:flex-row gap-4 sm:items-center justify-between hover:border-blue-500/30 transition-all group">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
                                                         {res.name?.[0].toUpperCase()}
@@ -356,7 +356,7 @@ export default function Login() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="text-right">
+                                                <div className="flex justify-end sm:block text-right">
                                                     {res.mobile ? (
                                                         <div className="flex flex-col items-end">
                                                             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Registered Mobile</span>
@@ -384,7 +384,7 @@ export default function Login() {
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="p-6 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800">
+                        <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800">
                             <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-600 dark:text-amber-500">
                                 <Info className="shrink-0 mt-0.5" size={18} />
                                 <div className="text-xs leading-relaxed">
