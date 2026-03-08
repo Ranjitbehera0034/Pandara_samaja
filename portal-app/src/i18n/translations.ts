@@ -58,9 +58,13 @@ export const translations = {
         membershipPlaceholder: { en: 'e.g. 123456789', od: 'ଯେପରିକି ୧୨୩୪୫୬୭୮୯' },
         mobilePlaceholder: { en: 'e.g. 9876543210', od: 'ଯେପରିକି ୯୮୭୬୫୪୩୨୧୦' },
         accessPortal: { en: 'Access Portal', od: 'ପୋର୍ଟାଲ ପ୍ରବେଶ' },
-        notMember: { en: 'Not a member yet?', od: 'ଏପର୍ଯ୍ୟନ୍ତ ସଦସ୍ୟ ନୁହଁନ୍ତି?' },
-        applyMembership: { en: 'Apply for Membership', od: 'ସଦସ୍ୟତା ପାଇଁ ଆବେଦନ' },
+        notMember: { en: "Don't know your Membership Number?", od: 'ଆପଣଙ୍କ ସଦସ୍ୟତା ନମ୍ବର ଜାଣିନାହାଁନ୍ତି କି?' },
+        applyMembership: { en: 'Find it here', od: 'ଏଠାରେ ଖୋଜନ୍ତୁ' },
         bothRequired: { en: 'Please enter both Membership No. and Mobile Number', od: 'ଦୟାକରି ସଦସ୍ୟତା ନମ୍ବର ଓ ମୋବାଇଲ ନମ୍ବର ଦିଅନ୍ତୁ' },
+        findTitle: { en: 'Find Membership Number', od: 'ସଦସ୍ୟତା ନମ୍ବର ଖୋଜନ୍ତୁ' },
+        findSubtitle: { en: 'Search by location and name', od: 'ସ୍ଥାନ ଏବଂ ନାମ ଦ୍ୱାରା ଖୋଜନ୍ତୁ' },
+        mobileNotRegistered: { en: 'Mobile not registered? Contact admin.', od: 'ମୋବାଇଲ୍ ପଞ୍ଜିକୃତ ହୋଇନାହିଁ କି? ଆଡମିନଙ୍କୁ କୁହନ୍ତୁ ।' },
+        howToUpdate: { en: 'If your mobile is not registered, ask admin to update it. You will receive an SMS once updated.', od: 'ଯଦି ଆପଣଙ୍କ ମୋବାଇଲ୍ ପଞ୍ଜିକୃତ ହୋଇନାହିଁ, ଏହାକୁ ଅପଡେଟ୍ କରିବାକୁ ଆଡମିନଙ୍କୁ କୁହନ୍ତୁ। ଅପଡେଟ୍ ହେବା ପରେ ଆପଣ ଏକ ଏସଏମଏସ ପାଇବେ।' },
     },
 
     // ═══════════════════════════════════════════
