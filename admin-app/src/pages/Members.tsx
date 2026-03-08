@@ -12,6 +12,7 @@ interface FamilyMember {
     age: string;
     mobile?: string;
     profile_pic?: string;
+    marital_status?: string;
 }
 
 export default function Members() {
@@ -34,6 +35,9 @@ export default function Members() {
     const [filterGender, setFilterGender] = useState('');
     const [filterHasPhoto, setFilterHasPhoto] = useState('');
     const [filterHasAadhar, setFilterHasAadhar] = useState('');
+    const [filterMaritalStatus, setFilterMaritalStatus] = useState('');
+    const [filterEligibleForMarriage, setFilterEligibleForMarriage] = useState(false);
+    const [filterChildrenCount, setFilterChildrenCount] = useState('');
     const [filterOptions, setFilterOptions] = useState<{
         districts: string[];
         talukas: Record<string, string[]>;
@@ -73,6 +77,8 @@ export default function Members() {
     const [headProfilePic, setHeadProfilePic] = useState<string | null>(null);
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [headAge, setHeadAge] = useState('');
+    const [headMaritalStatus, setHeadMaritalStatus] = useState('');
+    const [stats, setStats] = useState<any>(null);
 
     const maleCount = (headGender === 'Male' ? 1 : 0) + familyMembers.filter(fm => fm.gender === 'Male').length;
     const femaleCount = (headGender === 'Female' ? 1 : 0) + familyMembers.filter(fm => fm.gender === 'Female').length;
@@ -83,7 +89,21 @@ export default function Members() {
         } else {
             fetchPendingMembers();
         }
-    }, [activeTab, page, filterDistrict, filterTaluka, filterPanchayat, filterGender, filterHasPhoto, filterHasAadhar]);
+    }, [activeTab, page, filterDistrict, filterTaluka, filterPanchayat, filterGender, filterHasPhoto, filterHasAadhar, filterMaritalStatus, filterEligibleForMarriage, filterChildrenCount]);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await api.get('/members/stats/demographics');
+                if (res.data.success) {
+                    setStats(res.data.stats);
+                }
+            } catch (error) {
+                console.error('Failed to load stats', error);
+            }
+        };
+        fetchStats();
+    }, []);
 
     // Fetch Filter Options
     useEffect(() => {
@@ -122,6 +142,9 @@ export default function Members() {
             if (filterGender) params.append('gender', filterGender);
             if (filterHasPhoto) params.append('has_photo', filterHasPhoto);
             if (filterHasAadhar) params.append('has_aadhar', filterHasAadhar);
+            if (filterMaritalStatus) params.append('marital_status', filterMaritalStatus);
+            if (filterEligibleForMarriage) params.append('eligible_for_marriage', 'true');
+            if (filterChildrenCount) params.append('children_count', filterChildrenCount);
 
             const res = await api.get(`/members?${params.toString()}`);
             if (res.data.success) {
@@ -217,6 +240,7 @@ export default function Members() {
         setHeadProfilePic(null);
         setFamilyMembers([]);
         setHeadAge('');
+        setHeadMaritalStatus('');
         setIsModalOpen(true);
     };
 
@@ -242,6 +266,7 @@ export default function Members() {
         const otherMembers = parsedMembers.filter((fm: any) => !isHead(fm.relation));
 
         setHeadAge(headMember?.age || '');
+        setHeadMaritalStatus(headMember?.marital_status || '');
         setFamilyMembers(otherMembers.map((fm: any) => ({
             id: Math.random().toString(36).substr(2, 9),
             name: fm.name || '',
@@ -249,7 +274,8 @@ export default function Members() {
             gender: capitalize(fm.gender || ''),
             age: fm.age || '',
             mobile: fm.mobile || '',
-            profile_pic: fm.profile_pic || ''
+            profile_pic: fm.profile_pic || '',
+            marital_status: fm.marital_status || ''
         })));
         setIsModalOpen(true);
     };
@@ -262,14 +288,15 @@ export default function Members() {
         e.preventDefault();
         try {
             const allFamilyMembers = [
-                { name: String(name || '').trim(), relation: 'Self', gender: headGender, age: String(headAge || '').trim(), profile_pic: headProfilePic },
-                ...familyMembers.map(({ name, relation, gender, age, mobile, profile_pic }) => ({
+                { name: String(name || '').trim(), relation: 'Self', gender: headGender, age: String(headAge || '').trim(), profile_pic: headProfilePic, marital_status: headMaritalStatus },
+                ...familyMembers.map(({ name, relation, gender, age, mobile, profile_pic, marital_status }) => ({
                     name: String(name || '').trim(),
                     relation: String(relation || '').trim(),
                     gender,
                     age: String(age || '').trim(),
                     mobile: String(mobile || '').trim(),
-                    profile_pic
+                    profile_pic,
+                    marital_status: marital_status || ''
                 }))
             ].filter(fm => fm.name); // only include if they have a name
 
@@ -342,7 +369,7 @@ export default function Members() {
     const addFamilyMember = () => {
         setFamilyMembers([
             ...familyMembers,
-            { id: Math.random().toString(36).substr(2, 9), name: '', relation: '', gender: '', age: '', mobile: '', profile_pic: '' }
+            { id: Math.random().toString(36).substr(2, 9), name: '', relation: '', gender: '', age: '', mobile: '', profile_pic: '', marital_status: '' }
         ]);
     };
 
@@ -424,6 +451,42 @@ export default function Members() {
                     </button>
                 </div>
             </div>
+
+            {stats && activeTab === 'all' && (
+                <div className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex flex-col gap-1 transition-all hover:shadow-lg">
+                        <span className="text-slate-500 font-medium text-xs uppercase tracking-widest pl-1">Total Members</span>
+                        <div className="text-3xl font-black text-slate-800 dark:text-slate-100 mt-1 pl-1">
+                            {Number(stats.total_male) + Number(stats.total_female)}
+                        </div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex flex-col gap-1 transition-all hover:shadow-lg">
+                        <span className="text-slate-500 font-medium text-xs uppercase tracking-widest pl-1">Demographics</span>
+                        <div className="flex items-center gap-6 text-sm font-bold mt-2 pl-1">
+                            <span className="flex items-center gap-2 text-blue-600 bg-blue-50 dark:bg-blue-900/40 px-3 py-1.5 rounded-xl"><UserCircle2 size={18} /> {stats.total_male} M</span>
+                            <span className="flex items-center gap-2 text-pink-600 bg-pink-50 dark:bg-pink-900/40 px-3 py-1.5 rounded-xl"><UserCircle2 size={18} /> {stats.total_female} F</span>
+                        </div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex flex-col gap-2 transition-all hover:shadow-lg">
+                        <span className="text-slate-500 font-medium text-xs uppercase tracking-widest pl-1">Growth (Male)</span>
+                        <div className="flex items-center gap-2 pt-1 overflow-x-auto hide-scrollbar pl-1">
+                            <span className="px-3 py-1.5 bg-slate-50 border border-slate-100 dark:border-slate-800 dark:bg-slate-800/80 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 flex flex-col items-center shadow-sm" title="Today"><span className="text-[9px] uppercase opacity-60">Today</span>{stats.male_today}</span>
+                            <span className="px-3 py-1.5 bg-slate-50 border border-slate-100 dark:border-slate-800 dark:bg-slate-800/80 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 flex flex-col items-center shadow-sm" title="This Week"><span className="text-[9px] uppercase opacity-60">Week</span>{stats.male_week}</span>
+                            <span className="px-3 py-1.5 bg-slate-50 border border-slate-100 dark:border-slate-800 dark:bg-slate-800/80 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 flex flex-col items-center shadow-sm" title="This Month"><span className="text-[9px] uppercase opacity-60">Month</span>{stats.male_month}</span>
+                            <span className="px-3 py-1.5 bg-slate-50 border border-slate-100 dark:border-slate-800 dark:bg-slate-800/80 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 flex flex-col items-center shadow-sm" title="This Year"><span className="text-[9px] uppercase opacity-60">Year</span>{stats.male_year}</span>
+                        </div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex flex-col gap-2 transition-all hover:shadow-lg">
+                        <span className="text-slate-500 font-medium text-xs uppercase tracking-widest pl-1">Growth (Female)</span>
+                        <div className="flex items-center gap-2 pt-1 overflow-x-auto hide-scrollbar pl-1">
+                            <span className="px-3 py-1.5 bg-slate-50 border border-slate-100 dark:border-slate-800 dark:bg-slate-800/80 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 flex flex-col items-center shadow-sm" title="Today"><span className="text-[9px] uppercase opacity-60">Today</span>{stats.female_today}</span>
+                            <span className="px-3 py-1.5 bg-slate-50 border border-slate-100 dark:border-slate-800 dark:bg-slate-800/80 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 flex flex-col items-center shadow-sm" title="This Week"><span className="text-[9px] uppercase opacity-60">Week</span>{stats.female_week}</span>
+                            <span className="px-3 py-1.5 bg-slate-50 border border-slate-100 dark:border-slate-800 dark:bg-slate-800/80 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 flex flex-col items-center shadow-sm" title="This Month"><span className="text-[9px] uppercase opacity-60">Month</span>{stats.female_month}</span>
+                            <span className="px-3 py-1.5 bg-slate-50 border border-slate-100 dark:border-slate-800 dark:bg-slate-800/80 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 flex flex-col items-center shadow-sm" title="This Year"><span className="text-[9px] uppercase opacity-60">Year</span>{stats.female_year}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden flex-1 flex flex-col">
                 <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col gap-4 bg-slate-50/50 dark:bg-slate-900/50">
@@ -521,6 +584,43 @@ export default function Members() {
                                 <option value="false">Missing Aadhar</option>
                             </select>
 
+                            {/* Marital Status Filter */}
+                            <select
+                                value={filterMaritalStatus}
+                                onChange={e => setFilterMaritalStatus(e.target.value)}
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                            >
+                                <option value="">Marital Status: Any</option>
+                                <option value="Married">Married</option>
+                                <option value="Unmarried">Unmarried</option>
+                                <option value="Widowed">Widowed</option>
+                                <option value="Divorced">Divorced</option>
+                            </select>
+
+                            {/* Eligible For Marriage Filter */}
+                            <div className="flex items-center gap-2 px-1">
+                                <input
+                                    type="checkbox"
+                                    id="eligible_for_marriage"
+                                    checked={filterEligibleForMarriage}
+                                    onChange={e => setFilterEligibleForMarriage(e.target.checked)}
+                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer"
+                                />
+                                <label htmlFor="eligible_for_marriage" className="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+                                    Eligible for Marriage
+                                </label>
+                            </div>
+
+                            {/* Children Count Filter */}
+                            <input
+                                type="number"
+                                min="0"
+                                placeholder="Children Count"
+                                value={filterChildrenCount}
+                                onChange={e => setFilterChildrenCount(e.target.value)}
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                            />
+
                             <button
                                 onClick={() => {
                                     setFilterDistrict('');
@@ -529,6 +629,9 @@ export default function Members() {
                                     setFilterGender('');
                                     setFilterHasPhoto('');
                                     setFilterHasAadhar('');
+                                    setFilterMaritalStatus('');
+                                    setFilterEligibleForMarriage(false);
+                                    setFilterChildrenCount('');
                                     setSearch('');
                                 }}
                                 className="col-span-full sm:col-span-2 md:col-span-3 lg:col-span-full flex items-center justify-center sm:justify-end gap-2 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 mt-2 font-medium"
@@ -787,6 +890,16 @@ export default function Members() {
                                                 <option value="Female">Female</option>
                                             </select>
                                         </div>
+                                        <div className="flex flex-col justify-end md:col-span-6 lg:col-span-3">
+                                            <label className="block text-[11px] font-black text-blue-800/70 dark:text-blue-200/50 uppercase tracking-widest pl-1 mb-2">Marital Status</label>
+                                            <select value={headMaritalStatus} onChange={(e) => setHeadMaritalStatus(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-blue-200/50 dark:border-blue-700/50 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/50 outline-none backdrop-blur-xl transition-all shadow-inner">
+                                                <option value="">Select Status</option>
+                                                <option value="Married">Married</option>
+                                                <option value="Unmarried">Unmarried</option>
+                                                <option value="Widowed">Widowed</option>
+                                                <option value="Divorced">Divorced</option>
+                                            </select>
+                                        </div>
                                         <div className="flex flex-col justify-end md:col-span-6 lg:col-span-6">
                                             <label className="flex items-center justify-between min-h-[16px] text-[11px] font-black text-blue-800/70 dark:text-blue-200/50 uppercase tracking-widest pl-1 mb-2">
                                                 <span>Mobile Number</span>
@@ -902,6 +1015,13 @@ export default function Members() {
                                                     <option value="">Gender</option>
                                                     <option value="Male">Male</option>
                                                     <option value="Female">Female</option>
+                                                </select>
+                                                <select value={fm.marital_status || ''} onChange={(e) => updateFamilyMember(fm.id, 'marital_status', e.target.value)} className="px-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500/50 outline-none transition-all shadow-inner">
+                                                    <option value="">Marital Status</option>
+                                                    <option value="Married">Married</option>
+                                                    <option value="Unmarried">Unmarried</option>
+                                                    <option value="Widowed">Widowed</option>
+                                                    <option value="Divorced">Divorced</option>
                                                 </select>
                                                 <div className="relative">
                                                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
