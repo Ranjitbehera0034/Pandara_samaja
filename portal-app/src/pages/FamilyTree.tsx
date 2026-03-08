@@ -43,7 +43,8 @@ function groupByRelation(members: FamilyMember[]) {
 function categorizeRelation(relation: string): string {
     const r = relation.toLowerCase();
     if (r.includes('wife') || r.includes('husband') || r.includes('spouse')) return 'Spouse';
-    if (r.includes('son') || r.includes('daughter') || r.includes('child')) return 'Children';
+    // Direct children check (excludes in-laws and grand-relations)
+    if ((r.includes('son') || r.includes('daughter') || r.includes('child')) && !r.includes('in law') && !r.includes('grand')) return 'Children';
     if (r.includes('father') || r.includes('mother') || r.includes('parent')) return 'Parents';
     if (r.includes('brother') || r.includes('sister') || r.includes('sibling')) return 'Siblings';
     return 'Other Relations';
@@ -58,7 +59,9 @@ export default function FamilyTree() {
         Object.fromEntries(GROUP_ORDER.map(g => [g, true]))
     );
 
-    const familyMembers = member?.family_members || [];
+    const familyMembersFull = member?.family_members || [];
+    // Filter out "Self" if it refers to the head of family (Pramila Behera is already the root)
+    const familyMembers = familyMembersFull.filter(m => m.relation?.toLowerCase() !== 'self');
     const groups = groupByRelation(familyMembers);
 
     const toggleGroup = (group: string) => {
@@ -187,11 +190,11 @@ export default function FamilyTree() {
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${fm.gender === 'female'
+                                                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${fm.gender?.toLowerCase() === 'female'
                                                                 ? 'bg-pink-500/15 text-pink-400'
                                                                 : 'bg-blue-500/15 text-blue-400'
                                                                 }`}>
-                                                                {fm.gender === 'female' ? '♀' : '♂'}
+                                                                {fm.gender?.toLowerCase() === 'female' ? '♀' : '♂'}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -213,11 +216,15 @@ export default function FamilyTree() {
                     <div className="text-xs text-slate-400 mt-1">Total Members</div>
                 </div>
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4 text-center">
-                    <div className="text-2xl font-bold text-blue-400">{familyMembers.filter(f => f.gender === 'male').length + (member?.head_gender === 'male' ? 1 : 0)}</div>
+                    <div className="text-2xl font-bold text-blue-400">
+                        {familyMembers.filter(f => f.gender?.toLowerCase() === 'male').length + (member?.head_gender?.toLowerCase() === 'male' ? 1 : 0)}
+                    </div>
                     <div className="text-xs text-slate-400 mt-1">Male</div>
                 </div>
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4 text-center">
-                    <div className="text-2xl font-bold text-pink-400">{familyMembers.filter(f => f.gender === 'female').length + (member?.head_gender === 'female' ? 1 : 0)}</div>
+                    <div className="text-2xl font-bold text-pink-400">
+                        {familyMembers.filter(f => f.gender?.toLowerCase() === 'female').length + (member?.head_gender?.toLowerCase() === 'female' ? 1 : 0)}
+                    </div>
                     <div className="text-xs text-slate-400 mt-1">Female</div>
                 </div>
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4 text-center">
