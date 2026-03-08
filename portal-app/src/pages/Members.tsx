@@ -9,7 +9,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
-import { PORTAL_API_URL } from '../config/apiConfig';
+import { PORTAL_API_URL, API_BASE_URL } from '../config/apiConfig';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const getInitial = (name: string) => (name ? name.charAt(0).toUpperCase() : '?');
@@ -369,6 +369,7 @@ export default function Members() {
     const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
     const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
     const [showFilters, setShowFilters] = useState(false);
+    const [stats, setStats] = useState<any>(null);
     const [subscribing, setSubscribing] = useState<string | null>(null);
     const [filterOptions, setFilterOptions] = useState<{
         districts: string[];
@@ -377,6 +378,20 @@ export default function Members() {
     }>({ districts: [], talukas: {}, panchayats: {} });
 
     const bottomRef = useRef<HTMLDivElement>(null);
+
+    // Fetch Stats
+    useEffect(() => {
+        const token = getToken();
+        if (!token) return;
+        fetch(`${API_BASE_URL}/members/stats/demographics`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) setStats(data.stats);
+            })
+            .catch(err => console.error('Failed to load stats', err));
+    }, []);
 
     // Fetch filter options once
     useEffect(() => {
@@ -482,6 +497,40 @@ export default function Members() {
 
     return (
         <div className="max-w-7xl mx-auto space-y-4 pb-24 px-2 md:px-0">
+            {/* ── Stats ── */}
+            {stats && (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-2">
+                    <div className="bg-slate-800/80 border border-slate-700/50 p-4 rounded-2xl shadow-lg">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Members</p>
+                        <p className="text-2xl font-black text-white">{(Number(stats.total_male) + Number(stats.total_female)).toLocaleString()}</p>
+                    </div>
+                    <div className="bg-slate-800/80 border border-slate-700/50 p-4 rounded-2xl shadow-lg">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Demographics</p>
+                        <div className="flex items-center gap-4 mt-1">
+                            <span className="text-xs font-bold text-blue-400 bg-blue-400/10 px-2 py-1 rounded-lg">♂ {stats.total_male}</span>
+                            <span className="text-xs font-bold text-pink-400 bg-pink-400/10 px-2 py-1 rounded-lg">♀ {stats.total_female}</span>
+                        </div>
+                    </div>
+                    <div className="bg-slate-800/80 border border-slate-700/50 p-4 rounded-2xl shadow-lg">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">♂ Growth</p>
+                        <div className="flex items-center gap-2 mt-1 overflow-x-auto scrollbar-hide">
+                            <span className="text-[10px] font-bold text-slate-300 bg-slate-700/50 px-2 py-1 rounded-lg flex flex-col items-center min-w-[32px]"><span className="text-[8px] opacity-40">T</span>{stats.male_today}</span>
+                            <span className="text-[10px] font-bold text-slate-300 bg-slate-700/50 px-2 py-1 rounded-lg flex flex-col items-center min-w-[32px]"><span className="text-[8px] opacity-40">W</span>{stats.male_week}</span>
+                            <span className="text-[10px] font-bold text-slate-300 bg-slate-700/50 px-2 py-1 rounded-lg flex flex-col items-center min-w-[32px]"><span className="text-[8px] opacity-40">M</span>{stats.male_month}</span>
+                            <span className="text-[10px] font-bold text-slate-300 bg-slate-700/50 px-2 py-1 rounded-lg flex flex-col items-center min-w-[32px]"><span className="text-[8px] opacity-40">Y</span>{stats.male_year}</span>
+                        </div>
+                    </div>
+                    <div className="bg-slate-800/80 border border-slate-700/50 p-4 rounded-2xl shadow-lg">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">♀ Growth</p>
+                        <div className="flex items-center gap-2 mt-1 overflow-x-auto scrollbar-hide">
+                            <span className="text-[10px] font-bold text-slate-300 bg-slate-700/50 px-2 py-1 rounded-lg flex flex-col items-center min-w-[32px]"><span className="text-[8px] opacity-40">T</span>{stats.female_today}</span>
+                            <span className="text-[10px] font-bold text-slate-300 bg-slate-700/50 px-2 py-1 rounded-lg flex flex-col items-center min-w-[32px]"><span className="text-[8px] opacity-40">W</span>{stats.female_week}</span>
+                            <span className="text-[10px] font-bold text-slate-300 bg-slate-700/50 px-2 py-1 rounded-lg flex flex-col items-center min-w-[32px]"><span className="text-[8px] opacity-40">M</span>{stats.female_month}</span>
+                            <span className="text-[10px] font-bold text-slate-300 bg-slate-700/50 px-2 py-1 rounded-lg flex flex-col items-center min-w-[32px]"><span className="text-[8px] opacity-40">Y</span>{stats.female_year}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ── Header ── */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
