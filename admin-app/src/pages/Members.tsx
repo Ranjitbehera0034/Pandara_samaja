@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
-import { Search, Plus, Upload, Edit2, Trash2, X, Ban, CheckCircle, LayoutGrid, List, ChevronDown, ChevronUp, Camera, UserCircle2, Phone, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Plus, Upload, Edit2, Trash2, X, Ban, CheckCircle, LayoutGrid, List, ChevronDown, ChevronUp, Camera, UserCircle, Phone, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -94,7 +94,12 @@ export default function Members() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res = await api.get('/members/stats/demographics');
+                const queryParams: Record<string, string> = {};
+                if (filterDistrict) queryParams.district = filterDistrict;
+                if (filterTaluka) queryParams.taluka = filterTaluka;
+                if (filterPanchayat) queryParams.panchayat = filterPanchayat;
+
+                const res = await api.get('/members/stats/demographics', { params: queryParams });
                 if (res.data.success) {
                     setStats(res.data.stats);
                 }
@@ -102,8 +107,8 @@ export default function Members() {
                 console.error('Failed to load stats', error);
             }
         };
-        fetchStats();
-    }, []);
+        if (activeTab === 'all') fetchStats();
+    }, [activeTab, filterDistrict, filterTaluka, filterPanchayat]);
 
     // Fetch Filter Options
     useEffect(() => {
@@ -463,8 +468,8 @@ export default function Members() {
                     <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex flex-col gap-1 transition-all hover:shadow-lg">
                         <span className="text-slate-500 font-medium text-xs uppercase tracking-widest pl-1">Demographics</span>
                         <div className="flex items-center gap-6 text-sm font-bold mt-2 pl-1">
-                            <span className="flex items-center gap-2 text-blue-600 bg-blue-50 dark:bg-blue-900/40 px-3 py-1.5 rounded-xl"><UserCircle2 size={18} /> {stats.total_male} M</span>
-                            <span className="flex items-center gap-2 text-pink-600 bg-pink-50 dark:bg-pink-900/40 px-3 py-1.5 rounded-xl"><UserCircle2 size={18} /> {stats.total_female} F</span>
+                            <span className="flex items-center gap-2 text-blue-600 bg-blue-50 dark:bg-blue-900/40 px-3 py-1.5 rounded-xl"><UserCircle size={18} /> {stats.total_male} M</span>
+                            <span className="flex items-center gap-2 text-pink-600 bg-pink-50 dark:bg-pink-900/40 px-3 py-1.5 rounded-xl"><UserCircle size={18} /> {stats.total_female} F</span>
                         </div>
                     </div>
                     <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex flex-col gap-2 transition-all hover:shadow-lg">
@@ -862,7 +867,7 @@ export default function Members() {
                                                     <img src={headProfilePic} alt="Head" className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-600">
-                                                        <UserCircle2 size={40} className="mb-2" />
+                                                        <UserCircle size={40} className="mb-2" />
                                                         <span className="text-[9px] font-black uppercase tracking-widest text-center px-2">No Photo</span>
                                                     </div>
                                                 )}
@@ -999,7 +1004,7 @@ export default function Members() {
                                                         <img src={fm.profile_pic} alt="FM" className="w-full h-full object-cover" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500">
-                                                            <UserCircle2 size={28} />
+                                                            <UserCircle size={28} />
                                                         </div>
                                                     )}
                                                 </div>

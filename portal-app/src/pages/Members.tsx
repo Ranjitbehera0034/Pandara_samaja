@@ -383,7 +383,12 @@ export default function Members() {
     useEffect(() => {
         const token = getToken();
         if (!token) return;
-        fetch(`${API_BASE_URL}/members/stats/demographics`, {
+        const params = new URLSearchParams();
+        if (filterDistrict) params.append('district', filterDistrict);
+        if (filterTaluka) params.append('taluka', filterTaluka);
+        if (filterPanchayat) params.append('panchayat', filterPanchayat);
+
+        fetch(`${API_BASE_URL}/members/stats/demographics?${params.toString()}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())
@@ -391,7 +396,7 @@ export default function Members() {
                 if (data.success) setStats(data.stats);
             })
             .catch(err => console.error('Failed to load stats', err));
-    }, []);
+    }, [filterDistrict, filterTaluka, filterPanchayat]);
 
     // Fetch filter options once
     useEffect(() => {
