@@ -32,6 +32,7 @@ export default function Sidebar({ isMobileOpen = false, setIsMobileOpen }: Sideb
     const toggleLanguage = () => {
         const newLang = i18n.language === 'en' ? 'or' : 'en';
         i18n.changeLanguage(newLang);
+        localStorage.setItem('pandaraSamaja_lang', newLang);
     };
 
     const toggleDarkMode = () => {

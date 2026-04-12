@@ -124,18 +124,21 @@ export default function Profile() {
         if (!file) return;
         const toastId = toast.loading('Uploading profile photo...');
         try {
+            const { uploadProfilePhoto } = await import('../services/firebaseStorage');
+            const memberId = member?.membership_no || 'unknown';
+            const photoUrl = await uploadProfilePhoto(file, memberId);
+
+            // Save the URL to backend
             const token = localStorage.getItem('portalToken');
-            const formData = new FormData();
-            formData.append('photo', file);
             const response = await fetch(`${PORTAL_API_URL}/profile/photo`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ photoUrl })
             });
-            if (!response.ok) throw new Error('Upload failed');
+            if (!response.ok) throw new Error('Failed to save photo URL');
             const data = await response.json();
-            if (data.success && data.photoUrl) {
-                const updated = { ...member, profile_photo_url: data.photoUrl };
+            if (data.success) {
+                const updated = { ...member, profile_photo_url: photoUrl };
                 localStorage.setItem('portalMember', JSON.stringify(updated));
                 toast.success(t('profile', 'photoUploaded'), { id: toastId });
                 window.location.reload();

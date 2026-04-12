@@ -116,6 +116,16 @@ export default function Matrimony() {
             const formData = new FormData(e.currentTarget);
             const token = localStorage.getItem("portalToken");
 
+            // Upload file to Firebase Storage first
+            const file = formData.get('form_file') as File;
+            if (file && file.size > 0) {
+                const { uploadMatrimonyFile } = await import('../services/firebaseStorage');
+                const fileUrl = await uploadMatrimonyFile(file, 'form');
+                // Replace file with URL in form data
+                formData.delete('form_file');
+                formData.append('form_file_url', fileUrl);
+            }
+
             const res = await fetch(`${PORTAL_API_URL}/matrimony/submit`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },

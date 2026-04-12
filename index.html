@@ -443,6 +443,38 @@
                 const response = await fetch(baseUrl + '/api/v1/leaders');
                 const result = await response.json();
 
+                // Helper: resolve image URLs (Google Drive → local cache, Firebase → direct)
+                function fixGdriveUrl(url) {
+                    if (!url) return PLACEHOLDER;
+                    // Firebase Storage URLs — use directly
+                    if (url.includes('firebasestorage.googleapis.com')) {
+                        return url;
+                    }
+                    // Extract file ID from various Google Drive URL formats
+                    let fileId = null;
+                    const patterns = [
+                        /drive\.google\.com\/uc\?id=([A-Za-z0-9_-]+)/,
+                        /lh3\.googleusercontent\.com\/d\/([A-Za-z0-9_-]+)/,
+                        /drive\.google\.com\/file\/d\/([A-Za-z0-9_-]+)/,
+                        /drive\.google\.com\/thumbnail\?id=([A-Za-z0-9_-]+)/,
+                    ];
+                    for (const pat of patterns) {
+                        const m = url.match(pat);
+                        if (m) { fileId = m[1]; break; }
+                    }
+
+                    if (fileId) {
+                        // Serve from locally downloaded cache
+                        return 'assets/img/leaders/' + fileId + '.jpg';
+                    }
+                    // Non-Google-Drive URLs (other http, blob, assets)
+                    if (url.startsWith('http') || url.startsWith('blob') || url.startsWith('assets/')) {
+                        return url;
+                    }
+                    // Relative path -> prepend API base
+                    return baseUrl + (url.startsWith('/') ? '' : '/') + url;
+                }
+
                 if (result.success && result.data && result.data.length > 0) {
                     container.innerHTML = ''; // clear any loading text
                     container.className = ''; // remove grid class from container itself
@@ -450,19 +482,21 @@
                     // Group by level (only displaying 'State' leaders on the home page)
                     const levels = ['State'];
                     const grouped = {};
+                    let presidentFound = false;
                     result.data.forEach(leader => {
-                        // Check if this leader is the President
-                        if (leader.role && leader.role.toLowerCase() === 'president') {
-                            let pSrc = PLACEHOLDER;
-                            if (leader.image_url) {
-                                if (leader.image_url.includes('drive.google.com/uc?id=')) {
-                                    pSrc = leader.image_url.replace('drive.google.com/uc?id=', 'lh3.googleusercontent.com/d/');
-                                } else {
-                                    pSrc = leader.image_url;
-                                }
-                            }
+                        // Check if this leader is the President (English or Odia)
+                        const roleStr1 = leader.role ? String(leader.role).toLowerCase() : '';
+                        const roleStr2 = leader.role_or ? String(leader.role_or).toLowerCase() : '';
+                        if (!presidentFound && leader.level === 'State' && 
+                            (roleStr1.includes('president') || roleStr1.includes('ସଭାପତି') || 
+                            roleStr2.includes('president') || roleStr2.includes('ସଭାପତି'))) {
+                            presidentFound = true;
+                            const pSrc = fixGdriveUrl(leader.image_url);
                             const pImg = document.getElementById('presidentImage');
-                            if (pImg) pImg.src = pSrc;
+                            if (pImg) {
+                                pImg.onerror = () => { pImg.onerror = null; pImg.src = PLACEHOLDER; };
+                                pImg.src = pSrc;
+                            }
                         }
 
                         const lvl = leader.level || 'State';
@@ -496,16 +530,7 @@
                                 const card = document.createElement('div');
                                 card.className = 'leader-card';
 
-                                let src = PLACEHOLDER;
-                                if (image_url) {
-                                    if (image_url.includes('drive.google.com/uc?id=')) {
-                                        src = image_url.replace('drive.google.com/uc?id=', 'lh3.googleusercontent.com/d/');
-                                    } else if (image_url.startsWith('http') || image_url.startsWith('blob') || image_url.startsWith('assets/')) {
-                                        src = image_url;
-                                    } else {
-                                        src = baseUrl + (image_url.startsWith('/') ? '' : '/') + image_url;
-                                    }
-                                }
+                                const src = fixGdriveUrl(image_url);
 
                                 const nameHtml = name_or ? `<span class="lang-en">${name}</span><span class="lang-or">${name_or}</span>` : `<span class="lang-en">${name}</span><span class="lang-or">${name}</span>`;
                                 const roleHtml = role_or ? `<span class="lang-en">${role}</span><span class="lang-or">${role_or}</span>` : `<span class="lang-en">${role}</span><span class="lang-or">${role}</span>`;
@@ -517,12 +542,10 @@
                                     ${location ? '<p style="font-size:0.85rem; color: #555; margin-top:5px;">' + location + '</p>' : ''}
                                 `;
                                 const img = card.querySelector('img');
-                                img.onerror = () => {
-                                    img.onerror = null;
-                                    img.src = PLACEHOLDER;
-                                };
+                                img.onerror = () => { img.onerror = null; img.src = PLACEHOLDER; };
                                 grid.appendChild(card);
                             });
+
                             container.appendChild(grid);
                         }
                     });
