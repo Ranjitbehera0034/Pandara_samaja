@@ -16,8 +16,8 @@ const LanguageContext = createContext<LanguageContextType>({
 export function LanguageProvider({ children }: { children: ReactNode }) {
     const [lang, setLangState] = useState<Language>(() => {
         try {
-            const saved = localStorage.getItem('portalLanguage');
-            return (saved === 'od' ? 'od' : 'en') as Language;
+            const saved = localStorage.getItem('pandaraSamaja_lang');
+            return (saved === 'od' || saved === 'or' ? 'od' : 'en') as Language;
         } catch {
             return 'en';
         }
@@ -25,7 +25,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
     const setLang = useCallback((newLang: Language) => {
         setLangState(newLang);
-        localStorage.setItem('portalLanguage', newLang);
+        localStorage.setItem('pandaraSamaja_lang', newLang === 'od' ? 'or' : 'en');
         // Set html lang attribute
         document.documentElement.lang = newLang === 'od' ? 'or' : 'en';
     }, []);

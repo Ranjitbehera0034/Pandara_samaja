@@ -77,28 +77,33 @@ export default function Gallery() {
         if (!token) return;
 
         setUploading(true);
-        const formData = new FormData();
-
-        // Append all files
-        Array.from(files).forEach((file) => {
-            formData.append('photos', file);
-        });
 
         try {
+            const { uploadGalleryPhoto } = await import('../services/firebaseStorage');
+            const memberId = localStorage.getItem('portalMember')
+                ? JSON.parse(localStorage.getItem('portalMember')!).membership_no || 'unknown'
+                : 'unknown';
+
+            // Upload all files to Firebase Storage
+            const uploadPromises = Array.from(files).map(file => uploadGalleryPhoto(file, memberId));
+            const urls = await Promise.all(uploadPromises);
+
+            // Register URLs with backend
             const response = await fetch(`${PORTAL_API_URL}/photos`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 },
-                body: formData
+                body: JSON.stringify({ photoUrls: urls })
             });
 
             const data = await response.json();
 
             if (!response.ok) throw new Error(data.message || 'Upload failed');
 
-            setPhotos(prev => [...data.photos, ...prev]);
-            toast.success(`${t('gallery', 'successUpload')} ${data.photos.length} ${t('gallery', 'photos')}`);
+            setPhotos(prev => [...(data.photos || []), ...prev]);
+            toast.success(`${t('gallery', 'successUpload')} ${urls.length} ${t('gallery', 'photos')}`);
 
             // Reset input
             if (fileInputRef.current) {

@@ -229,14 +229,25 @@ export default function Matrimony() {
                                 </p>
                             </motion.div>
 
-                            {/* Admin Direct Add Button */}
-                            <motion.button
-                                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                onClick={() => setShowDirectModal(true)}
-                                className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-pink-600 to-red-600 text-white rounded-2xl font-bold shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 transition-all border border-pink-400/20 text-sm w-full sm:w-auto shrink-0"
-                            >
-                                <Plus size={18} /> Add Candidate Directly
-                            </motion.button>
+                            {/* Actions Group */}
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <motion.a
+                                    initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                    href="/assets/forms/matrimony_form.jpg"
+                                    download
+                                    className="group flex items-center justify-center gap-2 px-5 py-3 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-pink-600 dark:text-pink-400 rounded-2xl font-bold border border-pink-200 dark:border-pink-500/30 transition-all text-sm w-full sm:w-auto shrink-0 shadow-sm"
+                                >
+                                    <Download size={18} /> Step 1: Download Form
+                                </motion.a>
+
+                                <motion.button
+                                    initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                    onClick={() => setShowDirectModal(true)}
+                                    className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-pink-600 to-red-600 text-white rounded-2xl font-bold shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 transition-all border border-pink-400/20 text-sm w-full sm:w-auto shrink-0"
+                                >
+                                    <Plus size={18} /> Add Candidate Directly
+                                </motion.button>
+                            </div>
                         </div>
 
                         {/* View Mode Tabs */}

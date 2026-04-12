@@ -151,15 +151,22 @@ const resources = {
     }
 };
 
+const savedLang = localStorage.getItem('pandaraSamaja_lang') || 'en';
+
 i18n
     .use(initReactI18next) // passes i18n down to react-i18next
     .init({
         resources,
-        lng: "en", // default language
+        lng: savedLang, // default language
         fallbackLng: "en",
         interpolation: {
             escapeValue: false // react already safes from xss
         }
     });
+
+i18n.on('languageChanged', (lng) => {
+    document.documentElement.setAttribute('lang', lng);
+});
+document.documentElement.setAttribute('lang', savedLang);
 
 export default i18n;
