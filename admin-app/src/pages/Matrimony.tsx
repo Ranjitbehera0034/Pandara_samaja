@@ -233,8 +233,8 @@ export default function Matrimony() {
                             <div className="flex flex-col sm:flex-row gap-3">
                                 <motion.a
                                     initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                    href="/assets/forms/matrimony_form.jpg"
-                                    download
+                                    href="/CASTE_MATRIMONY.pdf"
+                                    download="CASTE_MATRIMONY.pdf"
                                     className="group flex items-center justify-center gap-2 px-5 py-3 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-pink-600 dark:text-pink-400 rounded-2xl font-bold border border-pink-200 dark:border-pink-500/30 transition-all text-sm w-full sm:w-auto shrink-0 shadow-sm"
                                 >
                                     <Download size={18} /> Step 1: Download Form
@@ -861,8 +861,8 @@ export default function Matrimony() {
                                     </div>
                                     <div>
                                         <a
-                                            href="/assets/forms/matrimony_form.jpg"
-                                            download
+                                            href="/CASTE_MATRIMONY.pdf"
+                                            download="CASTE_MATRIMONY.pdf"
                                             className="inline-flex items-center gap-2 text-xs text-pink-400 hover:text-pink-300 font-bold transition-colors"
                                         >
                                             <Download size={14} /> Download blank matrimony form

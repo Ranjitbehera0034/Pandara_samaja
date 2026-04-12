@@ -216,8 +216,8 @@ export default function Matrimony() {
                             <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 w-full md:w-auto">
                                 <motion.a
                                     initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                    href="/assets/forms/matrimony_form.jpg"
-                                    download
+                                    href="/CASTE_MATRIMONY.pdf"
+                                    download="CASTE_MATRIMONY.pdf"
                                     className="group flex items-center gap-2 px-5 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-slate-200 rounded-2xl text-sm font-bold border border-white/5 transition-all backdrop-blur-md w-full sm:w-auto justify-center sm:justify-start"
                                 >
                                     <div className="p-1.5 bg-slate-900 rounded-lg group-hover:bg-slate-800 transition-colors">
