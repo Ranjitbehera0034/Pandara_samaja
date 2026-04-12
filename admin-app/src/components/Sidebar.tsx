@@ -165,6 +165,14 @@ export default function Sidebar({ isMobileOpen = false, setIsMobileOpen }: Sideb
                 </nav>
             </div>
             <div className={`p-4 border-t border-slate-100 dark:border-slate-800 space-y-2 flex flex-col ${(isExpanded || isMobileOpen) ? '' : 'items-center'}`}>
+                <a
+                    href="/portal"
+                    className={`flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-xl transition-colors ${(isExpanded || isMobileOpen) ? 'px-4 w-full' : 'w-10 h-10 px-0'}`}
+                    title="Switch to Member Portal"
+                >
+                    <Globe size={18} />
+                    {(isExpanded || isMobileOpen) && <span>Member Portal</span>}
+                </a>
                 <button
                     onClick={toggleDarkMode}
                     className={`flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-xl transition-colors ${(isExpanded || isMobileOpen) ? 'px-4 w-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'w-10 h-10 px-0 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}`}

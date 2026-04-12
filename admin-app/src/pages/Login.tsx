@@ -14,6 +14,14 @@ export default function Login() {
     const { login } = useAdminAuth();
     const navigate = useNavigate();
 
+    const handlePortalSso = (resData: any) => {
+        if (resData.portalData) {
+            localStorage.setItem('portalMember', JSON.stringify(resData.portalData.member));
+            localStorage.setItem('portalUser', JSON.stringify(resData.portalData.loggedInUser));
+            localStorage.setItem('portalToken', resData.portalData.token);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -37,6 +45,7 @@ export default function Login() {
                     setCurrentStep('mfa_verify');
                     toast.success('Please enter MFA code');
                 } else if (res.data.token) {
+                    handlePortalSso(res.data);
                     login(res.data.token);
                     toast.success('Logged in successfully');
                     navigate('/');
@@ -56,6 +65,7 @@ export default function Login() {
                 headers: { Authorization: `Bearer ${mfaToken}` }
             });
             if (res.data.success && res.data.token) {
+                handlePortalSso(res.data);
                 login(res.data.token);
                 toast.success(res.data.message || 'Logged in successfully');
                 navigate('/');

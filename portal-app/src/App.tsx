@@ -3,7 +3,7 @@ import { HashRouter, Routes, Route, Link, Navigate, useLocation } from 'react-ro
 import {
   Home, Users, Image as ImageIcon, MessageSquare, Menu, Bell, Loader2, LogOut,
   User, Search, Compass, Settings, X, ChevronsLeft, ChevronsRight, Globe,
-  UsersRound, Calendar, Radio, Megaphone, Heart, Crown
+  UsersRound, Calendar, Radio, Megaphone, Heart, Crown, Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'sonner';
@@ -47,6 +47,8 @@ function ProtectedLayout() {
     return localStorage.getItem('sidebarCollapsed') === 'true';
   });
   const location = useLocation();
+
+  const hasAdminAccess = localStorage.getItem('adminToken') !== null;
 
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
@@ -120,6 +122,10 @@ function ProtectedLayout() {
     { to: '/settings', icon: <Settings size={20} />, label: t('nav', 'settings') },
     { to: 'https://nikhilaodishapandarasamaja.in', isExternal: true, icon: <Globe size={20} />, label: 'Website Home' },
   ];
+
+  if (hasAdminAccess) {
+    navLinks.push({ to: '/admin', isExternal: true, icon: <Shield size={20} />, label: 'Switch to Admin Panel' });
+  }
 
   const closeMobileSidebar = () => setSidebarOpen(false);
 
