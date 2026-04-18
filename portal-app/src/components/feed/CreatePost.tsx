@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
-import { Image, Video, MapPin, Send, X, AlertTriangle, Hash, Play, BarChart3, Wand2 } from 'lucide-react';
+import { Image, Video, MapPin, Send, X, AlertTriangle, Hash, BarChart3, Wand2 } from 'lucide-react';
+import { VideoPlayer } from './VideoPlayer';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -197,17 +198,12 @@ export function CreatePost({ onPostCreate }: CreatePostProps) {
                                     <div key={index} className="relative shrink-0 w-32 h-32 rounded-xl overflow-hidden group border border-slate-700">
                                         {preview.type === 'video' ? (
                                             <div className="w-full h-full bg-slate-900 flex items-center justify-center relative">
-                                                <video
-                                                    src={preview.url}
-                                                    className="w-full h-full object-cover"
-                                                    muted
+                                                <VideoPlayer 
+                                                    src={preview.url} 
+                                                    className="w-full h-full" 
+                                                    autoPlayEnabled={false} 
                                                 />
-                                                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                                    <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                                                        <Play size={20} className="text-white ml-0.5" fill="white" />
-                                                    </div>
-                                                </div>
-                                                <span className="absolute bottom-1 left-1 text-[10px] bg-black/60 text-white px-1.5 py-0.5 rounded font-medium">
+                                                <span className="absolute top-1 left-1 text-[10px] bg-black/60 text-white px-1.5 py-0.5 rounded font-medium z-30">
                                                     VIDEO
                                                 </span>
                                             </div>

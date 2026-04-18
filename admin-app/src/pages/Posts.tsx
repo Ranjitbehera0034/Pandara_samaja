@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Video, Image as ImageIcon } from 'lucide-react';
+import { VideoPlayer } from '../components/common/VideoPlayer';
 import { toast } from 'sonner';
 
 export default function Posts() {
@@ -15,6 +16,8 @@ export default function Posts() {
     const [content, setContent] = useState('');
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string>('');
+    const [videoFile, setVideoFile] = useState<File | null>(null);
+    const [videoPreview, setVideoPreview] = useState<string>('');
 
     useEffect(() => {
         fetchPosts();
@@ -45,6 +48,8 @@ export default function Posts() {
         setContent('');
         setImageFile(null);
         setImagePreview('');
+        setVideoFile(null);
+        setVideoPreview('');
         setIsModalOpen(true);
     };
 
@@ -55,6 +60,8 @@ export default function Posts() {
         setContent(p.content);
         setImageFile(null);
         setImagePreview(p.image_url || '');
+        setVideoFile(null);
+        setVideoPreview(p.video_url || '');
         setIsModalOpen(true);
     };
 
@@ -63,6 +70,18 @@ export default function Posts() {
             const file = e.target.files[0];
             setImageFile(file);
             setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            if (file.size > 50 * 1024 * 1024) {
+                toast.error('Video must be under 50MB');
+                return;
+            }
+            setVideoFile(file);
+            setVideoPreview(URL.createObjectURL(file));
         }
     };
 
@@ -82,8 +101,13 @@ export default function Posts() {
             if (imageFile) {
                 formData.append('image', imageFile);
             }
-            if (isEditing && !imagePreview && !imageFile) {
-                formData.append('removeImage', 'true');
+            if (videoFile) {
+                formData.append('video', videoFile);
+            }
+            
+            if (isEditing) {
+                if (!imagePreview && !imageFile) formData.append('removeImage', 'true');
+                if (!videoPreview && !videoFile) formData.append('removeVideo', 'true');
             }
 
             if (isEditing) {
@@ -156,8 +180,10 @@ export default function Posts() {
                             ) : (
                                 posts.map((post) => (
                                     <tr key={post.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
-                                        <td className="px-8 py-5 whitespace-nowrap text-sm font-bold text-blue-600 dark:text-blue-400 group-hover:underline">
+                                        <td className="px-8 py-5 whitespace-nowrap text-sm font-bold text-blue-600 dark:text-blue-400 group-hover:underline flex items-center gap-2">
                                             {post.title}
+                                            {post.video_url && <Video size={14} className="text-slate-400" />}
+                                            {post.image_url && <ImageIcon size={14} className="text-slate-400" />}
                                         </td>
                                         <td className="px-8 py-5 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
                                             {new Date(post.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -216,36 +242,70 @@ export default function Posts() {
                                 />
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Cover Image</label>
-                                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-200 dark:border-slate-800 border-dashed rounded-[24px] hover:border-blue-400 dark:hover:border-blue-500 transition-all bg-slate-50/50 dark:bg-slate-950/20 group">
-                                    <div className="space-y-2 text-center w-full">
-                                        {imagePreview ? (
-                                            <div className="relative inline-block group w-full">
-                                                <img src={imagePreview} alt="Preview" className="h-48 w-full object-cover rounded-2xl shadow-lg" />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => { setImageFile(null); setImagePreview(''); }}
-                                                    className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg hover:scale-110 transition-transform"
-                                                >
-                                                    <X size={14} />
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <div className="flex flex-col items-center">
-                                                <div className="w-16 h-16 mb-4 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                    <Plus size={32} />
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Cover Image</label>
+                                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-200 dark:border-slate-800 border-dashed rounded-[24px] hover:border-blue-400 dark:hover:border-blue-500 transition-all bg-slate-50/50 dark:bg-slate-950/20 group">
+                                        <div className="space-y-2 text-center w-full">
+                                            {imagePreview ? (
+                                                <div className="relative inline-block group w-full">
+                                                    <img src={imagePreview} alt="Preview" className="h-48 w-full object-cover rounded-2xl shadow-lg" />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setImageFile(null); setImagePreview(''); }}
+                                                        className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg hover:scale-110 transition-transform"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
                                                 </div>
-                                                <div className="flex text-sm text-slate-600 dark:text-slate-400 font-medium">
-                                                    <label htmlFor="file-upload" className="relative cursor-pointer bg-white dark:bg-slate-900 rounded-md font-bold text-blue-600 hover:text-blue-500">
-                                                        <span>Upload a file</span>
-                                                        <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleImageChange} accept="image/*" />
-                                                    </label>
-                                                    <p className="pl-1">or drag and drop</p>
+                                            ) : (
+                                                <div className="flex flex-col items-center">
+                                                    <div className="w-16 h-16 mb-4 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                        <ImageIcon size={32} />
+                                                    </div>
+                                                    <div className="flex text-sm text-slate-600 dark:text-slate-400 font-medium">
+                                                        <label htmlFor="image-upload" className="relative cursor-pointer bg-white dark:bg-slate-900 rounded-md font-bold text-blue-600 hover:text-blue-500">
+                                                            <span>Upload Image</span>
+                                                            <input id="image-upload" name="image-upload" type="file" className="sr-only" onChange={handleImageChange} accept="image/*" />
+                                                        </label>
+                                                    </div>
+                                                    <p className="text-xs text-slate-500 mt-1">PNG, JPG, GIF</p>
                                                 </div>
-                                                <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">PNG, JPG, GIF up to 10MB</p>
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Featured Video</label>
+                                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-200 dark:border-slate-800 border-dashed rounded-[24px] hover:border-blue-400 dark:hover:border-blue-500 transition-all bg-slate-50/50 dark:bg-slate-950/20 group">
+                                        <div className="space-y-2 text-center w-full">
+                                            {videoPreview ? (
+                                                <div className="relative inline-block group w-full">
+                                                    <VideoPlayer src={videoPreview} className="h-48 w-full rounded-2xl shadow-lg" />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setVideoFile(null); setVideoPreview(''); }}
+                                                        className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg hover:scale-110 transition-transform z-30"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col items-center">
+                                                    <div className="w-16 h-16 mb-4 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                        <Video size={32} />
+                                                    </div>
+                                                    <div className="flex text-sm text-slate-600 dark:text-slate-400 font-medium">
+                                                        <label htmlFor="video-upload" className="relative cursor-pointer bg-white dark:bg-slate-900 rounded-md font-bold text-indigo-600 hover:text-indigo-500">
+                                                            <span>Upload Video</span>
+                                                            <input id="video-upload" name="video-upload" type="file" className="sr-only" onChange={handleVideoChange} accept="video/*" />
+                                                        </label>
+                                                    </div>
+                                                    <p className="text-xs text-slate-500 mt-1">MP4, WebM (Max 50MB)</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
