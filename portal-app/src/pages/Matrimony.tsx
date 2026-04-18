@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Briefcase, GraduationCap, X, Heart, User, Download, Eye, Phone, Info, Filter, ArrowUpDown, Bookmark, Star, FileText, CheckCircle2, AlertCircle, Clock, Upload, ShieldAlert } from 'lucide-react';
+import { Search, MapPin, Briefcase, GraduationCap, X, Heart, User, Download, Eye, Phone, Info, Filter, ArrowUpDown, Bookmark, Star, FileText, CheckCircle2, AlertCircle, Clock, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
 
