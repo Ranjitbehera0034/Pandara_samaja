@@ -260,6 +260,15 @@ function ProtectedLayout() {
           </button>
         </div>
 
+        {/* Legal links */}
+        {!collapsed && (
+          <div className="px-6 py-2 flex items-center justify-center gap-4 text-[10px] text-slate-500 border-t border-slate-700/30">
+            <a href="https://nikhilaodishapandarasamaja.in/privacy.html" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400">Privacy</a>
+            <span>•</span>
+            <a href="https://nikhilaodishapandarasamaja.in/terms.html" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400">Terms</a>
+          </div>
+        )}
+
         {/* User card */}
         <div className={`border-t border-slate-100 dark:border-slate-700/50 ${collapsed ? 'p-2' : 'p-3'}`}>
           <Link
@@ -401,6 +410,8 @@ function ProtectedLayout() {
   );
 }
 
+import { CookieConsent } from './components/CookieConsent';
+
 // ─── App ─────────────────────────────────────────────────────────
 function App() {
   return (
@@ -409,6 +420,7 @@ function App() {
         <SettingsProvider>
           <LanguageProvider>
             <Toaster position="top-center" theme="dark" richColors closeButton />
+            <CookieConsent />
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/*" element={<ProtectedLayout />} />

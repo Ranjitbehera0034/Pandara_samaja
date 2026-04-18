@@ -75,11 +75,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+import { CookieConsent } from './components/CookieConsent';
+
 export default function App() {
   return (
     <AdminAuthProvider>
       <Router>
         <Toaster position="top-right" closeButton richColors />
+        <CookieConsent />
         <Routes>
           <Route path="/login" element={<Login />} />
 

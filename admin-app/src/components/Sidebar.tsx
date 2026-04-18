@@ -182,6 +182,16 @@ export default function Sidebar({ isMobileOpen = false, setIsMobileOpen }: Sideb
                     </div>
                 </nav>
             </div>
+            
+            {/* Legal Links */}
+            {(isExpanded || isMobileOpen) && (
+                <div className="px-6 py-2 flex items-center justify-center gap-4 text-[10px] text-slate-500 border-t border-slate-100 dark:border-slate-800">
+                    <a href="https://nikhilaodishapandarasamaja.in/privacy.html" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500">Privacy Policy</a>
+                    <span>•</span>
+                    <a href="https://nikhilaodishapandarasamaja.in/terms.html" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500">Terms of Service</a>
+                </div>
+            )}
+
             <div className={`p-4 border-t border-slate-100 dark:border-slate-800 space-y-2 flex flex-col ${(isExpanded || isMobileOpen) ? '' : 'items-center'}`}>
                 <a
                     href="/portal"
