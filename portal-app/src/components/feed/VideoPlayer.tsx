@@ -19,6 +19,7 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(true); // Default muted for auto-play friendliness
     const [progress, setProgress] = useState(0);
+    const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -27,7 +28,7 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
     const [playbackRate, setPlaybackRate] = useState(1);
     const [showRateMenu, setShowRateMenu] = useState(false);
 
-    const controlsTimeoutRef = useRef<any>(null);
+    const controlsTimeoutRef = useRef<number | null>(null);
 
     // Auto-hide controls after 3 seconds of inactivity
     const resetControlsTimeout = useCallback(() => {
@@ -105,6 +106,7 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
         if (!videoRef.current) return;
         const currentProgress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
         setProgress(currentProgress);
+        setCurrentTime(videoRef.current.currentTime);
     };
 
     const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,6 +114,7 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
         const seekTime = (parseFloat(e.target.value) / 100) * videoRef.current.duration;
         videoRef.current.currentTime = seekTime;
         setProgress(parseFloat(e.target.value));
+        setCurrentTime(seekTime);
     };
 
     const toggleFullscreen = (e: React.MouseEvent) => {
@@ -182,7 +185,11 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
                 muted={isMuted}
                 className="w-full h-full object-contain cursor-pointer"
                 onTimeUpdate={handleProgress}
-                onLoadedMetadata={() => { setDuration(videoRef.current?.duration || 0); setIsLoading(false); }}
+                onLoadedMetadata={() => { 
+                    setDuration(videoRef.current?.duration || 0); 
+                    setCurrentTime(videoRef.current?.currentTime || 0);
+                    setIsLoading(false); 
+                }}
                 onWaiting={() => setIsLoading(true)}
                 onPlaying={() => setIsLoading(false)}
                 onClick={togglePlay}
@@ -271,7 +278,7 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
                         </div>
 
                         <div className="text-white text-sm font-medium tabular-nums">
-                            {formatTime(videoRef.current?.currentTime || 0)} / {formatTime(duration)}
+                            {formatTime(currentTime)} / {formatTime(duration)}
                         </div>
                     </div>
 
