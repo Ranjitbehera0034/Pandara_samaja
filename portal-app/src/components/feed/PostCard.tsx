@@ -11,7 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { PollDisplay } from './Poll';
 import type { Post, ReactionType, Comment, MediaItem } from '../../types';
-import { PORTAL_API_URL } from '../../config/apiConfig';
+import { PORTAL_API_URL, resolveMediaUrl } from '../../config/apiConfig';
 
 // ─── Content Moderation ──────────────────────────────
 const BANNED_WORDS = ['nude', 'naked', 'xxx', 'porn', 'sex', 'nsfw', 'adult content', 'explicit', 'obscene', 'vulgar'];
@@ -93,7 +93,7 @@ function CommentItem({
             <div className="flex gap-2.5 text-sm group">
                 <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center shrink-0 text-xs font-bold text-white">
                     {comment.authorAvatar ? (
-                        <img src={comment.authorAvatar} alt="" className="w-full h-full rounded-full object-cover" />
+                        <img src={resolveMediaUrl(comment.authorAvatar)} alt="" className="w-full h-full rounded-full object-cover" />
                     ) : (
                         (comment.authorName || '?')[0].toUpperCase()
                     )}
@@ -400,12 +400,12 @@ export function PostCard({
     const isVideoUrl = (url: string) => {
         if (!url) return false;
         const lowercaseUrl = url.toLowerCase();
-        // Check standard extensions
-        if (lowercaseUrl.match(/\.(mp4|webm|mov|ogg|qt)$/)) return true;
+        // Check standard extensions - allow for query parameters in Signed URLs
+        if (lowercaseUrl.match(/\.(mp4|webm|mov|ogg|qt)(\?|$)/i)) return true;
         // Check if it's our proxy URL with a video extension in the path parameter
         if (lowercaseUrl.includes('/media?path=')) {
             const pathParam = lowercaseUrl.split('path=')[1];
-            return pathParam && pathParam.match(/\.(mp4|webm|mov|ogg|qt)$/i);
+            return pathParam && pathParam.match(/\.(mp4|webm|mov|ogg|qt)(\?|$)/i);
         }
         return false;
     };
@@ -436,7 +436,7 @@ export function PostCard({
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 p-[2px]">
                         <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
                             {post.authorAvatar ? (
-                                <img src={post.authorAvatar} alt={post.authorName} className="w-full h-full object-cover" />
+                                <img src={resolveMediaUrl(post.authorAvatar)} alt={post.authorName} className="w-full h-full object-cover" />
                             ) : (
                                 <span className="font-bold text-white text-sm">{(post.authorName || '?')[0].toUpperCase()}</span>
                             )}
@@ -540,9 +540,9 @@ export function PostCard({
                             animate={{ opacity: 1 }}
                         >
                             {item.type === 'video' ? (
-                                <VideoPlayer src={item.url} />
+                                <VideoPlayer src={resolveMediaUrl(item.url)} />
                             ) : (
-                                <img src={item.url} alt={`Post image ${index + 1}`} className="w-full h-full object-cover max-h-[500px]" />
+                                <img src={resolveMediaUrl(item.url)} alt={`Post image ${index + 1}`} className="w-full h-full object-cover max-h-[500px]" />
                             )}
                             {mediaItems.length > 4 && index === 3 && (
                                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-xl font-bold text-white">
@@ -713,7 +713,7 @@ export function PostCard({
                                 return (
                                     <div className={`w-8 h-8 rounded-full overflow-hidden shrink-0 ring-1 ${fem ? 'ring-pink-500/40' : 'ring-blue-500/40'} flex items-center justify-center font-bold text-xs text-white`}>
                                         {cP ? (
-                                            <img src={cP} referrerPolicy="no-referrer" alt="" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                            <img src={resolveMediaUrl(cP)} referrerPolicy="no-referrer" alt="" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                                         ) : (
                                             <div className={`w-full h-full flex items-center justify-center ${fem ? 'bg-gradient-to-br from-rose-500 to-pink-600' : 'bg-gradient-to-br from-blue-500 to-indigo-600'}`}>
                                                 {(user?.name || member?.name || '?')[0].toUpperCase()}

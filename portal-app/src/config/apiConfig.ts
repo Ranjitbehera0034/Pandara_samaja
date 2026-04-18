@@ -13,3 +13,22 @@ const PROD_URL = 'https://pandara-samaja-backend.onrender.com/api/v1';
 export const API_BASE_URL = import.meta.env.VITE_API_URL || (isLocal ? LOCAL_URL : PROD_URL);
 export const SOCKET_URL = isLocal ? 'http://localhost:5000' : 'https://pandara-samaja-backend.onrender.com';
 export const PORTAL_API_URL = `${API_BASE_URL}/portal`;
+
+/**
+ * Resolves a media URL from the backend. 
+ * If it's a relative path starting with /api, prepends the backend host.
+ */
+export const resolveMediaUrl = (url: string | null | undefined): string => {
+    if (!url) return '';
+    if (url.startsWith('http') || url.startsWith('blob:') || url.startsWith('data:')) return url;
+    
+    // Some URLs might come from Google Drive or other sources
+    if (url.includes('drive.google.com')) return url;
+
+    // Get the base host (e.g., http://localhost:5000)
+    const host = isLocal ? 'http://localhost:5000' : 'https://pandara-samaja-backend.onrender.com';
+    
+    // Handle both /api/v1 and api/v1
+    const normalizedPath = url.startsWith('/') ? url : `/${url}`;
+    return `${host}${normalizedPath}`;
+};
