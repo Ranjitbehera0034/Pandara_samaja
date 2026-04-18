@@ -1,218 +1,180 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { User, MessageSquare, Heart, Share2, VideoOff, Video, MicOff, Mic, X, Cast } from 'lucide-react';
+import { MessageSquare, Heart, Users, Loader2, Cast } from 'lucide-react';
 import { PORTAL_API_URL } from '../config/apiConfig';
+import ReactPlayer from 'react-player';
+import { useChatSocket } from '../hooks/useChatSocket';
+
+interface StreamMessage {
+    id: string;
+    user: string;
+    text: string;
+    timestamp: string;
+}
 
 export default function LiveStream() {
     const { member } = useAuth();
-    const [isLive, setIsLive] = useState(false);
-    const [viewerCount, setViewerCount] = useState(0);
-    const [chatMessages, setChatMessages] = useState<any[]>([]);
+    const token = localStorage.getItem('portalToken');
+    const myId = member?.membership_no;
+    const { socket } = useChatSocket(myId, member);
+
+    const [activeStream, setActiveStream] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [chatMessages, setChatMessages] = useState<StreamMessage[]>([]);
     const [messageInput, setMessageInput] = useState('');
-    const [micMuted, setMicMuted] = useState(false);
-    const [videoMuted, setVideoMuted] = useState(false);
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const streamRef = useRef<MediaStream | null>(null);
+    const [viewerCount, setViewerCount] = useState(0);
+    
     const chatEndRef = useRef<HTMLDivElement>(null);
-    const [activeStreams, setActiveStreams] = useState<any[]>([]);
 
     useEffect(() => {
-        const fetchStreams = async () => {
-            try {
-                const res = await fetch(`${PORTAL_API_URL}/live/streams`, {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('portalToken')}` }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    setActiveStreams(data.streams || []);
-                }
-            } catch (e) {
-                console.error("Failed to fetch live streams", e);
-            }
-        };
-
-        fetchStreams();
-        const interval = setInterval(fetchStreams, 30000);
+        fetchStream();
+        const interval = setInterval(fetchStream, 30000); // Check for new streams every 30s
         return () => clearInterval(interval);
     }, []);
+
+    const fetchStream = async () => {
+        try {
+            const res = await fetch(`${PORTAL_API_URL}/live/streams`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success && data.streams && data.streams.length > 0) {
+                // Pick the first active stream
+                setActiveStream(data.streams[0]); 
+            } else {
+                setActiveStream(null);
+            }
+        } catch (e) {
+            console.error("Failed to fetch live streams", e);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [chatMessages]);
 
-    const startStream = async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-            }
-            streamRef.current = stream;
-            setIsLive(true);
-            setViewerCount(Math.floor(Math.random() * 50) + 10);
+    // Socket IO Events
+    useEffect(() => {
+        if (!socket || !activeStream) return;
 
-            // Start fake chat
-            const interval = setInterval(() => {
-                setChatMessages(prev => [...prev, {
-                    id: Date.now(),
-                    user: `Viewer${Math.floor(Math.random() * 1000)}`,
-                    text: ['Hello!', 'Awesome ❤️', 'Where is this?', 'Great stream', 'Nice mask!'][Math.floor(Math.random() * 5)]
-                }].slice(-50));
-            }, 3000);
+        socket.emit('join_live_stream', { streamId: activeStream.id });
 
-            return () => clearInterval(interval);
-        } catch (err) {
-            console.error("Error accessing media devices.", err);
-            alert("Could not access camera/microphone.");
-        }
-    };
+        const handleReceive = (msg: StreamMessage) => {
+            setChatMessages(prev => [...prev, msg].slice(-100)); // Keep last 100 messages to prevent lag
+        };
 
-    const stopStream = () => {
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
-        }
-        if (videoRef.current) videoRef.current.srcObject = null;
-        setIsLive(false);
-        setViewerCount(0);
-        setChatMessages([]);
-    };
+        socket.on('receive_live_message', handleReceive);
 
-    const toggleVideo = () => {
-        if (streamRef.current) {
-            streamRef.current.getVideoTracks().forEach(track => {
-                track.enabled = !track.enabled;
-            });
-            setVideoMuted(!videoMuted);
-        }
-    };
+        // Simulated highly-engaged viewer count
+        setViewerCount(Math.floor(Math.random() * 50) + 120);
 
-    const toggleAudio = () => {
-        if (streamRef.current) {
-            streamRef.current.getAudioTracks().forEach(track => {
-                track.enabled = !track.enabled;
-            });
-            setMicMuted(!micMuted);
-        }
-    };
+        return () => {
+            socket.off('receive_live_message', handleReceive);
+        };
+    }, [socket, activeStream?.id]);
 
     const sendMessage = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!messageInput.trim()) return;
-        setChatMessages(prev => [...prev, {
-            id: Date.now(),
-            user: member?.name || 'You',
-            text: messageInput
-        }]);
+        if (!messageInput.trim() || !socket || !activeStream) return;
+
+        socket.emit('live_message', { 
+            streamId: activeStream.id, 
+            content: messageInput,
+            senderName: member?.name || 'Member'
+        });
+
         setMessageInput('');
     };
 
+    if (loading) {
+        return (
+            <div className="h-full flex items-center justify-center">
+                <Loader2 className="animate-spin text-blue-500" size={32} />
+            </div>
+        );
+    }
+
     return (
-        <div className="h-full max-w-5xl mx-auto flex flex-col md:flex-row gap-4">
-            {/* Left: Video Area */}
-            <div className={`relative flex-1 bg-black rounded-2xl overflow-hidden shadow-2xl ${!isLive ? 'flex items-center justify-center' : ''}`}>
-                <video
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    muted // mute self to avoid feedback
-                    className={`w-full h-full object-cover ${!isLive ? 'hidden' : ''}`}
-                />
-
-                {/* Offline State */}
-                {!isLive && (
-                    <div className="text-center p-8 flex flex-col items-center justify-center h-full">
-                        <div className="w-24 h-24 rounded-full bg-slate-800 mx-auto flex items-center justify-center mb-6 border-4 border-slate-700">
-                            <Cast size={40} className="text-blue-500" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-white mb-2">Start Broadcasting</h2>
-                        <p className="text-slate-400 mb-8 max-w-md mx-auto">Share your moments live with the Pandara Samaja community. Engage with members in real-time.</p>
-                        <button
-                            onClick={startStream}
-                            className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition-transform hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/30"
-                        >
-                            Go Live Now
-                        </button>
-
-                        {activeStreams.length > 0 && (
-                            <div className="mt-8 overflow-hidden rounded-xl border border-slate-700/50 bg-slate-800/50 p-4 w-full max-w-sm">
-                                <h3 className="text-white font-medium mb-3 flex items-center gap-2 justify-center">
-                                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                                    {activeStreams.length} Active Stream(s)
-                                </h3>
-                                <p className="text-slate-400 text-sm">Join active streams (WebRTC integration coming soon)</p>
+        <div className="h-full flex flex-col md:flex-row overflow-hidden relative pb-[70px] md:pb-0">
+            {/* Left: Video Area - STICKY TOP ON MOBILE */}
+            <div className="w-full md:flex-1 bg-black md:relative z-10 shrink-0 border-b border-slate-200 dark:border-slate-800 md:border-none shadow-md">
+                {activeStream ? (
+                    <div className="w-full h-full aspect-video md:aspect-auto">
+                        <ReactPlayer
+                            src={activeStream.stream_url}
+                            width="100%"
+                            height="100%"
+                            playing
+                            controls
+                            className="react-player-wrapper object-contain"
+                            style={{ position: 'absolute', top: 0, left: 0 }}
+                        />
+                        {/* Live Badge Overlay */}
+                        <div className="absolute top-4 left-4 flex gap-2 pointer-events-none">
+                            <div className="bg-red-600 text-white text-[10px] sm:text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-lg shadow-red-600/30">
+                                <span className="w-2 h-2 bg-white rounded-full animate-pulse shadow-sm" /> LIVE
                             </div>
-                        )}
+                            <div className="bg-black/60 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-lg">
+                                <Users size={14} /> {viewerCount}
+                            </div>
+                        </div>
                     </div>
-                )}
-
-                {/* Live Overlays */}
-                {isLive && (
-                    <>
-                        {/* Top Bar */}
-                        <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 to-transparent flex justify-between items-start">
-                            <div className="flex items-center gap-3">
-                                <div className="bg-red-500 text-white text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-lg shadow-red-500/20">
-                                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" /> LIVE
-                                </div>
-                                <div className="bg-black/50 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                                    <User size={14} /> {viewerCount}
-                                </div>
-                            </div>
-                            <button onClick={stopStream} className="bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-xl backdrop-blur-md transition-colors">
-                                <X size={20} />
-                            </button>
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center p-8">
+                        <div className="w-24 h-24 rounded-full bg-slate-800 flex items-center justify-center mb-6 shadow-2xl relative overflow-hidden">
+                            <div className="absolute inset-0 bg-blue-500/10 animate-pulse"></div>
+                            <Cast size={40} className="text-slate-500 relative z-10" />
                         </div>
-
-                        {/* Bottom Controls */}
-                        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <button onClick={toggleAudio} className={`p-3 rounded-full backdrop-blur-md transition-colors ${micMuted ? 'bg-red-500 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}>
-                                        {micMuted ? <MicOff size={20} /> : <Mic size={20} />}
-                                    </button>
-                                    <button onClick={toggleVideo} className={`p-3 rounded-full backdrop-blur-md transition-colors ${videoMuted ? 'bg-red-500 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}>
-                                        {videoMuted ? <VideoOff size={20} /> : <Video size={20} />}
-                                    </button>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <button className="p-3 rounded-full bg-blue-600 text-white hover:bg-blue-500 transition-colors shadow-lg shadow-blue-500/30">
-                                        <Share2 size={20} />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </>
+                        <h2 className="text-2xl font-bold text-white mb-2">No Active Broadcast</h2>
+                        <p className="text-slate-400 max-w-sm">The community administration has not started a live stream yet. Please check back later.</p>
+                    </div>
                 )}
             </div>
 
             {/* Right: Chat Overlay */}
-            <div className={`w-full md:w-80 flex flex-col bg-slate-800 rounded-2xl border border-slate-700/50 shadow-xl overflow-hidden transition-all ${isLive ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
-                <div className="p-4 border-b border-slate-700/50 bg-slate-900/50">
-                    <h3 className="font-bold text-white flex items-center gap-2">
-                        <MessageSquare size={18} className="text-blue-400" /> Live Chat
+            <div className="flex-1 md:w-[350px] lg:w-[400px] md:flex-none flex flex-col bg-slate-50 dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 overflow-hidden relative pb-16 md:pb-0">
+                <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 z-10 shadow-sm">
+                    <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <MessageSquare size={18} className="text-blue-500" /> Community Chat
                     </h3>
+                    {activeStream && <p className="text-xs text-slate-500 mt-1 truncate font-medium">{activeStream.title}</p>}
                 </div>
 
-                <div className="flex-1 p-4 overflow-y-auto space-y-3">
-                    {chatMessages.map(msg => (
-                        <div key={msg.id} className="text-sm">
-                            <span className="font-semibold text-blue-400 mr-2">{msg.user}:</span>
-                            <span className="text-slate-200">{msg.text}</span>
+                <div className="flex-1 p-4 overflow-y-auto space-y-3 pb-8 scroll-smooth">
+                    {(!activeStream || chatMessages.length === 0) ? (
+                        <div className="h-full flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm text-center px-6">
+                            {activeStream ? "Be the first to send a message!" : "Chat is paused while broadcast is offline."}
                         </div>
-                    ))}
+                    ) : (
+                        chatMessages.map(msg => (
+                            <div key={msg.id} className="text-sm bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-sm shadow-sm border border-slate-100 dark:border-slate-700/50 break-words flex flex-col gap-1">
+                                <span className="font-bold text-blue-600 dark:text-blue-400 text-xs">{msg.user}</span>
+                                <span className="text-slate-700 dark:text-slate-200">{msg.text}</span>
+                            </div>
+                        ))
+                    )}
                     <div ref={chatEndRef} />
                 </div>
 
-                <div className="p-3 border-t border-slate-700/50 bg-slate-900/50">
-                    <form onSubmit={sendMessage} className="relative">
+                {/* Chat Input */}
+                <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 z-20">
+                    <form onSubmit={sendMessage} className="relative flex items-center">
                         <input
                             type="text"
-                            className="w-full bg-slate-800 border border-slate-700 rounded-full py-2 pl-4 pr-10 text-white text-sm focus:outline-none focus:border-blue-500"
-                            placeholder="Type a message..."
+                            className="w-full bg-slate-100 dark:bg-slate-800 border-transparent rounded-full py-3.5 pl-5 pr-14 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all disabled:opacity-50"
+                            placeholder={activeStream ? "Type a message..." : "Chat offline..."}
                             value={messageInput}
                             onChange={e => setMessageInput(e.target.value)}
+                            disabled={!activeStream}
                         />
-                        <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-blue-400 hover:text-white transition-colors">
-                            <Heart size={18} />
+                        <button 
+                            type="submit" 
+                            disabled={!activeStream || !messageInput.trim()}
+                            className="absolute right-2 p-2 text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:shadow-lg transition-all disabled:opacity-50 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed disabled:shadow-none active:scale-95"
+                        >
+                            <Heart size={16} className={messageInput.trim() ? "animate-pulse" : ""} />
                         </button>
                     </form>
                 </div>

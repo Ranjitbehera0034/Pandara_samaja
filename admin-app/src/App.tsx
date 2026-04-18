@@ -24,6 +24,7 @@ import Broadcasts from './pages/Broadcasts';
 import Expenses from './pages/Expenses';
 import Documents from './pages/Documents';
 import Reels from './pages/Reels';
+import LiveStreams from './pages/LiveStreams';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAdminAuth();
@@ -101,6 +102,7 @@ export default function App() {
           <Route path="/expenses" element={<ProtectedRoute><Layout><Expenses /></Layout></ProtectedRoute>} />
           <Route path="/documents" element={<ProtectedRoute><Layout><Documents /></Layout></ProtectedRoute>} />
           <Route path="/reels" element={<ProtectedRoute><Layout><Reels /></Layout></ProtectedRoute>} />
+          <Route path="/live-streams" element={<ProtectedRoute><Layout><LiveStreams /></Layout></ProtectedRoute>} />
         </Routes>
       </Router>
     </AdminAuthProvider>

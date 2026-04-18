@@ -76,7 +76,7 @@ export default function Chat() {
                     (selectedContact && incoming.sender_id === selectedContact.contact_id) ||
                     (selectedContact && incoming.receiver_id === selectedContact.contact_id);
                 if (isRelevant) {
-                    socket.emit('mark_read', { readerId: myId, senderId: incoming.sender_id });
+                    socket.emit('mark_read', { readerId: myId, readerMobile: member?.mobile, senderId: incoming.sender_id, senderMobile: msg.senderMobile });
                     return [...prev, incoming];
                 }
                 return prev;
@@ -96,6 +96,7 @@ export default function Chat() {
                 } else {
                     return [{
                         contact_id: senderId,
+                        contact_mobile: msg.senderMobile,
                         contact_name: incoming.sender_name,
                         contact_avatar: incoming.sender_avatar,
                         ...updatedLast
@@ -133,7 +134,13 @@ export default function Chat() {
                 voiceDuration: duration,
             };
             setMessages(prev => [...prev, voiceMsg]);
-            socket.emit('send_message', { receiverId: selectedContact.contact_id, content: url, type: 'voice' });
+            socket.emit('send_message', { 
+                senderMobile: member?.mobile,
+                receiverId: selectedContact.contact_id, 
+                receiverMobile: selectedContact.contact_mobile,
+                content: url, 
+                type: 'voice' 
+            });
             toast.success(t('chat', 'voiceMessage'));
         }
     });
@@ -157,11 +164,12 @@ export default function Chat() {
         }
     }, []);
 
-    const fetchConversation = useCallback(async (contactId: string) => {
+    const fetchConversation = useCallback(async (contactId: string, contactMobile?: string) => {
         try {
             setMessagesLoading(true);
             const token = localStorage.getItem('portalToken');
-            const res = await fetch(`${PORTAL_API_URL}/chat/conversation/${contactId}`, {
+            const url = `${PORTAL_API_URL}/chat/conversation/${contactId}${contactMobile ? '/' + contactMobile : ''}`;
+            const res = await fetch(url, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (res.ok) {
@@ -179,8 +187,8 @@ export default function Chat() {
 
     useEffect(() => {
         if (selectedContact) {
-            fetchConversation(selectedContact.contact_id);
-            if (socket) socket.emit('mark_read', { readerId: myId, senderId: selectedContact.contact_id });
+            fetchConversation(selectedContact.contact_id, selectedContact.contact_mobile);
+            if (socket) socket.emit('mark_read', { readerId: myId, readerMobile: member?.mobile, senderId: selectedContact.contact_id, senderMobile: selectedContact.contact_mobile });
             setContacts(prev => prev.map(c => c.contact_id === selectedContact.contact_id ? { ...c, unread_count: 0 } : c));
         }
     }, [selectedContact, fetchConversation, socket, myId]);
@@ -202,17 +210,23 @@ export default function Chat() {
         };
         setMessages(prev => [...prev, optimisticMsg]);
         setInputMessage('');
-        socket.emit('send_message', { receiverId: selectedContact.contact_id, content, type: 'text' });
-        socket.emit('typing_stop', { senderId: myId, receiverId: selectedContact.contact_id });
+        socket.emit('send_message', { 
+            senderMobile: member?.mobile,
+            receiverId: selectedContact.contact_id, 
+            receiverMobile: selectedContact.contact_mobile,
+            content, 
+            type: 'text' 
+        });
+        socket.emit('typing_stop', { senderId: myId, senderMobile: member?.mobile, receiverId: selectedContact.contact_id, receiverMobile: selectedContact.contact_mobile });
     };
 
     const handleInputChange = (value: string) => {
         setInputMessage(value);
         if (selectedContact && socket) {
-            socket.emit('typing_start', { senderId: myId, receiverId: selectedContact.contact_id });
+            socket.emit('typing_start', { senderId: myId, senderMobile: member?.mobile, receiverId: selectedContact.contact_id, receiverMobile: selectedContact.contact_mobile });
             if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
             typingTimeoutRef.current = setTimeout(() => {
-                socket.emit('typing_stop', { senderId: myId, receiverId: selectedContact.contact_id });
+                socket.emit('typing_stop', { senderId: myId, senderMobile: member?.mobile, receiverId: selectedContact.contact_id, receiverMobile: selectedContact.contact_mobile });
             }, 2000);
         }
     };
@@ -221,10 +235,9 @@ export default function Chat() {
         setMembersLoading(true);
         try {
             const token = localStorage.getItem('portalToken');
-            const url = new URL(`${PORTAL_API_URL}/members`);
-            url.searchParams.append('hasMobile', 'true');
+            const url = new URL(`${PORTAL_API_URL}/chat/search`);
             if (searchQuery.trim()) {
-                url.searchParams.append('search', searchQuery.trim());
+                url.searchParams.append('q', searchQuery.trim());
             }
             const res = await fetch(url.toString(), { headers: { Authorization: `Bearer ${token}` } });
             if (res.ok) {
@@ -258,6 +271,7 @@ export default function Chat() {
     const startNewChat = (m: MemberOption) => {
         const newContact: ChatContact = {
             contact_id: m.membership_no,
+            contact_mobile: m.mobile,
             contact_name: m.name,
             contact_avatar: m.profile_photo_url,
             last_message: '',

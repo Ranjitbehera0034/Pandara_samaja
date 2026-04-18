@@ -2,6 +2,7 @@
 
 export interface ChatContact {
     contact_id: string;
+    contact_mobile?: string;
     contact_name: string;
     contact_avatar: string | null;
     last_message: string;
@@ -38,6 +39,7 @@ export interface GroupChat {
 
 export interface MemberOption {
     membership_no: string;
+    mobile?: string;
     name: string;
     profile_photo_url: string | null;
     village?: string;
