@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { useTranslation } from 'react-i18next';
-import { LogOut, LayoutDashboard, Users, Heart, Megaphone, ShieldAlert, Calendar, UsersRound, BellRing, Settings, FileClock, Languages, Moon, Sun, X, Shield, Globe, Wallet } from 'lucide-react';
+import { LogOut, LayoutDashboard, Users, Heart, Megaphone, Film, ShieldAlert, Calendar, UsersRound, BellRing, Settings, FileClock, Languages, Moon, Sun, X, Shield, Globe, Wallet } from 'lucide-react';
 
 interface SidebarProps {
     isMobileOpen?: boolean;
@@ -116,6 +116,10 @@ export default function Sidebar({ isMobileOpen = false, setIsMobileOpen }: Sideb
                     <NavLink to="/announcements" className={linkClasses} onClick={handleLinkClick}>
                         <div className="shrink-0 px-2 flex justify-center w-10"><Megaphone size={20} /></div>
                         <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('announcements')}</span>
+                    </NavLink>
+                    <NavLink to="/reels" className={linkClasses} onClick={handleLinkClick}>
+                        <div className="shrink-0 px-2 flex justify-center w-10"><Film size={20} /></div>
+                        <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Reels</span>
                     </NavLink>
                     <NavLink to="/events" className={linkClasses} onClick={handleLinkClick}>
                         <div className="shrink-0 px-2 flex justify-center w-10"><Calendar size={20} /></div>

@@ -3,82 +3,48 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-mo
 import type { PanInfo } from 'framer-motion';
 import {
     Play, Volume2, VolumeX, Heart, MessageSquare,
-    Share2, Bookmark, Music2, X, ChevronUp, ChevronDown
+    Share2, Bookmark, Music2, X, ChevronUp, ChevronDown, Plus, Trash2
 } from 'lucide-react';
+import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+import { toast } from 'sonner';
+import { UploadReelModal } from './UploadReelModal';
 
 interface Reel {
     id: string;
-    authorId: string;
-    authorName: string;
-    authorAvatar?: string;
-    videoUrl: string;
+    author_id: string;
+    author_name: string;
+    author_photo?: string;
+    video_url: string;
     caption: string;
-    musicName?: string;
-    likes: number;
-    comments: number;
-    shares: number;
-    isLiked: boolean;
-    isBookmarked: boolean;
+    music_name?: string;
+    likes_count: number;
+    comments_count: number;
+    shares_count: number;
+    views_count: number;
+    liked_by_me: boolean;
+    isBookmarked?: boolean;
 }
-
-// Mock Reels data
-const SAMPLE_REELS: Reel[] = [
-    {
-        id: 'r1',
-        authorName: 'Sasmita Das',
-        authorId: '103',
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-        caption: 'Beautiful sunset at Puri beach! 🌅 #Odisha #Beach #Sunset',
-        musicName: 'Original Audio',
-        likes: 234,
-        comments: 45,
-        shares: 12,
-        isLiked: false,
-        isBookmarked: false,
-    },
-    {
-        id: 'r2',
-        authorName: 'Rajesh Patel',
-        authorId: '105',
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-        caption: 'Community gathering was amazing! 🎉 #PandaraSamaja #Community',
-        musicName: 'Festival Vibes',
-        likes: 412,
-        comments: 89,
-        shares: 28,
-        isLiked: true,
-        isBookmarked: false,
-    },
-    {
-        id: 'r3',
-        authorName: 'Amit Kumar',
-        authorId: '107',
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-        caption: 'Traditional dance performance 💃 #Culture #Tradition',
-        musicName: 'Folk Music',
-        likes: 567,
-        comments: 123,
-        shares: 45,
-        isLiked: false,
-        isBookmarked: true,
-    },
-];
 
 // ─── Single Reel Item ────────────────────────────────
 function ReelItem({
-    reel, isActive, onLike, onBookmark
+    reel, isActive, onLike, onBookmark, onDelete, onShare
 }: {
     reel: Reel;
     isActive: boolean;
     onLike: (id: string) => void;
     onBookmark: (id: string) => void;
+    onDelete?: (id: string) => void;
+    onShare: (id: string) => void;
 }) {
+    const { member } = useAuth();
     const videoRef = useRef<HTMLVideoElement>(null);
     const [playing, setPlaying] = useState(false);
     const [muted, setMuted] = useState(true);
-    const [liked, setLiked] = useState(reel.isLiked);
-    const [likeCount, setLikeCount] = useState(reel.likes);
-    const [bookmarked, setBookmarked] = useState(reel.isBookmarked);
+    const [liked, setLiked] = useState(reel.liked_by_me);
+    const [likeCount, setLikeCount] = useState(reel.likes_count);
+    const [shareCount, setShareCount] = useState(reel.shares_count);
+    const [bookmarked, setBookmarked] = useState(!!reel.isBookmarked);
     const [showHeart, setShowHeart] = useState(false);
 
     useEffect(() => {
@@ -123,12 +89,30 @@ function ReelItem({
         onBookmark(reel.id);
     };
 
+    const handleShare = () => {
+        onShare(reel.id);
+        setShareCount(prev => prev + 1);
+        // Simple share feedback
+        if (navigator.share) {
+            navigator.share({
+                title: 'Pandara Samaja Reel',
+                text: reel.caption,
+                url: window.location.href,
+            }).catch(() => {});
+        } else {
+            toast.info('Link copied to clipboard');
+            navigator.clipboard.writeText(window.location.href);
+        }
+    };
+
+    const isAuthor = member?.membership_no === reel.author_id;
+
     return (
         <div className="relative w-full h-full bg-black snap-start snap-always">
             {/* Video */}
             <video
                 ref={videoRef}
-                src={reel.videoUrl}
+                src={reel.video_url}
                 loop
                 muted={muted}
                 playsInline
@@ -172,10 +156,10 @@ function ReelItem({
                 {/* Author avatar */}
                 <div className="relative mb-2">
                     <div className="w-11 h-11 rounded-full border-2 border-white bg-slate-700 flex items-center justify-center overflow-hidden">
-                        {reel.authorAvatar ? (
-                            <img src={reel.authorAvatar} className="w-full h-full object-cover" />
+                        {reel.author_photo ? (
+                            <img src={reel.author_photo} className="w-full h-full object-cover" />
                         ) : (
-                            <span className="text-white font-bold text-sm">{(reel.authorName || '?')[0].toUpperCase()}</span>
+                            <span className="text-white font-bold text-sm">{(reel.author_name || '?')[0].toUpperCase()}</span>
                         )}
                     </div>
                     <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-blue-500 rounded-full w-5 h-5 flex items-center justify-center text-white text-xs font-bold border border-black">
@@ -198,13 +182,13 @@ function ReelItem({
                 {/* Comments */}
                 <button className="flex flex-col items-center gap-0.5">
                     <MessageSquare size={26} className="text-white" />
-                    <span className="text-white text-[11px] font-medium">{reel.comments}</span>
+                    <span className="text-white text-[11px] font-medium">{reel.comments_count}</span>
                 </button>
 
                 {/* Share */}
-                <button className="flex flex-col items-center gap-0.5">
+                <button onClick={handleShare} className="flex flex-col items-center gap-0.5">
                     <Share2 size={26} className="text-white" />
-                    <span className="text-white text-[11px] font-medium">{reel.shares}</span>
+                    <span className="text-white text-[11px] font-medium">{shareCount}</span>
                 </button>
 
                 {/* Bookmark */}
@@ -227,12 +211,19 @@ function ReelItem({
 
             {/* Bottom overlay - author + caption */}
             <div className="absolute bottom-4 left-4 right-16 z-20">
-                <h3 className="font-bold text-white text-sm mb-1 drop-shadow-lg">{reel.authorName}</h3>
+                <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-bold text-white text-sm drop-shadow-lg">{reel.author_name}</h3>
+                    {isAuthor && onDelete && (
+                        <button onClick={() => onDelete(reel.id)} className="text-white/50 hover:text-red-400">
+                            <Trash2 size={14} />
+                        </button>
+                    )}
+                </div>
                 <p className="text-white/90 text-sm leading-snug drop-shadow-lg mb-2">{reel.caption}</p>
-                {reel.musicName && (
-                    <div className="flex items-center gap-2 text-white/70 text-xs">
-                        <Music2 size={12} />
-                        <span className="truncate">{reel.musicName}</span>
+                {reel.music_name && (
+                    <div className="flex items-center gap-2 text-white/70 text-xs text-balance">
+                        <Music2 size={12} className="shrink-0" />
+                        <span className="truncate">{reel.music_name}</span>
                     </div>
                 )}
             </div>
@@ -254,10 +245,47 @@ interface ReelsViewerProps {
 
 export function ReelsViewer({ isOpen, onClose }: ReelsViewerProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [reels] = useState<Reel[]>(SAMPLE_REELS);
+    const [reels, setReels] = useState<Reel[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [showUpload, setShowUpload] = useState(false);
+    const [viewHeight, setViewHeight] = useState(window.innerHeight);
     const containerRef = useRef<HTMLDivElement>(null);
     const y = useMotionValue(0);
     const opacity = useTransform(y, [-100, 0, 100], [0.5, 1, 0.5]);
+
+    useEffect(() => {
+        const handleResize = () => setViewHeight(window.innerHeight);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchReels();
+        }
+    }, [isOpen]);
+
+    // Record view when currentIndex changes
+    useEffect(() => {
+        if (reels.length > 0 && reels[currentIndex]) {
+            const timer = setTimeout(() => {
+                api.post(`/reels/${reels[currentIndex].id}/view`).catch(() => {});
+            }, 2000); // 2 seconds threshold for a "view"
+            return () => clearTimeout(timer);
+        }
+    }, [currentIndex, reels]);
+
+    const fetchReels = async () => {
+        try {
+            setLoading(true);
+            const { data } = await api.get('/reels');
+            setReels(data.reels);
+        } catch (error) {
+            toast.error('Failed to load reels');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const goToNext = useCallback(() => {
         if (currentIndex < reels.length - 1) {
@@ -276,12 +304,38 @@ export function ReelsViewer({ isOpen, onClose }: ReelsViewerProps) {
         if (info.offset.y > 50) goToPrev();
     };
 
-    const handleLike = (_id: string) => {
-        // Will wire to backend
+    const handleLike = async (id: string) => {
+        try {
+            await api.post(`/reels/${id}/like`);
+        } catch (error) {
+            console.error('Like error:', error);
+        }
     };
 
     const handleBookmark = (_id: string) => {
-        // Will wire to backend
+        toast.success('Saved to bookmarks');
+    };
+
+    const handleShare = async (id: string) => {
+        try {
+            await api.post(`/reels/${id}/share`);
+        } catch (error) {
+            console.error('Share record error:', error);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!window.confirm('Are you sure you want to delete this reel?')) return;
+        try {
+            await api.delete(`/reels/${id}`);
+            setReels(prev => prev.filter(r => r.id !== id));
+            if (currentIndex >= reels.length - 1) {
+                setCurrentIndex(Math.max(0, reels.length - 2));
+            }
+            toast.success('Reel deleted');
+        } catch (error) {
+            toast.error('Failed to delete reel');
+        }
     };
 
     // Keyboard navigation
@@ -305,14 +359,22 @@ export function ReelsViewer({ isOpen, onClose }: ReelsViewerProps) {
                     exit={{ opacity: 0 }}
                     className="fixed inset-0 z-[200] bg-black"
                 >
-                    {/* Header */}
-                    <div className="absolute top-0 left-0 right-0 h-14 flex items-center justify-between px-4 z-50">
-                        <h2 className="text-white font-bold text-lg">Reels</h2>
+                    <div className="absolute top-0 left-0 right-0 h-14 flex items-center justify-between px-4 z-50 bg-gradient-to-b from-black/60 to-transparent">
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={onClose}
+                                className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                            >
+                                <X size={22} />
+                            </button>
+                            <h2 className="text-white font-bold text-lg">Reels</h2>
+                        </div>
                         <button
-                            onClick={onClose}
-                            className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                            onClick={() => setShowUpload(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-full shadow-lg transition-all"
                         >
-                            <X size={22} />
+                            <Plus size={18} />
+                            <span>Create</span>
                         </button>
                     </div>
 
@@ -344,20 +406,43 @@ export function ReelsViewer({ isOpen, onClose }: ReelsViewerProps) {
                         style={{ y, opacity }}
                     >
                         <motion.div
-                            animate={{ y: -currentIndex * window.innerHeight }}
+                            animate={{ y: -currentIndex * viewHeight }}
                             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
                             className="w-full"
                         >
-                            {reels.map((reel, index) => (
-                                <div key={reel.id} style={{ height: window.innerHeight }} className="w-full">
-                                    <ReelItem
-                                        reel={reel}
-                                        isActive={index === currentIndex}
-                                        onLike={handleLike}
-                                        onBookmark={handleBookmark}
-                                    />
+                            {loading ? (
+                                <div className="w-full h-full flex flex-col items-center justify-center gap-4" style={{ height: viewHeight }}>
+                                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                    <p className="text-white/60 text-sm">Loading reels...</p>
                                 </div>
-                            ))}
+                            ) : reels.length === 0 ? (
+                                <div className="w-full h-full flex flex-col items-center justify-center gap-4 px-8 text-center" style={{ height: viewHeight }}>
+                                    <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mb-2">
+                                        <Music2 size={40} className="text-white/20" />
+                                    </div>
+                                    <h3 className="text-white font-bold text-xl">No reels yet</h3>
+                                    <p className="text-white/60">Be the first to share a moment with the community!</p>
+                                    <button 
+                                        onClick={() => setShowUpload(true)}
+                                        className="mt-4 px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:scale-105 transition-transform"
+                                    >
+                                        Create Reel
+                                    </button>
+                                </div>
+                            ) : (
+                                reels.map((reel, index) => (
+                                    <div key={reel.id} style={{ height: viewHeight }} className="w-full">
+                                        <ReelItem
+                                            reel={reel}
+                                            isActive={index === currentIndex}
+                                            onLike={handleLike}
+                                            onBookmark={handleBookmark}
+                                            onShare={handleShare}
+                                            onDelete={handleDelete}
+                                        />
+                                    </div>
+                                ))
+                            )}
                         </motion.div>
                     </motion.div>
 
@@ -370,6 +455,15 @@ export function ReelsViewer({ isOpen, onClose }: ReelsViewerProps) {
                             />
                         ))}
                     </div>
+
+                    <UploadReelModal 
+                        isOpen={showUpload} 
+                        onClose={() => setShowUpload(false)} 
+                        onSuccess={() => {
+                            setShowUpload(false);
+                            fetchReels();
+                        }}
+                    />
                 </motion.div>
             )}
         </AnimatePresence>

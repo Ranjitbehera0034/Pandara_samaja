@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import {
     MessageSquare, Share2, MoreHorizontal, Bookmark,
     Flag, Trash2, Edit3, Copy, EyeOff, X, Send,
-    ThumbsUp, Play, Pause, Volume2, VolumeX, BadgeCheck
+    ThumbsUp, BadgeCheck
 } from 'lucide-react';
+import { VideoPlayer } from './VideoPlayer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
@@ -65,57 +66,7 @@ function RichContent({ text }: { text: string }) {
     );
 }
 
-// ─── Video Player ────────────────────────────────────
-function VideoPlayer({ src }: { src: string }) {
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const [playing, setPlaying] = useState(false);
-    const [muted, setMuted] = useState(true);
-
-    const togglePlay = () => {
-        if (!videoRef.current) return;
-        if (playing) {
-            videoRef.current.pause();
-        } else {
-            videoRef.current.play();
-        }
-        setPlaying(!playing);
-    };
-
-    return (
-        <div className="relative group bg-black rounded-xl overflow-hidden">
-            <video
-                ref={videoRef}
-                src={src}
-                muted={muted}
-                loop
-                playsInline
-                className="w-full max-h-[500px] object-contain"
-                onClick={togglePlay}
-                onEnded={() => setPlaying(false)}
-            />
-            {/* Play/Pause Overlay */}
-            <div
-                className={`absolute inset-0 flex items-center justify-center transition-opacity ${playing ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'} cursor-pointer`}
-                onClick={togglePlay}
-            >
-                <div className="w-14 h-14 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl">
-                    {playing ? (
-                        <Pause size={24} className="text-white" />
-                    ) : (
-                        <Play size={24} className="text-white ml-1" fill="white" />
-                    )}
-                </div>
-            </div>
-            {/* Mute Toggle */}
-            <button
-                onClick={(e) => { e.stopPropagation(); setMuted(!muted); }}
-                className="absolute bottom-3 right-3 p-2 bg-black/50 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-                {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-            </button>
-        </div>
-    );
-}
+// Premium VideoPlayer is now imported from a separate file
 
 // ─── Nested Comment Component ────────────────────────
 function CommentItem({
@@ -445,8 +396,28 @@ export function PostCard({
         }
     };
 
+    // Helper to detect if a URL is a video
+    const isVideoUrl = (url: string) => {
+        if (!url) return false;
+        const lowercaseUrl = url.toLowerCase();
+        // Check standard extensions
+        if (lowercaseUrl.match(/\.(mp4|webm|mov|ogg|qt)$/)) return true;
+        // Check if it's our proxy URL with a video extension in the path parameter
+        if (lowercaseUrl.includes('/media?path=')) {
+            const pathParam = lowercaseUrl.split('path=')[1];
+            return pathParam && pathParam.match(/\.(mp4|webm|mov|ogg|qt)$/i);
+        }
+        return false;
+    };
+
     // Get media items — support both legacy `images` and new `media`
-    const mediaItems: MediaItem[] = post.media || (post.images?.map(url => ({ url, type: 'image' as const })) || []);
+    // Convert string array to MediaItem array with proper type detection
+    const mediaItems: MediaItem[] = post.media?.length 
+        ? post.media 
+        : (post.images?.map(url => ({ 
+            url, 
+            type: isVideoUrl(url) ? 'video' as const : 'image' as const 
+          })) || []);
 
     // Get top reactions for display
     const topReactions = REACTIONS.filter(r => localReactions[r.type] > 0).sort((a, b) => localReactions[b.type] - localReactions[a.type]).slice(0, 3);

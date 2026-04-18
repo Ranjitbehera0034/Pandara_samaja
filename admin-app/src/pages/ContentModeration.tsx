@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Shield, AlertTriangle, CheckCircle, Trash2, Globe, Clock } from 'lucide-react';
+import { VideoPlayer } from '../components/common/VideoPlayer';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -113,6 +114,17 @@ export default function ContentModeration() {
         } catch (error) {
             toast.error('Failed to delete post');
         }
+    };
+
+    const isVideoUrl = (url: string) => {
+        if (!url) return false;
+        const lowercaseUrl = url.toLowerCase();
+        if (lowercaseUrl.match(/\.(mp4|webm|mov|ogg|qt)$/)) return true;
+        if (lowercaseUrl.includes('/media?path=')) {
+            const pathParam = lowercaseUrl.split('path=')[1];
+            return pathParam && pathParam.match(/\.(mp4|webm|mov|ogg|qt)$/i);
+        }
+        return false;
     };
 
     return (
@@ -274,9 +286,15 @@ export default function ContentModeration() {
                                     {item.text_content}
                                 </div>
                                 {(item.images && item.images.length > 0) && (
-                                    <div className={`grid gap-2 mt-4 ${item.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                                    <div className={`grid gap-3 mt-4 ${item.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                                         {item.images.map((img: string, i: number) => (
-                                            <img key={i} src={img} alt="" className="rounded-xl border border-slate-200 max-h-64 object-cover w-full" />
+                                            <div key={i} className="relative group">
+                                                {isVideoUrl(img) ? (
+                                                    <VideoPlayer src={img} className="max-h-80 w-full" />
+                                                ) : (
+                                                    <img src={img} alt="" className="rounded-xl border border-slate-200 max-h-80 object-cover w-full transition-transform hover:scale-[1.02]" />
+                                                )}
+                                            </div>
                                         ))}
                                     </div>
                                 )}
