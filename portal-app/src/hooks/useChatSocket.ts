@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { SOCKET_URL } from '../config/apiConfig';
 
-export const useChatSocket = (myId: string, member: any) => {
+export const useChatSocket = (myId: string | undefined, member: any) => {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());

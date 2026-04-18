@@ -11,8 +11,20 @@ export default function Login() {
     const [mfaToken, setMfaToken] = useState('');
     const [qrCodeData, setQrCodeData] = useState('');
     const [currentStep, setCurrentStep] = useState<'login' | 'mfa_verify' | 'mfa_setup'>('login');
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
     const { login } = useAdminAuth();
     const navigate = useNavigate();
+
+    React.useEffect(() => {
+        if (currentStep === 'login' && (window as any).turnstile) {
+            (window as any).turnstile.render("#turnstile-container", {
+                sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA", // Placeholder test key
+                callback: (token: string) => {
+                    setCaptchaToken(token);
+                },
+            });
+        }
+    }, [currentStep]);
 
     const handlePortalSso = (resData: any) => {
         if (resData.portalData) {
@@ -24,8 +36,12 @@ export default function Login() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!captchaToken) {
+            toast.error("Please complete the CAPTCHA");
+            return;
+        }
         try {
-            const res = await api.post('/auth/login', { username, password });
+            const res = await api.post('/auth/login', { username, password, captchaToken });
             if (res.data.success) {
                 if (res.data.mfa_setup_required) {
                     setMfaToken(res.data.token);
@@ -97,6 +113,7 @@ export default function Login() {
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 required
+                                autoComplete="username"
                                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 placeholder="Enter username"
                             />
@@ -108,9 +125,13 @@ export default function Login() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
+                                autoComplete="current-password"
                                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 placeholder="Enter password"
                             />
+                        </div>
+                        <div className="flex justify-center my-4">
+                            <div id="turnstile-container"></div>
                         </div>
                         <button
                             type="submit"
@@ -135,6 +156,7 @@ export default function Login() {
                                 onChange={(e) => setMfaCode(e.target.value)}
                                 required
                                 maxLength={6}
+                                autoComplete="one-time-code"
                                 className="w-full px-4 py-3 text-center tracking-widest text-lg rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 placeholder="000000"
                             />

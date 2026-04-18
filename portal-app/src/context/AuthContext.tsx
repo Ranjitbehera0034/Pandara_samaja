@@ -10,7 +10,7 @@ interface AuthContextType {
     user: LoggedUser | null;
     isLoading: boolean;
     sendFirebaseOtp: (mobile: string, recaptchaContainerId: string) => Promise<void>;
-    verifyFirebaseOtp: (otp: string, membershipNo: string, mobile: string) => Promise<void>;
+    verifyFirebaseOtp: (otp: string, membershipNo: string, mobile: string, captchaToken: string | null) => Promise<void>;
     logout: () => void;
 }
 
@@ -98,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const verifyFirebaseOtp = async (otp: string, membershipNo: string, mobile: string) => {
+    const verifyFirebaseOtp = async (otp: string, membershipNo: string, mobile: string, captchaToken: string | null) => {
         if (!confirmationResult) {
             toast.error("Please request OTP first");
             return;
@@ -116,7 +116,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 body: JSON.stringify({
                     idToken,
                     membership_no: membershipNo,
-                    mobile
+                    mobile,
+                    captchaToken
                 }),
             });
 

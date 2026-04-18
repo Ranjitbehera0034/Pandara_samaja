@@ -13,8 +13,21 @@ export default function Login() {
     const [membershipNo, setMembershipNo] = useState("");
     const [mobile, setMobile] = useState("");
     const [otp, setOtp] = useState("");
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        // Initialize Turnstile if on step 1 (where the widget is located)
+        if (step === 1 && (window as any).turnstile) {
+            (window as any).turnstile.render("#turnstile-container", {
+                sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA", // Placeholder test key
+                callback: (token: string) => {
+                    setCaptchaToken(token);
+                },
+            });
+        }
+    }, [step]);
 
     // Lookup Modal State
     const [showLookup, setShowLookup] = useState(false);
@@ -83,6 +96,11 @@ export default function Login() {
             return;
         }
 
+        if (!captchaToken) {
+            toast.error("Please complete the CAPTCHA");
+            return;
+        }
+
         setLoading(true);
         try {
             await sendFirebaseOtp(mobile, 'recaptcha-container');
@@ -103,7 +121,7 @@ export default function Login() {
 
         setLoading(true);
         try {
-            await verifyFirebaseOtp(otp, membershipNo, mobile);
+            await verifyFirebaseOtp(otp, membershipNo, mobile, captchaToken);
             // navigate will be handled by useEffect redirect
         } catch (err) {
             // Handled by context
@@ -151,6 +169,7 @@ export default function Login() {
                                     value={membershipNo}
                                     onChange={(e) => setMembershipNo(e.target.value)}
                                     placeholder={t('login', 'membershipPlaceholder')}
+                                    autoComplete="username"
                                     className="w-full px-5 py-3.5 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-sm"
                                 />
                             </div>
@@ -165,6 +184,7 @@ export default function Login() {
                                     value={mobile}
                                     onChange={(e) => setMobile(e.target.value)}
                                     placeholder={t('login', 'mobilePlaceholder')}
+                                    autoComplete="tel"
                                     className="w-full px-5 py-3.5 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-sm"
                                 />
                             </div>
@@ -183,6 +203,11 @@ export default function Login() {
                                     </>
                                 )}
                             </button>
+                            
+                            <div className="flex justify-center mt-4">
+                                <div id="turnstile-container"></div>
+                            </div>
+
                             <div id="recaptcha-container"></div>
                         </form>
                     ) : (

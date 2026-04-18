@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /portal/
+Disallow: /assets/
+Disallow: /admin-app/
+Disallow: /portal-app/
+Disallow: /tmp/
+Disallow: /backup/
+
+Sitemap: https://nikhilaodishapandarasamaja.in/sitemap.xml

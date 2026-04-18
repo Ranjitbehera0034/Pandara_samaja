@@ -332,27 +332,35 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
                             <button onClick={toggleMute} className="text-white hover:text-blue-400 transition-colors p-1 min-w-[32px] min-h-[32px] flex items-center justify-center">
                                 {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
                             </button>
-                            <div 
-                                className={`overflow-hidden transition-all duration-300 ease-in-out ${showVolumeSlider ? 'w-20 opacity-100' : 'w-0 opacity-0 sm:group-hover/volume:w-20 sm:group-hover/volume:opacity-100'}`}
-                                onMouseEnter={() => {
-                                    if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
-                                }}
-                                onMouseLeave={() => {
-                                    volumeTimeoutRef.current = setTimeout(() => setShowVolumeSlider(false), 2000);
-                                }}
-                            >
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="1"
-                                    step="0.05"
-                                    value={isMuted ? 0 : volume}
-                                    onChange={handleVolumeChange}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="w-20 h-1.5 bg-white/30 rounded-full appearance-none cursor-pointer accent-blue-500"
-                                    style={{ WebkitAppearance: 'none', touchAction: 'manipulation' }}
-                                />
-                            </div>
+                            {showVolumeSlider && (
+                                <div 
+                                    className="flex items-center w-20 animate-in fade-in slide-in-from-left-2 duration-200"
+                                    onMouseEnter={() => {
+                                        if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
+                                    }}
+                                    onMouseLeave={() => {
+                                        volumeTimeoutRef.current = setTimeout(() => setShowVolumeSlider(false), 2000);
+                                    }}
+                                    onTouchStart={() => {
+                                        if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
+                                    }}
+                                    onTouchEnd={() => {
+                                        volumeTimeoutRef.current = setTimeout(() => setShowVolumeSlider(false), 4000);
+                                    }}
+                                >
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="1"
+                                        step="0.05"
+                                        value={isMuted ? 0 : volume}
+                                        onChange={handleVolumeChange}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="w-full h-1.5 bg-white/30 rounded-full appearance-none cursor-pointer accent-blue-500"
+                                        style={{ touchAction: 'none' }}
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         <div className="text-white text-[10px] sm:text-sm font-medium tabular-nums whitespace-nowrap">

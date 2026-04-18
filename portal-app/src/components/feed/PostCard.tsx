@@ -385,32 +385,39 @@ export function PostCard({
 
     const handleShare = async () => {
         const shareUrl = `${window.location.origin}${window.location.pathname}#/`;
-        const shareData = {
-            title: `Post by ${post.authorName}`,
-            text: post.content.substring(0, 100),
-            url: shareUrl,
-        };
 
+        let shared = false;
+
+        // Try native share dialog first (mobile)
         if (navigator.share) {
             try {
-                await navigator.share(shareData);
-                // Only count if user completed the share (didn't cancel)
-                if (onShare) onShare(post.id);
+                await navigator.share({
+                    title: `Post by ${post.authorName}`,
+                    text: post.content.substring(0, 100),
+                    url: shareUrl,
+                });
+                shared = true;
             } catch (err: any) {
-                // User cancelled the share dialog — don't count
-                if (err.name !== 'AbortError') {
-                    console.error('Share failed:', err);
-                }
+                // AbortError = user cancelled, don't count or fallback
+                if (err.name === 'AbortError') return;
+                // Any other error (InvalidStateError etc.) — fall through to clipboard
             }
-        } else {
-            // Fallback: copy link to clipboard
+        }
+
+        // Fallback: copy link to clipboard
+        if (!shared) {
             try {
                 await navigator.clipboard.writeText(shareUrl);
                 toast.success('Link copied to clipboard!');
-                if (onShare) onShare(post.id);
+                shared = true;
             } catch {
                 toast.error('Failed to copy link');
             }
+        }
+
+        // Only record share if user actually completed it
+        if (shared && onShare) {
+            onShare(post.id);
         }
     };
 
