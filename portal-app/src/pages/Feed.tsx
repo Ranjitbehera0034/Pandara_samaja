@@ -169,7 +169,7 @@ export default function Feed() {
                     timestamp: p.created_at,
                     isLiked: p.liked_by_me || false,
                     isBookmarked: false,
-                    shareCount: 0
+                    shareCount: Number(p.share_count) || 0
                 }));
                 allPosts = [...allPosts, ...mappedPosts];
             }
@@ -483,10 +483,24 @@ export default function Feed() {
         ));
     };
 
-    const handleSharePost = (id: string) => {
+    const handleSharePost = async (id: string) => {
+        // Optimistic update
         setPosts(posts.map(p =>
             p.id === id ? { ...p, shareCount: (p.shareCount || 0) + 1 } : p
         ));
+        try {
+            const token = getToken();
+            const response = await fetch(`${PORTAL_API_URL}/posts/${id}/share`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (data.success) {
+                setPosts(prev => prev.map(p =>
+                    p.id === id ? { ...p, shareCount: data.share_count } : p
+                ));
+            }
+        } catch { /* keep optimistic update */ }
     };
 
     // ─── Status Updates ─────────────────────────
