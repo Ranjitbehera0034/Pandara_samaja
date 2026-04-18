@@ -17,7 +17,7 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
     const containerRef = useRef<HTMLDivElement>(null);
     
     const [isPlaying, setIsPlaying] = useState(false);
-    const [isMuted, setIsMuted] = useState(autoPlayEnabled); // Default unmuted unless auto-playing
+    const [isMuted, setIsMuted] = useState(autoPlayEnabled);
     const [progress, setProgress] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -28,8 +28,10 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
     const [playbackRate, setPlaybackRate] = useState(1);
     const [showRateMenu, setShowRateMenu] = useState(false);
     const [bufferProgress, setBufferProgress] = useState(0);
+    const [showVolumeSlider, setShowVolumeSlider] = useState(false);
 
     const controlsTimeoutRef = useRef<number | null>(null);
+    const volumeTimeoutRef = useRef<number | null>(null);
 
     // Auto-hide controls after 3 seconds of inactivity
     const resetControlsTimeout = useCallback(() => {
@@ -58,6 +60,14 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
             videoRef.current.load();
         }
     }, [src]);
+
+    // Sync volume to video element whenever volume or muted state changes
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.volume = volume;
+            videoRef.current.muted = isMuted;
+        }
+    }, [volume, isMuted]);
 
     // Intersection Observer for auto-play/pause
     useEffect(() => {
@@ -101,34 +111,45 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
     const toggleMute = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (!videoRef.current) return;
-        videoRef.current.muted = !isMuted;
-        setIsMuted(!isMuted);
+        
+        if (isMuted) {
+            // Unmuting - restore previous volume (or default to 1)
+            const newVol = volume === 0 ? 1 : volume;
+            setVolume(newVol);
+            setIsMuted(false);
+        } else {
+            setIsMuted(true);
+        }
+        
+        // Toggle volume slider visibility on mobile (click-based instead of hover)
+        setShowVolumeSlider(prev => !prev);
+        if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
+        volumeTimeoutRef.current = setTimeout(() => setShowVolumeSlider(false), 4000);
     };
 
     const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        e.stopPropagation();
         const val = parseFloat(e.target.value);
         setVolume(val);
-        if (videoRef.current) {
-            videoRef.current.volume = val;
-            videoRef.current.muted = val === 0;
-            setIsMuted(val === 0);
-        }
+        setIsMuted(val === 0);
+        
+        // Keep slider visible while interacting
+        if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
+        volumeTimeoutRef.current = setTimeout(() => setShowVolumeSlider(false), 4000);
     };
 
     const handleProgress = () => {
         if (!videoRef.current) return;
         
-        // Main playback progress
         const currentProgress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
         setProgress(currentProgress);
         setCurrentTime(videoRef.current.currentTime);
 
-        // Buffering/Chunking progress
         if (videoRef.current.buffered.length > 0) {
             const bufferedEnd = videoRef.current.buffered.end(videoRef.current.buffered.length - 1);
-            const duration = videoRef.current.duration;
-            if (duration > 0) {
-                setBufferProgress((bufferedEnd / duration) * 100);
+            const dur = videoRef.current.duration;
+            if (dur > 0) {
+                setBufferProgress((bufferedEnd / dur) * 100);
             }
         }
     };
@@ -172,10 +193,8 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
         
         const x = e.clientX - rect.left;
         if (x < rect.width / 3) {
-            // Left side double tap
             if (videoRef.current) videoRef.current.currentTime -= 10;
         } else if (x > (rect.width * 2) / 3) {
-            // Right side double tap
             if (videoRef.current) videoRef.current.currentTime += 10;
         } else {
             togglePlay();
@@ -195,10 +214,11 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
     return (
         <div 
             ref={containerRef}
-            className={`relative group bg-black rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 ${className}`}
+            className={`relative group bg-black rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 aspect-video ${className}`}
             onMouseEnter={() => { setShowControls(true); }}
-            onMouseLeave={() => { if (isPlaying) setShowControls(false); }}
+            onMouseLeave={() => { if (isPlaying) setShowControls(false); setShowVolumeSlider(false); }}
             onMouseMove={resetControlsTimeout}
+            onClick={resetControlsTimeout}
         >
             <video
                 ref={videoRef}
@@ -214,12 +234,24 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
                 onLoadedMetadata={() => { 
                     setDuration(videoRef.current?.duration || 0); 
                     setCurrentTime(videoRef.current?.currentTime || 0);
-                    setIsLoading(false); 
+                    setIsLoading(false);
+                    // Ensure volume is synced after metadata loads
+                    if (videoRef.current) {
+                        videoRef.current.volume = volume;
+                        videoRef.current.muted = isMuted;
+                    }
                 }}
                 onWaiting={() => setIsLoading(true)}
                 onPlaying={() => setIsLoading(false)}
                 onClick={togglePlay}
                 onDoubleClick={handleDoubleTap}
+                onVolumeChange={() => {
+                    // Sync React state if native controls change volume
+                    if (videoRef.current) {
+                        setVolume(videoRef.current.volume);
+                        setIsMuted(videoRef.current.muted);
+                    }
+                }}
             />
 
             {/* Premium Buffering Indicator */}
@@ -236,7 +268,7 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
                 )}
             </AnimatePresence>
 
-            {/* Play/Pause Large Center Icon for Visual Feedback */}
+            {/* Play/Pause Large Center Icon */}
             <AnimatePresence>
                 {!isPlaying && !isLoading && (
                     <motion.div 
@@ -245,30 +277,30 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
                         exit={{ opacity: 0, scale: 0.8 }}
                         className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
                     >
-                        <div className="w-20 h-20 bg-blue-600/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-2xl">
-                            <Play size={40} fill="white" className="text-white ml-2" />
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-600/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-2xl">
+                            <Play size={32} fill="white" className="text-white ml-1 sm:ml-2" />
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Gradient Overlay for Controls */}
-            <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 transition-opacity duration-500 ${showControls || !isPlaying ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} />
+            {/* Gradient Overlay */}
+            <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 transition-opacity duration-500 ${showControls || !isPlaying ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} />
 
             {/* Bottom Controls Bar */}
             <motion.div 
                 animate={{ y: showControls || !isPlaying ? 0 : 20, opacity: showControls || !isPlaying ? 1 : 0 }}
                 transition={{ duration: 0.3 }}
-                className="absolute bottom-0 left-0 right-0 p-4 z-20"
+                className="absolute bottom-0 left-0 right-0 p-2 sm:p-4 z-20"
             >
                 {/* Progress Bar */}
-                <div className="relative w-full h-1.5 bg-white/10 rounded-full mb-4 group/progress cursor-pointer">
-                    {/* Buffered / Chunked Bar */}
+                <div className="relative w-full h-2 sm:h-1.5 bg-white/10 rounded-full mb-2 sm:mb-4 group/progress cursor-pointer">
+                    {/* Buffered Bar */}
                     <div 
                         className="absolute top-0 left-0 h-full bg-white/20 rounded-full z-10 transition-all duration-300" 
                         style={{ width: `${bufferProgress}%` }}
                     />
-                    {/* Playback Progress Bar */}
+                    {/* Playback Progress */}
                     <div 
                         className="absolute top-0 left-0 h-full bg-blue-500 rounded-full z-20" 
                         style={{ width: `${progress}%` }}
@@ -279,44 +311,58 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
                         max="100"
                         value={progress}
                         onChange={handleSeek}
-                        className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-20"
+                        className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-30"
+                        style={{ WebkitAppearance: 'none', touchAction: 'manipulation' }}
                     />
-                    {/* Progress handle (visible on hover) */}
+                    {/* Progress handle */}
                     <div 
                         className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg border-2 border-blue-500 z-30 transition-opacity opacity-0 group-hover/progress:opacity-100 pointer-events-none"
                         style={{ left: `${progress}%`, marginLeft: '-8px' }}
                     />
                 </div>
 
-                <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                        <button onClick={togglePlay} className="text-white hover:text-blue-400 transition-colors">
-                            {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
+                <div className="flex items-center justify-between gap-2 sm:gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        <button onClick={togglePlay} className="text-white hover:text-blue-400 transition-colors p-1 min-w-[32px] min-h-[32px] flex items-center justify-center">
+                            {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
                         </button>
                         
-                        <div className="flex items-center gap-2 group/volume relative">
-                            <button onClick={toggleMute} className="text-white hover:text-blue-400 transition-colors">
-                                {isMuted || volume === 0 ? <VolumeX size={22} /> : <Volume2 size={22} />}
+                        {/* Volume Control - click-based toggle for mobile */}
+                        <div className="flex items-center gap-1 relative">
+                            <button onClick={toggleMute} className="text-white hover:text-blue-400 transition-colors p-1 min-w-[32px] min-h-[32px] flex items-center justify-center">
+                                {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
                             </button>
-                            <input
-                                type="range"
-                                min="0"
-                                max="1"
-                                step="0.05"
-                                value={isMuted ? 0 : volume}
-                                onChange={handleVolumeChange}
-                                className="w-0 group-hover/volume:w-20 transition-all overflow-hidden h-1 bg-white/30 rounded-full appearance-none cursor-pointer accent-blue-500"
-                            />
+                            <div 
+                                className={`overflow-hidden transition-all duration-300 ease-in-out ${showVolumeSlider ? 'w-20 opacity-100' : 'w-0 opacity-0 sm:group-hover/volume:w-20 sm:group-hover/volume:opacity-100'}`}
+                                onMouseEnter={() => {
+                                    if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
+                                }}
+                                onMouseLeave={() => {
+                                    volumeTimeoutRef.current = setTimeout(() => setShowVolumeSlider(false), 2000);
+                                }}
+                            >
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="1"
+                                    step="0.05"
+                                    value={isMuted ? 0 : volume}
+                                    onChange={handleVolumeChange}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="w-20 h-1.5 bg-white/30 rounded-full appearance-none cursor-pointer accent-blue-500"
+                                    style={{ WebkitAppearance: 'none', touchAction: 'manipulation' }}
+                                />
+                            </div>
                         </div>
 
-                        <div className="text-white text-sm font-medium tabular-nums">
+                        <div className="text-white text-[10px] sm:text-sm font-medium tabular-nums whitespace-nowrap">
                             {formatTime(currentTime)} / {formatTime(duration)}
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        {/* Playback Speed Menu */}
-                        <div className="relative">
+                    <div className="flex items-center gap-1 sm:gap-4">
+                        {/* Playback Speed - hidden on very small screens */}
+                        <div className="relative hidden sm:block">
                             <button 
                                 onClick={(e) => { e.stopPropagation(); setShowRateMenu(!showRateMenu); }}
                                 className="text-white hover:text-blue-400 transition-colors text-xs font-bold border border-white/30 px-2 py-1 rounded"
@@ -343,15 +389,15 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
                             )}
                         </div>
 
-                        <button onClick={seekBackward} className="text-white/70 hover:text-white transition-colors" title="Back 10s">
-                            <RotateCcw size={20} />
+                        <button onClick={seekBackward} className="text-white/70 hover:text-white transition-colors p-1 min-w-[32px] min-h-[32px] hidden sm:flex items-center justify-center" title="Back 10s">
+                            <RotateCcw size={18} />
                         </button>
-                        <button onClick={seekForward} className="text-white/70 hover:text-white transition-colors" title="Forward 10s">
-                            <RotateCw size={20} />
+                        <button onClick={seekForward} className="text-white/70 hover:text-white transition-colors p-1 min-w-[32px] min-h-[32px] hidden sm:flex items-center justify-center" title="Forward 10s">
+                            <RotateCw size={18} />
                         </button>
                         
-                        <button onClick={toggleFullscreen} className="text-white hover:text-blue-400 transition-colors">
-                            {isFullscreen ? <Minimize size={22} /> : <Maximize size={22} />}
+                        <button onClick={toggleFullscreen} className="text-white hover:text-blue-400 transition-colors p-1 min-w-[32px] min-h-[32px] flex items-center justify-center">
+                            {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
                         </button>
                     </div>
                 </div>

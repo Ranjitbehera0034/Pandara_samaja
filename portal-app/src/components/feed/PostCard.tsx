@@ -383,16 +383,34 @@ export function PostCard({
         setShowMenu(false);
     };
 
-    const handleShare = () => {
-        if (onShare) onShare(post.id);
+    const handleShare = async () => {
+        const shareUrl = `${window.location.origin}${window.location.pathname}#/`;
+        const shareData = {
+            title: `Post by ${post.authorName}`,
+            text: post.content.substring(0, 100),
+            url: shareUrl,
+        };
+
         if (navigator.share) {
-            navigator.share({
-                title: `Post by ${post.authorName}`,
-                text: post.content.substring(0, 100),
-                url: `${window.location.origin}/post/${post.id}`,
-            }).catch(() => { });
+            try {
+                await navigator.share(shareData);
+                // Only count if user completed the share (didn't cancel)
+                if (onShare) onShare(post.id);
+            } catch (err: any) {
+                // User cancelled the share dialog — don't count
+                if (err.name !== 'AbortError') {
+                    console.error('Share failed:', err);
+                }
+            }
         } else {
-            handleCopyLink();
+            // Fallback: copy link to clipboard
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                toast.success('Link copied to clipboard!');
+                if (onShare) onShare(post.id);
+            } catch {
+                toast.error('Failed to copy link');
+            }
         }
     };
 
