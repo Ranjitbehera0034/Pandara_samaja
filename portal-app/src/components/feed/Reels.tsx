@@ -9,6 +9,7 @@ import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { UploadReelModal } from './UploadReelModal';
+import { resolveMediaUrl } from '../../config/apiConfig';
 
 interface Reel {
     id: string;
@@ -112,7 +113,7 @@ function ReelItem({
             {/* Video */}
             <video
                 ref={videoRef}
-                src={reel.video_url}
+                src={resolveMediaUrl(reel.video_url)}
                 loop
                 muted={muted}
                 playsInline
@@ -157,7 +158,7 @@ function ReelItem({
                 <div className="relative mb-2">
                     <div className="w-11 h-11 rounded-full border-2 border-white bg-slate-700 flex items-center justify-center overflow-hidden">
                         {reel.author_photo ? (
-                            <img src={reel.author_photo} className="w-full h-full object-cover" />
+                            <img src={resolveMediaUrl(reel.author_photo)} className="w-full h-full object-cover" />
                         ) : (
                             <span className="text-white font-bold text-sm">{(reel.author_name || '?')[0].toUpperCase()}</span>
                         )}

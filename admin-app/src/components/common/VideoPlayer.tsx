@@ -17,7 +17,7 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
     const containerRef = useRef<HTMLDivElement>(null);
     
     const [isPlaying, setIsPlaying] = useState(false);
-    const [isMuted, setIsMuted] = useState(true); // Default muted for auto-play friendliness
+    const [isMuted, setIsMuted] = useState(autoPlayEnabled); // Default unmuted unless auto-playing
     const [progress, setProgress] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -27,6 +27,7 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
     const [showControls, setShowControls] = useState(true);
     const [playbackRate, setPlaybackRate] = useState(1);
     const [showRateMenu, setShowRateMenu] = useState(false);
+    const [bufferProgress, setBufferProgress] = useState(0);
 
     const controlsTimeoutRef = useRef<number | null>(null);
 
@@ -45,6 +46,18 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
             if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
         };
     }, [resetControlsTimeout]);
+
+    // Reset state when src changes
+    useEffect(() => {
+        setIsPlaying(false);
+        setIsLoading(true);
+        setProgress(0);
+        setCurrentTime(0);
+        setBufferProgress(0);
+        if (videoRef.current) {
+            videoRef.current.load();
+        }
+    }, [src]);
 
     // Intersection Observer for auto-play/pause
     useEffect(() => {
@@ -104,9 +117,20 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
 
     const handleProgress = () => {
         if (!videoRef.current) return;
+
+        // Main playback progress
         const currentProgress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
         setProgress(currentProgress);
         setCurrentTime(videoRef.current.currentTime);
+
+        // Buffering/Chunking progress
+        if (videoRef.current.buffered.length > 0) {
+            const bufferedEnd = videoRef.current.buffered.end(videoRef.current.buffered.length - 1);
+            const duration = videoRef.current.duration;
+            if (duration > 0) {
+                setBufferProgress((bufferedEnd / duration) * 100);
+            }
+        }
     };
 
     const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -182,9 +206,11 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
                 poster={poster}
                 loop
                 playsInline
+                preload="metadata"
                 muted={isMuted}
                 className="w-full h-full object-contain cursor-pointer"
                 onTimeUpdate={handleProgress}
+                onProgress={handleProgress}
                 onLoadedMetadata={() => { 
                     setDuration(videoRef.current?.duration || 0); 
                     setCurrentTime(videoRef.current?.currentTime || 0);
@@ -236,9 +262,15 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
                 className="absolute bottom-0 left-0 right-0 p-4 z-20"
             >
                 {/* Progress Bar */}
-                <div className="relative w-full h-1.5 bg-white/20 rounded-full mb-4 group/progress cursor-pointer">
+                <div className="relative w-full h-1.5 bg-white/10 rounded-full mb-4 group/progress cursor-pointer">
+                    {/* Buffered / Chunked Bar */}
                     <div 
-                        className="absolute top-0 left-0 h-full bg-blue-500 rounded-full z-10" 
+                        className="absolute top-0 left-0 h-full bg-white/20 rounded-full z-10 transition-all duration-300" 
+                        style={{ width: `${bufferProgress}%` }}
+                    />
+                    {/* Playback Progress Bar */}
+                    <div 
+                        className="absolute top-0 left-0 h-full bg-blue-500 rounded-full z-20" 
                         style={{ width: `${progress}%` }}
                     />
                     <input
