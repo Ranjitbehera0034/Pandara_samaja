@@ -68,10 +68,45 @@ export default function Matrimony() {
     const [directPhoto, setDirectPhoto] = useState<File | null>(null);
     const [directFormFile, setDirectFormFile] = useState<File | null>(null);
     const [directSubmitting, setDirectSubmitting] = useState(false);
+    const [downloadingForm, setDownloadingForm] = useState(false);
 
     useEffect(() => {
         fetchCandidates();
     }, [genderFilter, statusFilter]);
+
+    const handleDownloadForm = async () => {
+        setDownloadingForm(true);
+        toast.loading('Preparing download...', { id: 'form-download' });
+        try {
+            const token = localStorage.getItem('adminToken');
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+            const res = await fetch(`${baseUrl}/portal/documents/matrimony-form`, {
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+            });
+            const data = await res.json();
+            if (data.success && data.url) {
+                toast.success('Download starting!', { id: 'form-download' });
+                const a = document.createElement('a');
+                a.href = data.url;
+                a.download = 'CASTE_MATRIMONY.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                throw new Error('No URL returned');
+            }
+        } catch {
+            toast.error('Download failed. Trying local copy...', { id: 'form-download' });
+            const a = document.createElement('a');
+            a.href = '/assets/forms/CASTE_MATRIMONY.pdf';
+            a.download = 'CASTE_MATRIMONY.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } finally {
+            setDownloadingForm(false);
+        }
+    };
 
     const fetchCandidates = async () => {
         setLoading(true);
@@ -231,14 +266,14 @@ export default function Matrimony() {
 
                             {/* Actions Group */}
                             <div className="flex flex-col sm:flex-row gap-3">
-                                <motion.a
+                                <motion.button
                                     initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                    href="/CASTE_MATRIMONY.pdf"
-                                    download="CASTE_MATRIMONY.pdf"
-                                    className="group flex items-center justify-center gap-2 px-5 py-3 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-pink-600 dark:text-pink-400 rounded-2xl font-bold border border-pink-200 dark:border-pink-500/30 transition-all text-sm w-full sm:w-auto shrink-0 shadow-sm"
+                                    onClick={handleDownloadForm}
+                                    disabled={downloadingForm}
+                                    className="group flex items-center justify-center gap-2 px-5 py-3 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-pink-600 dark:text-pink-400 rounded-2xl font-bold border border-pink-200 dark:border-pink-500/30 transition-all text-sm w-full sm:w-auto shrink-0 shadow-sm disabled:opacity-60"
                                 >
-                                    <Download size={18} /> Step 1: Download Form
-                                </motion.a>
+                                    <Download size={18} /> {downloadingForm ? 'Preparing...' : 'Step 1: Download Form'}
+                                </motion.button>
 
                                 <motion.button
                                     initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
@@ -860,13 +895,13 @@ export default function Matrimony() {
                                         </label>
                                     </div>
                                     <div>
-                                        <a
-                                            href="/CASTE_MATRIMONY.pdf"
-                                            download="CASTE_MATRIMONY.pdf"
-                                            className="inline-flex items-center gap-2 text-xs text-pink-400 hover:text-pink-300 font-bold transition-colors"
+                                        <button
+                                            onClick={handleDownloadForm}
+                                            disabled={downloadingForm}
+                                            className="inline-flex items-center gap-2 text-xs text-pink-400 hover:text-pink-300 font-bold transition-colors disabled:opacity-60"
                                         >
-                                            <Download size={14} /> Download blank matrimony form
-                                        </a>
+                                            <Download size={14} /> {downloadingForm ? 'Preparing...' : 'Download blank matrimony form'}
+                                        </button>
                                     </div>
                                 </div>
                             </form>

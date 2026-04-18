@@ -21,6 +21,8 @@ import MakerChecker from './pages/MakerChecker';
 import Leaders from './pages/Leaders';
 import AdminUsers from './pages/AdminUsers';
 import Broadcasts from './pages/Broadcasts';
+import Expenses from './pages/Expenses';
+import Documents from './pages/Documents';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAdminAuth();
@@ -95,6 +97,8 @@ export default function App() {
           <Route path="/reviews" element={<ProtectedRoute><Layout><Reviews /></Layout></ProtectedRoute>} />
           <Route path="/admin-users" element={<ProtectedRoute><Layout><AdminUsers /></Layout></ProtectedRoute>} />
           <Route path="/broadcasts" element={<ProtectedRoute><Layout><Broadcasts /></Layout></ProtectedRoute>} />
+          <Route path="/expenses" element={<ProtectedRoute><Layout><Expenses /></Layout></ProtectedRoute>} />
+          <Route path="/documents" element={<ProtectedRoute><Layout><Documents /></Layout></ProtectedRoute>} />
         </Routes>
       </Router>
     </AdminAuthProvider>

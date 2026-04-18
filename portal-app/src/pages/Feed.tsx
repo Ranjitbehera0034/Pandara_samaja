@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { io } from 'socket.io-client';
 import { Film } from 'lucide-react';
 
-import { PORTAL_API_URL, SOCKET_URL } from '../config/apiConfig';
+import { PORTAL_API_URL, SOCKET_URL, API_BASE_URL } from '../config/apiConfig';
 
 const MOCK_STORIES: Story[] = [
     {
@@ -137,15 +137,23 @@ export default function Feed() {
             const token = getToken();
             if (!token) { setLoading(false); return; }
 
-            const response = await fetch(`${PORTAL_API_URL}/posts`, {
+            // Fetch Member Feed Posts
+            const feedPromise = fetch(`${PORTAL_API_URL}/posts`, {
                 headers: { 'Authorization': `Bearer ${token}` }
-            });
+            }).then(res => res.json()).catch(() => ({ success: false, posts: [] }));
 
-            if (!response.ok) throw new Error('Failed to fetch posts');
+            // Fetch Admin Announcements
+            const announcementsPromise = fetch(`${API_BASE_URL}/posts`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then(res => res.json()).catch(() => []); // Blog route usually returns array directly or { success, posts }
 
-            const data = await response.json();
-            if (data.success) {
-                const mappedPosts: Post[] = data.posts.map((p: any) => ({
+            const [feedData, announcementsData] = await Promise.all([feedPromise, announcementsPromise]);
+
+            let allPosts: Post[] = [];
+
+            // Add standard feed posts
+            if (feedData && feedData.success && Array.isArray(feedData.posts)) {
+                const mappedPosts: Post[] = feedData.posts.map((p: any) => ({
                     id: p.id.toString(),
                     authorId: p.author_id,
                     authorName: p.author_name,
@@ -163,8 +171,45 @@ export default function Feed() {
                     isBookmarked: false,
                     shareCount: 0
                 }));
-                setPosts(mappedPosts);
+                allPosts = [...allPosts, ...mappedPosts];
             }
+
+            // Extract and map Announcements
+            let rawAnnouncements: any[] = [];
+            if (Array.isArray(announcementsData)) {
+                rawAnnouncements = announcementsData;
+            } else if (announcementsData && Array.isArray(announcementsData.posts)) {
+                rawAnnouncements = announcementsData.posts;
+            } else if (announcementsData && Array.isArray(announcementsData.data)) {
+                rawAnnouncements = announcementsData.data;
+            }
+
+            if (rawAnnouncements.length > 0) {
+                const mappedAnnouncements: Post[] = rawAnnouncements.map((p: any) => ({
+                    id: `annc_${p.id}`,
+                    authorId: 'admin',
+                    authorName: 'Pandara Samaja Admin',
+                    authorAvatar: 'https://cdn-icons-png.flaticon.com/512/9133/9133036.png', // Default megaphone/admin icon
+                    location: undefined,
+                    content: `📢 **OFFICIAL ANNOUNCEMENT: ${p.title}**\n\n${p.content}`,
+                    images: p.image_url ? [p.image_url] : [],
+                    media: p.image_url ? [{ url: p.image_url, type: 'image' }] : [],
+                    likes: 0,
+                    reactions: { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
+                    comments: [],
+                    commentsCount: 0,
+                    timestamp: p.created_at,
+                    isLiked: false,
+                    isBookmarked: false,
+                    shareCount: 0
+                }));
+                allPosts = [...allPosts, ...mappedAnnouncements];
+            }
+
+            // Sort all items combined by descending date
+            allPosts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+            setPosts(allPosts);
         } catch (error) {
             console.error(error);
         } finally {
