@@ -192,8 +192,11 @@ export default function Feed() {
                     authorAvatar: 'https://cdn-icons-png.flaticon.com/512/9133/9133036.png', // Default megaphone/admin icon
                     location: undefined,
                     content: `📢 **OFFICIAL ANNOUNCEMENT: ${p.title}**\n\n${p.content}`,
-                    images: p.image_url ? [p.image_url] : [],
-                    media: p.image_url ? [{ url: p.image_url, type: 'image' }] : [],
+                    images: [p.image_url, p.video_url].filter(Boolean) as string[],
+                    media: [
+                        ...(p.image_url ? [{ url: p.image_url, type: 'image' }] : []),
+                        ...(p.video_url ? [{ url: p.video_url, type: 'video' }] : [])
+                    ] as MediaItem[],
                     likes: 0,
                     reactions: { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
                     comments: [],

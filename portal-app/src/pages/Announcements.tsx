@@ -72,7 +72,17 @@ export default function Announcements() {
                             key={post.id}
                             className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden hover:border-blue-500/30 transition-colors shadow-lg shadow-black/20"
                         >
-                            {post.image_url && (
+                            {post.video_url && (
+                                <div className="w-full h-64 sm:h-80 relative bg-slate-900 border-b border-slate-700">
+                                    <video 
+                                        src={post.video_url} 
+                                        controls 
+                                        className="w-full h-full object-contain"
+                                        poster={post.image_url}
+                                    />
+                                </div>
+                            )}
+                            {post.image_url && !post.video_url && (
                                 <div className="w-full h-64 sm:h-80 relative bg-slate-900 border-b border-slate-700">
                                     <img src={post.image_url} alt={post.title} className="w-full h-full object-cover" />
                                 </div>
