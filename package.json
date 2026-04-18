@@ -14,7 +14,8 @@
     "build": "npm run build --workspaces",
     "dev:admin": "npm run dev -w admin-app",
     "dev:portal": "npm run dev -w portal-app",
-    "lint": "npm run lint --workspaces"
+    "lint": "npm run lint --workspaces",
+    "typecheck": "npm run build --workspaces"
   },
   "keywords": [
     "monorepo",
