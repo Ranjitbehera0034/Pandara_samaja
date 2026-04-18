@@ -44,10 +44,10 @@ export async function uploadPostMedia(file: File, memberId: string): Promise<str
 /**
  * Upload a matrimony profile photo or form scan.
  */
-export async function uploadMatrimonyFile(file: File, type: 'photo' | 'form'): Promise<string> {
+export async function uploadMatrimonyFile(file: File, memberId: string): Promise<string> {
     const ext = file.name.split('.').pop() || 'jpg';
     const timestamp = Date.now();
-    const path = `matrimony/${type}/${timestamp}.${ext}`;
+    const path = `matrimony/${memberId}/${timestamp}.${ext}`;
     return uploadFile(file, path);
 }
 
