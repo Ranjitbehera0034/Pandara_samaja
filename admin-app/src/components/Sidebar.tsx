@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { useTranslation } from 'react-i18next';
-import { LogOut, LayoutDashboard, Users, Heart, Megaphone, ShieldAlert, Calendar, UsersRound, BellRing, Settings, FileClock, Languages, Moon, Sun, X, Shield, Globe } from 'lucide-react';
+import { LogOut, LayoutDashboard, Users, Heart, Megaphone, ShieldAlert, Calendar, UsersRound, BellRing, Settings, FileClock, Languages, Moon, Sun, X, Shield, Globe, Wallet } from 'lucide-react';
 
 interface SidebarProps {
     isMobileOpen?: boolean;
@@ -132,6 +132,16 @@ export default function Sidebar({ isMobileOpen = false, setIsMobileOpen }: Sideb
                     <NavLink to="/broadcasts" className={linkClasses} onClick={handleLinkClick}>
                         <div className="shrink-0 px-2 flex justify-center w-10"><Megaphone size={20} /></div>
                         <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Broadcasts</span>
+                    </NavLink>
+                    {(user?.role?.toLowerCase() === 'admin' || user?.role?.toLowerCase() === 'superadmin' || user?.role?.toLowerCase() === 'super_admin') && (
+                        <NavLink to="/expenses" className={linkClasses} onClick={handleLinkClick}>
+                            <div className="shrink-0 px-2 flex justify-center w-10"><Wallet size={20} /></div>
+                            <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('expense_tracker')}</span>
+                        </NavLink>
+                    )}
+                    <NavLink to="/documents" className={linkClasses} onClick={handleLinkClick}>
+                        <div className="shrink-0 px-2 flex justify-center w-10"><FileClock size={20} /></div>
+                        <span className={`transition-opacity duration-300 ${(isExpanded || isMobileOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>{t('documents')}</span>
                     </NavLink>
                     <div className="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
                         <NavLink to="/settings" className={linkClasses} onClick={handleLinkClick}>

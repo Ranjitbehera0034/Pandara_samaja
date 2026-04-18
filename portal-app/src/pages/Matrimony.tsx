@@ -52,6 +52,7 @@ export default function Matrimony() {
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
     const [shortlisted, setShortlisted] = useState<number[]>([]);
     const [myApplication, setMyApplication] = useState<MyApplication | null>(null);
+    const [downloadingForm, setDownloadingForm] = useState(false);
 
     // Determine if current member is Head of Family
     const memberStr = localStorage.getItem('portalMember');
@@ -65,6 +66,37 @@ export default function Matrimony() {
         fetchCandidates();
         fetchMyApplication();
     }, [genderFilter]);
+
+    const handleDownloadForm = async () => {
+        setDownloadingForm(true);
+        toast.loading('Preparing download...', { id: 'form-download' });
+        try {
+            const res = await fetch(`${PORTAL_API_URL}/documents/matrimony-form`);
+            const data = await res.json();
+            if (data.success && data.url) {
+                toast.success('Download starting!', { id: 'form-download' });
+                // Trigger browser download
+                const a = document.createElement('a');
+                a.href = data.url;
+                a.download = 'CASTE_MATRIMONY.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                throw new Error('No URL returned');
+            }
+        } catch {
+            toast.error('Download failed. Trying local copy...', { id: 'form-download' });
+            const a = document.createElement('a');
+            a.href = '/assets/forms/CASTE_MATRIMONY.pdf';
+            a.download = 'CASTE_MATRIMONY.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } finally {
+            setDownloadingForm(false);
+        }
+    };
 
     const fetchMyApplication = async () => {
         try {
@@ -211,20 +243,19 @@ export default function Matrimony() {
                             </p>
                         </motion.div>
 
-                        {/* HoF Action Buttons */}
-                        {isHoF ? (
-                            <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 w-full md:w-auto">
-                                <motion.a
+                        {/* Download Form — always visible */}
+                        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 w-full md:w-auto">
+                                <motion.button
                                     initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                    href="/CASTE_MATRIMONY.pdf"
-                                    download="CASTE_MATRIMONY.pdf"
-                                    className="group flex items-center gap-2 px-5 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-slate-200 rounded-2xl text-sm font-bold border border-white/5 transition-all backdrop-blur-md w-full sm:w-auto justify-center sm:justify-start"
+                                    onClick={handleDownloadForm}
+                                    disabled={downloadingForm}
+                                    className="group flex items-center gap-2 px-5 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-slate-200 rounded-2xl text-sm font-bold border border-white/5 transition-all backdrop-blur-md w-full sm:w-auto justify-center sm:justify-start disabled:opacity-60"
                                 >
                                     <div className="p-1.5 bg-slate-900 rounded-lg group-hover:bg-slate-800 transition-colors">
                                         <Download size={16} />
                                     </div>
-                                    Step 1: Download Form
-                                </motion.a>
+                                    {downloadingForm ? 'Preparing...' : 'Step 1: Download Form'}
+                                </motion.button>
 
                                 {(!myApplication || myApplication.status === 'correction_needed' || myApplication.status === 'rejected') && (
                                     <motion.button
@@ -243,16 +274,7 @@ export default function Matrimony() {
                                         Form Submitted
                                     </div>
                                 )}
-                            </div>
-                        ) : (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                className="flex items-start gap-3 px-5 py-4 bg-slate-800/40 border border-white/5 rounded-2xl backdrop-blur-md text-sm text-slate-400 w-full md:max-w-xs"
-                            >
-                                <ShieldAlert size={20} className="text-amber-500 shrink-0 mt-0.5" />
-                                <span>Only the <strong className="text-white">Head of Family</strong> can submit the matrimony form for family members.</span>
-                            </motion.div>
-                        )}
+                        </div>
                     </div>
                 </header>
 
