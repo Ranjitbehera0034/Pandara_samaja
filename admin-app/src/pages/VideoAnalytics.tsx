@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import api from '../services/api';
 import { 
-    Video, Users, MousePointer2, TrendingUp, 
+    Video, TrendingUp, 
     Clock, Tag, Eye, ArrowUpRight, BarChart,
     Layers, Play
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 interface AnalyticsData {

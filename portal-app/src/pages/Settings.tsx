@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { useSettings } from '../context/SettingsContext';
+import { useSettings, type PortalSettings } from '../context/SettingsContext';
 import { useLanguage } from '../context/LanguageContext';
 import {
     Shield, Eye, Bell, Moon, Globe, Lock,
@@ -39,7 +39,7 @@ export default function SettingsPage() {
         title: string;
         icon: ReactNode;
         description: string;
-        items: { key: string; label: string; description: string; icon: ReactNode }[];
+        items: { key: keyof PortalSettings; label: string; description: string; icon: ReactNode }[];
     }[] = [
             {
                 title: t('settings', 'contentSafety'),
