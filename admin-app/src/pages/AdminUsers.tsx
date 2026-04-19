@@ -39,7 +39,7 @@ const AdminUsers: React.FC = () => {
     const [newAdmin, setNewAdmin] = useState({ username: '', password: '', role: 'admin' });
 
 
-    const fetchAdmins = async () => {
+    const fetchAdmins = React.useCallback(async () => {
         setIsLoading(true);
         try {
             const response = await fetch(`${API_BASE_URL}/auth/admins`, {
@@ -51,12 +51,12 @@ const AdminUsers: React.FC = () => {
             } else {
                 toast.error(data.message || 'Failed to fetch admins');
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error('Network error while fetching admins');
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [token]);
 
     const handleSearchMembers = async (query: string) => {
         if (!query || query.length < 2) {
@@ -72,8 +72,8 @@ const AdminUsers: React.FC = () => {
             if (data.success) {
                 setSearchResults(data.members);
             }
-        } catch (error) {
-            console.error('Search error:', error);
+        } catch (_error) {
+            console.error('Search error:', _error);
         } finally {
             setIsSearching(false);
         }
@@ -89,7 +89,7 @@ const AdminUsers: React.FC = () => {
 
     useEffect(() => {
         fetchAdmins();
-    }, []);
+    }, [fetchAdmins]);
 
     const resetModal = () => {
         setShowAddModal(false);
@@ -127,7 +127,7 @@ const AdminUsers: React.FC = () => {
             } else {
                 toast.error(data.message || 'Failed to register admin');
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error('Network error while registering admin');
         }
     };
@@ -147,7 +147,7 @@ const AdminUsers: React.FC = () => {
             } else {
                 toast.error(data.message || 'Failed to revoke access');
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error('Network error');
         }
     };

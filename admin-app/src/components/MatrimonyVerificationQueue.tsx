@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, XCircle, Eye, Maximize2, User, FileText, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -42,6 +42,7 @@ type CandidateForm = {
 };
 
 export default function MatrimonyVerificationQueue() {
+    // eslint-disable-next-line no-empty-pattern
     const { } = useTranslation();
     const [queue, setQueue] = useState<VerificationApp[]>([]);
     const [loading, setLoading] = useState(true);
@@ -62,11 +63,7 @@ export default function MatrimonyVerificationQueue() {
     const [candidatePhoto, setCandidatePhoto] = useState<File | null>(null);
     const [publishing, setPublishing] = useState(false);
 
-    useEffect(() => {
-        fetchQueue();
-    }, [statusFilter]);
-
-    const fetchQueue = async () => {
+    const fetchQueue = useCallback(async () => {
         setLoading(true);
         try {
             const statusParam = statusFilter !== 'all' ? `?status=${statusFilter}` : '';
@@ -74,12 +71,16 @@ export default function MatrimonyVerificationQueue() {
             if (res.data.success) {
                 setQueue(res.data.applications);
             }
-        } catch {
+        } catch (_e) {
             toast.error('Failed to load verification queue');
         } finally {
             setLoading(false);
         }
-    };
+    }, [statusFilter]);
+
+    useEffect(() => {
+        fetchQueue();
+    }, [statusFilter, fetchQueue]);
 
 
     const handleReviewAction = async (action: 'approve' | 'reject' | 'correction_needed') => {
@@ -121,8 +122,8 @@ export default function MatrimonyVerificationQueue() {
                 setRemarks('');
                 fetchQueue();
             }
-        } catch (e: any) {
-            toast.error(e.response?.data?.message || 'Failed to process action');
+        } catch (_e: any) {
+            toast.error(_e.response?.data?.message || 'Failed to process action');
         } finally {
             setActioning(false);
         }
@@ -162,8 +163,8 @@ export default function MatrimonyVerificationQueue() {
             setReviewApp(null);
             setRemarks('');
             fetchQueue();
-        } catch (e: any) {
-            toast.error(e.response?.data?.message || e.response?.data?.error || 'Failed to publish candidate');
+        } catch (_e: any) {
+            toast.error(_e.response?.data?.message || _e.response?.data?.error || 'Failed to publish candidate');
         } finally {
             setPublishing(false);
         }

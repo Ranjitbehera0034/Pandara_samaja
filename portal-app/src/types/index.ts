@@ -102,6 +102,7 @@ export interface Post {
     hashtags?: string[];
     mentions?: string[];
     poll?: Poll;                 // Phase 2: embedded poll
+    views_count?: number;        // Analytics: video view count
 }
 
 // ─── Polls (Phase 2) ────────────────────────────────

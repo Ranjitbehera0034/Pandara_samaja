@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Image, Video, MapPin, Send, X, AlertTriangle, Hash, BarChart3, Wand2 } from 'lucide-react';
+import { Image, Video, MapPin, Send, X, AlertTriangle, Hash, BarChart, Wand2 } from 'lucide-react';
 import { VideoPlayer } from './VideoPlayer';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -251,7 +251,7 @@ export function CreatePost({ onPostCreate }: CreatePostProps) {
                                 <X size={14} />
                             </button>
                             <div className="flex items-center gap-2 text-sm text-blue-400 font-medium mb-2">
-                                <BarChart3 size={14} />
+                                <BarChart size={14} />
                                 <span>Poll: {poll.question}</span>
                             </div>
                             <div className="flex flex-wrap gap-1">
@@ -331,7 +331,7 @@ export function CreatePost({ onPostCreate }: CreatePostProps) {
                                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors text-sm ${showPollCreator || poll ? 'bg-amber-500/10 text-amber-400' : 'hover:bg-amber-500/10 text-amber-400'}`}
                                 title="Add Poll"
                             >
-                                <BarChart3 size={18} />
+                                <BarChart size={18} />
                                 <span className="hidden sm:inline">Poll</span>
                             </button>
 

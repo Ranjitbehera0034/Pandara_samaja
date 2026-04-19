@@ -66,7 +66,7 @@ export default function Notifications() {
             });
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
             toast.success("Marked all as read");
-        } catch (e) {
+        } catch (_e) {
             toast.error("Error marking all read");
         }
     };
@@ -80,8 +80,8 @@ export default function Notifications() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-        } catch (e) {
-            console.error(e);
+        } catch (_e) {
+            console.error(_e);
         }
     };
 
@@ -94,7 +94,7 @@ export default function Notifications() {
             });
             setNotifications(prev => prev.filter(n => n.id !== id));
             toast.success("Notification deleted");
-        } catch (e) {
+        } catch (_e) {
             toast.error("Failed to delete notification");
         }
     };

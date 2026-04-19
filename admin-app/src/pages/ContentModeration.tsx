@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Shield, AlertTriangle, CheckCircle, Trash2, Globe, Clock } from 'lucide-react';
 import { VideoPlayer } from '../components/common/VideoPlayer';
 import api from '../services/api';
@@ -14,6 +14,48 @@ export default function ContentModeration() {
     const [newWord, setNewWord] = useState('');
     const [loading, setLoading] = useState(true);
 
+    const fetchReports = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await api.get('/admin/posts/reported');
+            if (res.data.success) {
+                setReports(res.data.reports);
+            }
+        } catch (_error) {
+            toast.error('Failed to load reported posts');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchPosts = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await api.get('/admin/posts');
+            if (res.data.success) {
+                setPosts(res.data.posts);
+            }
+        } catch (_error) {
+            toast.error('Failed to load feed posts');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchBannedWords = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await api.get('/admin/banned-words');
+            if (res.data.success) {
+                setBannedWords(res.data.words);
+            }
+        } catch (_error) {
+            toast.error('Failed to load banned words');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
         if (activeTab === 'reported') {
             fetchReports();
@@ -22,49 +64,7 @@ export default function ContentModeration() {
         } else {
             fetchBannedWords();
         }
-    }, [activeTab]);
-
-    const fetchReports = async () => {
-        setLoading(true);
-        try {
-            const res = await api.get('/admin/posts/reported');
-            if (res.data.success) {
-                setReports(res.data.reports);
-            }
-        } catch (error) {
-            toast.error('Failed to load reported posts');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchPosts = async () => {
-        setLoading(true);
-        try {
-            const res = await api.get('/admin/posts');
-            if (res.data.success) {
-                setPosts(res.data.posts);
-            }
-        } catch (error) {
-            toast.error('Failed to load feed posts');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchBannedWords = async () => {
-        setLoading(true);
-        try {
-            const res = await api.get('/admin/banned-words');
-            if (res.data.success) {
-                setBannedWords(res.data.words);
-            }
-        } catch (error) {
-            toast.error('Failed to load banned words');
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [activeTab, fetchReports, fetchPosts, fetchBannedWords]);
 
     const handleAddBannedWord = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -76,8 +76,8 @@ export default function ContentModeration() {
                 setNewWord('');
                 fetchBannedWords();
             }
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to add word');
+        } catch (_error: any) {
+            toast.error(_error.response?.data?.message || 'Failed to add word');
         }
     };
 
@@ -86,7 +86,7 @@ export default function ContentModeration() {
             await api.delete(`/admin/banned-words/${id}`);
             toast.success('Word removed from banned list');
             setBannedWords(bannedWords.filter(w => w.id !== id));
-        } catch (error) {
+        } catch (_error) {
             toast.error('Failed to remove word');
         }
     };
@@ -96,7 +96,7 @@ export default function ContentModeration() {
             await api.delete(`/admin/reports/${reportId}/dismiss`);
             toast.success('Report dismissed');
             setReports(reports.filter(r => r.report_id !== reportId));
-        } catch (error) {
+        } catch (_error) {
             toast.error('Failed to dismiss report');
         }
     };
@@ -111,7 +111,7 @@ export default function ContentModeration() {
             } else {
                 setPosts(posts.filter(p => p.id !== postId));
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error('Failed to delete post');
         }
     };

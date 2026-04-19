@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, X, BarChart3 } from 'lucide-react';
+import { Plus, X, BarChart } from 'lucide-react';
 import type { Poll, PollOption } from '../../types';
 
 // ─── Poll Creator (inside CreatePost) ────────────────
@@ -56,7 +56,7 @@ export function PollCreator({ onCreatePoll, onCancel }: PollCreatorProps) {
         >
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2 text-sm font-semibold text-blue-400">
-                    <BarChart3 size={16} />
+                    <BarChart size={16} />
                     <span>Create Poll</span>
                 </div>
                 <button onClick={onCancel} className="p-1 text-slate-400 hover:text-white">
@@ -144,7 +144,7 @@ export function PollDisplay({ poll, onVote }: PollDisplayProps) {
     return (
         <div className="bg-slate-900/40 border border-slate-700/50 rounded-xl p-4 mt-3">
             <div className="flex items-center gap-2 mb-3">
-                <BarChart3 size={16} className="text-blue-400" />
+                <BarChart size={16} className="text-blue-400" />
                 <span className="text-sm font-semibold text-white">{localPoll.question}</span>
             </div>
 

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { useSettings } from '../context/SettingsContext';
+import { useSettings, type PortalSettings } from '../context/SettingsContext';
 import { useLanguage } from '../context/LanguageContext';
 import {
     Shield, Eye, Bell, Moon, Globe, Lock,
@@ -15,16 +15,16 @@ export default function SettingsPage() {
     const { settings, updateSetting } = useSettings();
     const { t, lang, setLang } = useLanguage();
 
-    const ToggleSwitch = ({ settingKey, label }: { settingKey: string; label?: string }) => {
-        const isOn = (settings as any)[settingKey];
+    const ToggleSwitch = ({ settingKey, label }: { settingKey: keyof typeof settings; label?: string }) => {
+        const isOn = settings[settingKey];
         return (
             <button
                 onClick={() => {
                     updateSetting(settingKey as any, !isOn);
-                    toast.success(`${label || settingKey} ${!isOn ? t('settings', 'enabled') : t('settings', 'disabled')}`);
+                    toast.success(`${label || String(settingKey)} ${!isOn ? t('settings', 'enabled') : t('settings', 'disabled')}`);
                 }}
                 className="shrink-0 transition-transform active:scale-95"
-                aria-label={`Toggle ${label || settingKey}`}
+                aria-label={`Toggle ${label || String(settingKey)}`}
             >
                 {isOn ? (
                     <ToggleRight size={28} className="text-blue-500" />
@@ -39,7 +39,7 @@ export default function SettingsPage() {
         title: string;
         icon: ReactNode;
         description: string;
-        items: { key: string; label: string; description: string; icon: ReactNode }[];
+        items: { key: keyof PortalSettings; label: string; description: string; icon: ReactNode }[];
     }[] = [
             {
                 title: t('settings', 'contentSafety'),

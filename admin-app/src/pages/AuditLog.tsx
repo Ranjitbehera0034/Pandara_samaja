@@ -36,11 +36,35 @@ const AdminActionIcon = ({ action }: { action: string }) => {
     return <AlertTriangle size={16} className="text-amber-500" />;
 };
 
+interface AdminLog {
+    id: number;
+    admin_username: string;
+    action: string;
+    target_type: string;
+    target_id: string;
+    ip_address: string;
+    created_at: string;
+}
+
+interface UserLog {
+    id: number;
+    member_name: string;
+    action: string;
+    target_type: string;
+    target_id: string;
+    user_agent: string;
+    ip_address: string;
+    created_at: string;
+    details?: {
+        preview?: string;
+    };
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function AuditLog() {
     const [activeTab, setActiveTab] = useState<'admin' | 'user'>('user');
-    const [adminLogs, setAdminLogs] = useState<any[]>([]);
-    const [userLogs, setUserLogs] = useState<any[]>([]);
+    const [adminLogs, setAdminLogs] = useState<AdminLog[]>([]);
+    const [userLogs, setUserLogs] = useState<UserLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
 

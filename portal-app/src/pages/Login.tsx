@@ -39,7 +39,13 @@ export default function Login() {
     const [filterOptions, setFilterOptions] = useState<{ districts: string[], talukas: Record<string, string[]>, panchayats: Record<string, string[]> }>({
         districts: [], talukas: {}, panchayats: {}
     });
-    const [lookupResults, setLookupResults] = useState<any[]>([]);
+    interface Member {
+        membership_no: string;
+        name: string;
+        mobile?: string;
+        village?: string;
+    }
+    const [lookupResults, setLookupResults] = useState<Member[]>([]);
 
     // Redirect if already logged in
     useEffect(() => {
@@ -55,8 +61,8 @@ export default function Login() {
                 const res = await fetch(`${API_BASE_URL}/members/filters`);
                 const data = await res.json();
                 if (data.success) setFilterOptions(data.filters);
-            } catch (err) {
-                console.error("Failed to fetch filters", err);
+            } catch (_err) {
+                console.error("Failed to fetch filters", _err);
             }
         };
         fetchFilters();
@@ -82,7 +88,7 @@ export default function Login() {
                 setLookupResults(data.rows);
                 if (data.rows.length === 0) toast.info("No members found matching your search");
             }
-        } catch (err) {
+        } catch (_err) {
             toast.error("Failed to search members");
         } finally {
             setLookupLoading(false);
@@ -105,7 +111,7 @@ export default function Login() {
         try {
             await sendFirebaseOtp(mobile, 'recaptcha-container');
             setStep(2);
-        } catch (err) {
+        } catch (_err) {
             // Handled by context
         } finally {
             setLoading(false);
@@ -123,7 +129,7 @@ export default function Login() {
         try {
             await verifyFirebaseOtp(otp, membershipNo, mobile, captchaToken);
             // navigate will be handled by useEffect redirect
-        } catch (err) {
+        } catch (_err) {
             // Handled by context
         } finally {
             setLoading(false);

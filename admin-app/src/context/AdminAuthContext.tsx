@@ -28,7 +28,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 setUser(payload);
-            } catch (e) {
+            } catch (_e) {
                 console.error('Failed to parse token');
             }
         } else {
