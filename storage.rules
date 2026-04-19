@@ -1,0 +1,113 @@
+rules_version = '2';
+
+// =============================================================================
+// Nikhila Odisha Pandara Samaja — Firebase Storage Security Rules
+// =============================================================================
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // --- Helper functions -----------------------------------------------------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    function isOwner(memberId) {
+      return isSignedIn() && request.auth.uid == memberId;
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/(jpeg|jpg|png|webp|gif)');
+    }
+
+    function isVideo() {
+      return request.resource.contentType.matches('video/(mp4|webm|quicktime)');
+    }
+
+    function maxImageSize() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+
+    function maxVideoSize() {
+      return request.resource.size < 50 * 1024 * 1024;
+    }
+
+    function isImageOrVideo() {
+      return (isImage() && maxImageSize()) || (isVideo() && maxVideoSize());
+    }
+
+    // --- Member profile photos ------------------------------------------------
+    match /profiles/{memberId}/{file} {
+      allow read:  if isSignedIn();
+      allow write: if (isOwner(memberId) || isAdmin())
+                   && isImage()
+                   && maxImageSize();
+    }
+
+    // --- Personal gallery -----------------------------------------------------
+    match /gallery/{memberId}/{file} {
+      allow read:  if isSignedIn();
+      allow write: if (isOwner(memberId) || isAdmin())
+                   && isImageOrVideo();
+    }
+
+    // --- Post / feed media ---------------------------------------------------
+    match /posts/{memberId}/{file} {
+      allow read:  if isSignedIn();
+      allow write: if (isOwner(memberId) || isAdmin())
+                   && isImageOrVideo();
+    }
+
+    // --- Matrimony photos (SENSITIVE) -----------------------------------------
+    // Portal: matrimony/{memberId}/{timestamp}.{ext}
+    match /matrimony/{memberId}/{file} {
+      allow read:  if isSignedIn();
+      allow write: if (isOwner(memberId) || isAdmin())
+                   && isImage()
+                   && maxImageSize();
+    }
+    
+    // Admin-managed candidates
+    match /matrimony/photo/{file} {
+      allow read:  if isSignedIn();
+      allow write: if isAdmin()
+                   && isImage()
+                   && maxImageSize();
+    }
+
+    // --- Leader photos (admin-only) ------------------------------------------
+    match /leaders/{leaderId}/{file} {
+      allow read:  if true;
+      allow write: if isAdmin()
+                   && isImage()
+                   && maxImageSize();
+    }
+
+    // --- Admin-managed gallery ------------------------------------------------
+    match /gallery/admin/{file} {
+      allow read:  if true;
+      allow write: if isAdmin()
+                   && isImageOrVideo();
+    }
+
+    // --- Documents (admin-only) ----------------------------------------------
+    match /documents/{file} {
+      allow read:  if isSignedIn();
+      allow write: if isAdmin()
+                   && request.resource.size < 20 * 1024 * 1024
+                   && request.resource.contentType.matches(
+                     '(application/pdf|image/.*|application/vnd.openxmlformats-officedocument.*)'
+                   );
+    }
+
+    // --- Default DENY (catch-all) --------------------------------------------
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

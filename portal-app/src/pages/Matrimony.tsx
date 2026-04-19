@@ -150,9 +150,11 @@ export default function Matrimony() {
 
             // Upload file to Firebase Storage first
             const file = formData.get('form_file') as File;
+            const memberId = memberObj?.id || memberObj?._id || 'anonymous';
+            
             if (file && file.size > 0) {
                 const { uploadMatrimonyFile } = await import('../services/firebaseStorage');
-                const fileUrl = await uploadMatrimonyFile(file, 'form');
+                const fileUrl = await uploadMatrimonyFile(file, memberId);
                 // Replace file with URL in form data
                 formData.delete('form_file');
                 formData.append('form_file_url', fileUrl);

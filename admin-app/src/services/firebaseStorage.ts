@@ -1,5 +1,5 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { storage } from '../config/firebase';
+import { storage } from '../config/firebaseConfig';
 
 /**
  * Upload a file to Firebase Storage and return the download URL.
