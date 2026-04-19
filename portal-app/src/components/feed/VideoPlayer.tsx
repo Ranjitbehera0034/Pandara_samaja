@@ -9,10 +9,12 @@ interface VideoPlayerProps {
     src: string;
     poster?: string;
     autoPlayEnabled?: boolean;
+    onPlay?: () => void;
+    onWatch?: (data: { durationSeconds: number; segments: number[] }) => void;
     className?: string;
 }
 
-export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = "" }: VideoPlayerProps) {
+export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWatch, className = "" }: VideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     
@@ -29,6 +31,11 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
     const [showRateMenu, setShowRateMenu] = useState(false);
     const [bufferProgress, setBufferProgress] = useState(0);
     const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+    
+    // Watch Session Tracking
+    const watchedSegments = useRef<Set<number>>(new Set());
+    const [totalWatchTime, setTotalWatchTime] = useState(0);
+    const lastSessionUpdate = useRef<number>(Date.now());
 
     const controlsTimeoutRef = useRef<number | null>(null);
     const volumeTimeoutRef = useRef<number | null>(null);
@@ -42,6 +49,17 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
         }, 3000);
     }, [isPlaying]);
 
+    // Report watch session
+    const reportWatchSession = useCallback(() => {
+        if (watchedSegments.current.size > 0 && onWatch) {
+            onWatch({
+                durationSeconds: Math.round(totalWatchTime),
+                segments: Array.from(watchedSegments.current).sort((a, b) => a - b)
+            });
+            // Don't clear, we might continue if just paused
+        }
+    }, [onWatch, totalWatchTime]);
+
     useEffect(() => {
         resetControlsTimeout();
         return () => {
@@ -51,15 +69,18 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
 
     // Reset state when src changes
     useEffect(() => {
+        if (isPlaying) reportWatchSession();
         setIsPlaying(false);
         setIsLoading(true);
         setProgress(0);
         setCurrentTime(0);
         setBufferProgress(0);
+        setTotalWatchTime(0);
+        watchedSegments.current.clear();
         if (videoRef.current) {
             videoRef.current.load();
         }
-    }, [src]);
+    }, [src, reportWatchSession]);
 
     // Sync volume to video element whenever volume or muted state changes
     useEffect(() => {
@@ -141,9 +162,24 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
     const handleProgress = () => {
         if (!videoRef.current) return;
         
-        const currentProgress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+        const currentPos = videoRef.current.currentTime;
+        const currentProgress = (currentPos / videoRef.current.duration) * 100;
         setProgress(currentProgress);
-        setCurrentTime(videoRef.current.currentTime);
+        setCurrentTime(currentPos);
+
+        // Track segments (5s buckets)
+        if (isPlaying) {
+            const segmentIndex = Math.floor(currentPos / 5);
+            watchedSegments.current.add(segmentIndex);
+
+            // Track total watch time
+            const now = Date.now();
+            const delta = (now - lastSessionUpdate.current) / 1000;
+            if (delta > 0 && delta < 2) { // Guard against spikes
+                setTotalWatchTime(prev => prev + delta);
+            }
+            lastSessionUpdate.current = now;
+        }
 
         if (videoRef.current.buffered.length > 0) {
             const bufferedEnd = videoRef.current.buffered.end(videoRef.current.buffered.length - 1);
@@ -242,7 +278,13 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, className = 
                     }
                 }}
                 onWaiting={() => setIsLoading(true)}
-                onPlaying={() => setIsLoading(false)}
+                onPlaying={() => {
+                    setIsLoading(false);
+                    lastSessionUpdate.current = Date.now();
+                    if (onPlay) onPlay();
+                }}
+                onPause={reportWatchSession}
+                onEnded={reportWatchSession}
                 onClick={togglePlay}
                 onDoubleClick={handleDoubleTap}
                 onVolumeChange={() => {

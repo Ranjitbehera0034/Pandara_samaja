@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import {
     MessageSquare, Share2, MoreHorizontal, Bookmark,
     Flag, Trash2, Edit3, Copy, EyeOff, X, Send,
-    ThumbsUp, BadgeCheck
+    ThumbsUp, BadgeCheck, Eye
 } from 'lucide-react';
 import { VideoPlayer } from './VideoPlayer';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -434,6 +434,40 @@ export function PostCard({
         }
         return false;
     };
+    const [viewRecorded, setViewRecorded] = useState(false);
+    const handleVideoPlay = async () => {
+        if (viewRecorded) return;
+        try {
+            const token = localStorage.getItem("portalToken");
+            await fetch(`${PORTAL_API_URL}/posts/${post.id}/view`, {
+                method: "POST",
+                headers: { 
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ durationSeconds: 0, segments: [] })
+            });
+            setViewRecorded(true);
+        } catch (error) {
+            console.error("Failed to record view", error);
+        }
+    };
+
+    const handleVideoWatch = async (data: { durationSeconds: number; segments: number[] }) => {
+        try {
+            const token = localStorage.getItem("portalToken");
+            await fetch(`${PORTAL_API_URL}/posts/${post.id}/view`, {
+                method: "POST",
+                headers: { 
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+        } catch (error) {
+            console.error("Failed to record watch telemetry", error);
+        }
+    };
 
     // Get media items — support both legacy `images` and new `media`
     // Convert string array to MediaItem array with proper type detection
@@ -565,7 +599,11 @@ export function PostCard({
                             animate={{ opacity: 1 }}
                         >
                             {item.type === 'video' ? (
-                                <VideoPlayer src={resolveMediaUrl(item.url)} />
+                                <VideoPlayer 
+                                    src={resolveMediaUrl(item.url)} 
+                                    onPlay={handleVideoPlay}
+                                    onWatch={handleVideoWatch}
+                                />
                             ) : (
                                 <img src={resolveMediaUrl(item.url)} alt={`Post image ${index + 1}`} className="w-full h-full object-cover max-h-[500px]" />
                             )}
@@ -596,11 +634,19 @@ export function PostCard({
                         ))}
                         <span className="ml-1">{totalReactions}</span>
                     </div>
-                    {(post.commentsCount || 0) > 0 && (
-                        <button onClick={() => setShowComments(!showComments)} className="hover:text-white transition-colors">
-                            {post.commentsCount} {post.commentsCount === 1 ? 'comment' : 'comments'}
-                        </button>
-                    )}
+                    <div className="flex items-center gap-3">
+                        {(post.commentsCount || 0) > 0 && (
+                            <button onClick={() => setShowComments(!showComments)} className="hover:text-white transition-colors">
+                                {post.commentsCount} {post.commentsCount === 1 ? 'comment' : 'comments'}
+                            </button>
+                        )}
+                        {post.views_count !== undefined && (
+                            <div className="flex items-center gap-1">
+                                <Eye size={12} className="opacity-50" />
+                                <span className="opacity-70">{post.views_count || 0} {t('postCard', 'views') || 'Views'}</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
 
