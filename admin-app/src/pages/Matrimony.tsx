@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, X, Heart, User, Eye, Info, Filter, ArrowUpDown, Pencil, Trash2, ShieldCheck, Users, Plus, Upload, FileText, Download, GraduationCap, Briefcase, Phone } from 'lucide-react';
 import { toast } from 'sonner';
@@ -70,10 +70,6 @@ export default function Matrimony() {
     const [directSubmitting, setDirectSubmitting] = useState(false);
     const [downloadingForm, setDownloadingForm] = useState(false);
 
-    useEffect(() => {
-        fetchCandidates();
-    }, [genderFilter, statusFilter]);
-
     const handleDownloadForm = async () => {
         setDownloadingForm(true);
         toast.loading('Preparing download...', { id: 'form-download' });
@@ -108,7 +104,7 @@ export default function Matrimony() {
         }
     };
 
-    const fetchCandidates = async () => {
+    const fetchCandidates = useCallback(async () => {
         setLoading(true);
         try {
             const res = await api.get('/admin/candidates');
@@ -120,7 +116,11 @@ export default function Matrimony() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [lang]);
+
+    useEffect(() => {
+        fetchCandidates();
+    }, [genderFilter, statusFilter, fetchCandidates]);
 
     const handleUpdateStatus = async (id: number, status: string, comments: string) => {
         setSubmitting(true);
@@ -172,8 +172,8 @@ export default function Matrimony() {
             setDirectPhoto(null);
             setDirectFormFile(null);
             fetchCandidates();
-        } catch (e: any) {
-            toast.error(e.response?.data?.message || e.response?.data?.error || 'Failed to add candidate');
+        } catch (_e: any) {
+            toast.error(_e.response?.data?.message || _e.response?.data?.error || 'Failed to add candidate');
         } finally {
             setDirectSubmitting(false);
         }

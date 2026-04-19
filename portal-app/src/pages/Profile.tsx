@@ -111,8 +111,8 @@ export default function Profile() {
                 toast.success(t('profile', 'profileUpdated'));
                 setIsEditing(false);
             }
-        } catch (err) {
-            console.error(err);
+        } catch (_err) {
+            console.error(_err);
             toast.error(t('profile', 'failedUpdate'));
         } finally {
             setSaving(false);
@@ -143,9 +143,9 @@ export default function Profile() {
                 toast.success(t('profile', 'photoUploaded'), { id: toastId });
                 window.location.reload();
             }
-        } catch (err) {
-            console.error(err);
-            toast.error('Failed to upload photo', { id: toastId } as any);
+        } catch (_err) {
+            console.error(_err);
+            toast.error('Failed to upload photo', { id: toastId });
         }
     };
 
@@ -162,7 +162,9 @@ export default function Profile() {
                 toast.success('Profile photo removed');
                 window.location.reload();
             }
-        } catch (e) { }
+        } catch (_e) {
+            console.error('Failed to delete photo', _e);
+        }
     };
 
     const getInitial = (name: string) => name ? name.charAt(0).toUpperCase() : '?';

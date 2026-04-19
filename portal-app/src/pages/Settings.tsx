@@ -15,16 +15,16 @@ export default function SettingsPage() {
     const { settings, updateSetting } = useSettings();
     const { t, lang, setLang } = useLanguage();
 
-    const ToggleSwitch = ({ settingKey, label }: { settingKey: string; label?: string }) => {
-        const isOn = (settings as any)[settingKey];
+    const ToggleSwitch = ({ settingKey, label }: { settingKey: keyof typeof settings; label?: string }) => {
+        const isOn = settings[settingKey];
         return (
             <button
                 onClick={() => {
                     updateSetting(settingKey as any, !isOn);
-                    toast.success(`${label || settingKey} ${!isOn ? t('settings', 'enabled') : t('settings', 'disabled')}`);
+                    toast.success(`${label || String(settingKey)} ${!isOn ? t('settings', 'enabled') : t('settings', 'disabled')}`);
                 }}
                 className="shrink-0 transition-transform active:scale-95"
-                aria-label={`Toggle ${label || settingKey}`}
+                aria-label={`Toggle ${label || String(settingKey)}`}
             >
                 {isOn ? (
                     <ToggleRight size={28} className="text-blue-500" />

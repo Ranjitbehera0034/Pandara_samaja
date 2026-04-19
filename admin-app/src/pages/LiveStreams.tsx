@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Video, Plus, Trash2, Power, PowerOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAdminAuth } from '../context/AdminAuthContext';
@@ -28,11 +28,7 @@ export default function LiveStreams() {
     const [streamUrl, setStreamUrl] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        fetchStreams();
-    }, []);
-
-    const fetchStreams = async () => {
+    const fetchStreams = useCallback(async () => {
         try {
             const res = await fetch(`${ADMIN_API_URL}/live-streams`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -41,12 +37,16 @@ export default function LiveStreams() {
             if (data.success) {
                 setStreams(data.streams || []);
             }
-        } catch (e) {
+        } catch (_e) {
             toast.error("Failed to fetch live streams");
         } finally {
             setLoading(false);
         }
-    };
+    }, [token]);
+
+    useEffect(() => {
+        fetchStreams();
+    }, [fetchStreams]);
 
     const handleCreateStream = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -75,7 +75,7 @@ export default function LiveStreams() {
             } else {
                 toast.error(data.message || "Failed to create stream");
             }
-        } catch (e) {
+        } catch (_e) {
             toast.error("An error occurred");
         } finally {
             setIsSubmitting(false);
@@ -97,7 +97,7 @@ export default function LiveStreams() {
                 toast.success(!currentStatus ? "Stream is now LIVE!" : "Stream ended.");
                 fetchStreams();
             }
-        } catch (e) {
+        } catch (_e) {
             toast.error("Failed to update status");
         }
     };
@@ -113,7 +113,7 @@ export default function LiveStreams() {
                 toast.success("Stream deleted");
                 fetchStreams();
             }
-        } catch (e) {
+        } catch (_e) {
             toast.error("Failed to delete");
         }
     };

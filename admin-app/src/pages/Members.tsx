@@ -1,26 +1,60 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../services/api';
 import { Search, Plus, Upload, Edit2, Trash2, X, Ban, CheckCircle, LayoutGrid, List, ChevronDown, ChevronUp, Camera, UserCircle, Phone, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 interface FamilyMember {
-    id: string;
+    id: string | number;
     name: string;
     relation: string;
     gender: string;
-    age: string;
+    age: string | number;
     mobile?: string;
     profile_pic?: string;
     marital_status?: string;
+}
+
+interface Member {
+    id: string | number;
+    membership_no: string;
+    name: string;
+    mobile?: string;
+    district?: string;
+    taluka?: string;
+    panchayat?: string;
+    address?: string;
+    head_gender?: string;
+    profile_photo_url?: string;
+    is_banned?: boolean;
+    ban_reason?: string;
+    aadhar_no?: string;
+    family_members?: FamilyMember[];
+    male?: number;
+    female?: number;
+    state?: string;
+    stateLocation?: string;
+}
+
+interface DemographicStats {
+    total_male: number;
+    total_female: number;
+    male_today: number;
+    male_week: number;
+    male_month: number;
+    male_year: number;
+    female_today: number;
+    female_week: number;
+    female_month: number;
+    female_year: number;
 }
 
 export default function Members() {
     const [activeTab, setActiveTab] = useState<'all' | 'pending'>('all');
     const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
     const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
-    const [members, setMembers] = useState<any[]>([]);
-    const [pendingMembers, setPendingMembers] = useState<any[]>([]);
+    const [members, setMembers] = useState<Member[]>([]);
+    const [pendingMembers, setPendingMembers] = useState<Member[]>([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
@@ -78,62 +112,12 @@ export default function Members() {
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [headAge, setHeadAge] = useState('');
     const [headMaritalStatus, setHeadMaritalStatus] = useState('');
-    const [stats, setStats] = useState<any>(null);
+    const [stats, setStats] = useState<DemographicStats | null>(null);
 
     const maleCount = (headGender === 'Male' ? 1 : 0) + familyMembers.filter(fm => fm.gender === 'Male').length;
     const femaleCount = (headGender === 'Female' ? 1 : 0) + familyMembers.filter(fm => fm.gender === 'Female').length;
 
-    useEffect(() => {
-        if (activeTab === 'all') {
-            fetchMembers();
-        } else {
-            fetchPendingMembers();
-        }
-    }, [activeTab, page, filterDistrict, filterTaluka, filterPanchayat, filterGender, filterHasPhoto, filterHasAadhar, filterMaritalStatus, filterEligibleForMarriage, filterChildrenCount]);
-
-    useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const queryParams: Record<string, string> = {};
-                if (filterDistrict) queryParams.district = filterDistrict;
-                if (filterTaluka) queryParams.taluka = filterTaluka;
-                if (filterPanchayat) queryParams.panchayat = filterPanchayat;
-
-                const res = await api.get('/members/stats/demographics', { params: queryParams });
-                if (res.data.success) {
-                    setStats(res.data.stats);
-                }
-            } catch (error) {
-                console.error('Failed to load stats', error);
-            }
-        };
-        if (activeTab === 'all') fetchStats();
-    }, [activeTab, filterDistrict, filterTaluka, filterPanchayat]);
-
-    // Fetch Filter Options
-    useEffect(() => {
-        const fetchFilters = async () => {
-            try {
-                const res = await api.get('/members/filters');
-                if (res.data.success && res.data.filters) {
-                    setFilterOptions(res.data.filters);
-                }
-            } catch (error) {
-                console.error('Failed to load filters', error);
-            }
-        };
-        fetchFilters();
-    }, []);
-
-    // Custom debounce logic if search term changes without hitting enter immediately
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            if (activeTab === 'all') fetchMembers();
-        }, 500);
-        return () => clearTimeout(timeoutId);
-    }, [search]);
-
-    const fetchMembers = async () => {
+    const fetchMembers = useCallback(async () => {
         setLoading(true);
         try {
             const params = new URLSearchParams({
@@ -163,33 +147,86 @@ export default function Members() {
             } else {
                 setMembers([]);
             }
-        } catch (e) {
+        } catch (_e) {
             toast.error('Failed to load members');
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, search, filterDistrict, filterTaluka, filterPanchayat, filterGender, filterHasPhoto, filterHasAadhar, filterMaritalStatus, filterEligibleForMarriage, filterChildrenCount]);
 
-    const fetchPendingMembers = async () => {
+    const fetchPendingMembers = useCallback(async () => {
         setLoading(true);
         try {
             const res = await api.get('/admin/members/pending');
             if (res.data.success) {
                 setPendingMembers(res.data.members || []);
             }
-        } catch (e) {
+        } catch (_e) {
             toast.error('Failed to load pending members');
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    const fetchStats = useCallback(async () => {
+        try {
+            const queryParams: Record<string, string> = {};
+            if (filterDistrict) queryParams.district = filterDistrict;
+            if (filterTaluka) queryParams.taluka = filterTaluka;
+            if (filterPanchayat) queryParams.panchayat = filterPanchayat;
+
+            const res = await api.get('/members/stats/demographics', { params: queryParams });
+            if (res.data.success) {
+                setStats(res.data.stats);
+            }
+        } catch (error) {
+            console.error('Failed to load stats', error);
+        }
+    }, [filterDistrict, filterTaluka, filterPanchayat]);
+
+    useEffect(() => {
+        if (activeTab === 'all') {
+            fetchMembers();
+        } else {
+            fetchPendingMembers();
+        }
+    }, [activeTab, page, filterDistrict, filterTaluka, filterPanchayat, filterGender, filterHasPhoto, filterHasAadhar, filterMaritalStatus, filterEligibleForMarriage, filterChildrenCount, fetchMembers, fetchPendingMembers]);
+
+
+    useEffect(() => {
+        if (activeTab === 'all') fetchStats();
+    }, [activeTab, fetchStats]);
+
+    // Fetch Filter Options
+    useEffect(() => {
+        const fetchFilters = async () => {
+            try {
+                const res = await api.get('/members/filters');
+                if (res.data.success && res.data.filters) {
+                    setFilterOptions(res.data.filters);
+                }
+            } catch (error) {
+                console.error('Failed to load filters', error);
+            }
+        };
+        fetchFilters();
+    }, []);
+
+    // Custom debounce logic if search term changes without hitting enter immediately
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (activeTab === 'all') fetchMembers();
+        }, 500);
+        return () => clearTimeout(timeoutId);
+    }, [search, activeTab, fetchMembers]);
+
 
     const handleApprove = async (membershipNo: string) => {
         try {
             await api.put(`/admin/members/${membershipNo}/status`, { status: 'approved' });
             toast.success('Member approved successfully');
             setPendingMembers(pendingMembers.filter(m => m.membership_no !== membershipNo));
-        } catch (e) {
+        } catch (_e) {
             toast.error('Failed to approve member');
         }
     };
@@ -199,7 +236,7 @@ export default function Members() {
             await api.put(`/admin/members/${membershipNo}/status`, { status: 'rejected' });
             toast.success('Member rejected');
             setPendingMembers(pendingMembers.filter(m => m.membership_no !== membershipNo));
-        } catch (e) {
+        } catch (_e) {
             toast.error('Failed to reject member');
         }
     };
@@ -249,13 +286,13 @@ export default function Members() {
         setIsModalOpen(true);
     };
 
-    const openEditModal = (m: any) => {
+    const openEditModal = (m: Member) => {
         setIsEditing(true);
-        setMemberId(m.membership_no);
+        setMemberId(String(m.membership_no));
         setMembershipNo(m.membership_no);
         setName(m.name);
-        const capitalize = (s: any) => (typeof s === 'string' && s.length > 0) ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
-        setHeadGender(capitalize(m.head_gender || ''));
+        const capitalize = (s: string | undefined) => (typeof s === 'string' && s.length > 0) ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
+        setHeadGender(capitalize(m.head_gender));
         setMobile(m.mobile || '');
         setAadharNo(m.aadhar_no || '');
         setDistrict(m.district || '');
@@ -266,13 +303,13 @@ export default function Members() {
         setHeadProfilePic(m.profile_photo_url || null);
 
         const parsedMembers = Array.isArray(m.family_members) ? m.family_members : [];
-        const isHead = (rel: any) => !rel ? false : ['head', 'self'].includes(String(rel).toLowerCase());
-        const headMember = parsedMembers.find((fm: any) => isHead(fm.relation));
-        const otherMembers = parsedMembers.filter((fm: any) => !isHead(fm.relation));
+        const isHead = (rel: string | undefined) => !rel ? false : ['head', 'self'].includes(String(rel).toLowerCase());
+        const headMember = parsedMembers.find((fm) => isHead(fm.relation));
+        const otherMembers = parsedMembers.filter((fm) => !isHead(fm.relation));
 
-        setHeadAge(headMember?.age || '');
+        setHeadAge(String(headMember?.age || ''));
         setHeadMaritalStatus(headMember?.marital_status || '');
-        setFamilyMembers(otherMembers.map((fm: any) => ({
+        setFamilyMembers(otherMembers.map((fm) => ({
             id: Math.random().toString(36).substr(2, 9),
             name: fm.name || '',
             relation: fm.relation || '',
@@ -360,7 +397,7 @@ export default function Members() {
         }
     };
 
-    const handleFamilyPhotoUpload = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFamilyPhotoUpload = (id: string | number, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();
@@ -378,11 +415,11 @@ export default function Members() {
         ]);
     };
 
-    const updateFamilyMember = (id: string, field: keyof FamilyMember, value: string) => {
+    const updateFamilyMember = (id: string | number, field: keyof FamilyMember, value: string) => {
         setFamilyMembers(familyMembers.map(fm => fm.id === id ? { ...fm, [field]: value } : fm));
     };
 
-    const removeFamilyMember = (id: string) => {
+    const removeFamilyMember = (id: string | number) => {
         setFamilyMembers(familyMembers.filter(fm => fm.id !== id));
     };
 
@@ -758,7 +795,7 @@ export default function Members() {
                                                     <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50">
                                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Family Members List</p>
                                                         <ul className="space-y-1.5">
-                                                            {m.family_members.map((fm: any, idx: number) => (
+                                                            {m.family_members.map((fm, idx: number) => (
                                                                 <li key={idx} className="flex justify-between items-center text-xs p-2 bg-white dark:bg-slate-800 rounded border border-slate-100 dark:border-slate-700">
                                                                     <span className="font-medium">{fm.name}</span>
                                                                     <div className="text-slate-500 flex items-center gap-2">

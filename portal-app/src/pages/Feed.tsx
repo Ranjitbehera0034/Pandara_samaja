@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CreatePost } from '../components/feed/CreatePost';
 import { PostCard } from '../components/feed/PostCard';
 import { Stories } from '../components/feed/Stories';
@@ -58,6 +58,94 @@ export default function Feed() {
 
     const getToken = () => localStorage.getItem("portalToken");
 
+    const fetchPosts = useCallback(async () => {
+        try {
+            const token = getToken();
+            if (!token) { setLoading(false); return; }
+
+            // Fetch Member Feed Posts
+            const feedPromise = fetch(`${PORTAL_API_URL}/posts`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then(res => res.json()).catch(() => ({ success: false, posts: [] }));
+
+            // Fetch Admin Announcements
+            const announcementsPromise = fetch(`${API_BASE_URL}/posts`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then(res => res.json()).catch(() => []); 
+
+            const [feedData, announcementsData] = await Promise.all([feedPromise, announcementsPromise]);
+
+            let allPosts: Post[] = [];
+
+            // Add standard feed posts
+            if (feedData && feedData.success && Array.isArray(feedData.posts)) {
+                const mappedPosts: Post[] = (feedData.posts as any[]).map((p) => ({
+                    id: p.id.toString(),
+                    authorId: p.author_id,
+                    authorName: p.author_name,
+                    authorAvatar: p.author_photo,
+                    location: p.location,
+                    content: p.text_content || "",
+                    images: p.images || [],
+                    media: (p.media || []).map((m: any) => ({ url: m.url, type: m.type || 'image' })),
+                    likes: Number(p.likes_count) || 0,
+                    reactions: { like: Number(p.likes_count) || 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
+                    comments: [],
+                    commentsCount: Number(p.comments_count) || 0,
+                    timestamp: p.created_at,
+                    isLiked: p.liked_by_me || false,
+                    isBookmarked: false,
+                    shareCount: Number(p.share_count) || 0
+                }));
+                allPosts = [...allPosts, ...mappedPosts];
+            }
+
+            // Extract and map Announcements
+            let rawAnnouncements: any[] = [];
+            if (Array.isArray(announcementsData)) {
+                rawAnnouncements = announcementsData;
+            } else if (announcementsData && Array.isArray(announcementsData.posts)) {
+                rawAnnouncements = announcementsData.posts;
+            } else if (announcementsData && Array.isArray(announcementsData.data)) {
+                rawAnnouncements = announcementsData.data;
+            }
+
+            if (rawAnnouncements.length > 0) {
+                const mappedAnnouncements: Post[] = (rawAnnouncements as any[]).map((p) => ({
+                    id: `annc_${p.id}`,
+                    authorId: 'admin',
+                    authorName: 'Pandara Samaja Admin',
+                    authorAvatar: 'https://cdn-icons-png.flaticon.com/512/9133/9133036.png',
+                    location: undefined,
+                    content: `📢 **OFFICIAL ANNOUNCEMENT: ${p.title}**\n\n${p.content}`,
+                    images: [p.image_url, p.video_url].filter(Boolean) as string[],
+                    media: [
+                        ...(p.image_url ? [{ url: p.image_url, type: 'image' }] : []),
+                        ...(p.video_url ? [{ url: p.video_url, type: 'video' }] : [])
+                    ] as MediaItem[],
+                    likes: 0,
+                    reactions: { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
+                    comments: [],
+                    commentsCount: 0,
+                    timestamp: p.created_at,
+                    isLiked: false,
+                    isBookmarked: false,
+                    shareCount: 0
+                }));
+                allPosts = [...allPosts, ...mappedAnnouncements];
+            }
+
+            // Sort all items combined by descending date
+            allPosts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+            setPosts(allPosts);
+        } catch (_error) {
+            console.error(_error);
+        } finally {
+            setLoading(false);
+        }
+    }, [t]);
+
     useEffect(() => {
         fetchPosts();
 
@@ -109,7 +197,16 @@ export default function Feed() {
             })));
         });
 
-        socket.on('new_comment', (data: { postId: string, comment: any }) => {
+        socket.on('new_comment', (data: { postId: string, comment: {
+            id: number;
+            member_id: string;
+            author_name: string;
+            author_photo?: string;
+            text: string;
+            created_at: string;
+            parent_id?: number;
+            likes_count?: number;
+        } }) => {
             const mappedComment: Comment = {
                 id: data.comment.id.toString(),
                 authorId: data.comment.member_id,
@@ -130,95 +227,8 @@ export default function Feed() {
         });
 
         return () => { socket.disconnect(); };
-    }, []);
+    }, [fetchPosts, t]);
 
-    const fetchPosts = async () => {
-        try {
-            const token = getToken();
-            if (!token) { setLoading(false); return; }
-
-            // Fetch Member Feed Posts
-            const feedPromise = fetch(`${PORTAL_API_URL}/posts`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            }).then(res => res.json()).catch(() => ({ success: false, posts: [] }));
-
-            // Fetch Admin Announcements
-            const announcementsPromise = fetch(`${API_BASE_URL}/posts`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            }).then(res => res.json()).catch(() => []); // Blog route usually returns array directly or { success, posts }
-
-            const [feedData, announcementsData] = await Promise.all([feedPromise, announcementsPromise]);
-
-            let allPosts: Post[] = [];
-
-            // Add standard feed posts
-            if (feedData && feedData.success && Array.isArray(feedData.posts)) {
-                const mappedPosts: Post[] = feedData.posts.map((p: any) => ({
-                    id: p.id.toString(),
-                    authorId: p.author_id,
-                    authorName: p.author_name,
-                    authorAvatar: p.author_photo,
-                    location: p.location,
-                    content: p.text_content || "",
-                    images: p.images || [],
-                    media: (p.media || []).map((m: any) => ({ url: m.url, type: m.type || 'image' })),
-                    likes: Number(p.likes_count) || 0,
-                    reactions: { like: Number(p.likes_count) || 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
-                    comments: [],
-                    commentsCount: Number(p.comments_count) || 0,
-                    timestamp: p.created_at,
-                    isLiked: p.liked_by_me || false,
-                    isBookmarked: false,
-                    shareCount: Number(p.share_count) || 0
-                }));
-                allPosts = [...allPosts, ...mappedPosts];
-            }
-
-            // Extract and map Announcements
-            let rawAnnouncements: any[] = [];
-            if (Array.isArray(announcementsData)) {
-                rawAnnouncements = announcementsData;
-            } else if (announcementsData && Array.isArray(announcementsData.posts)) {
-                rawAnnouncements = announcementsData.posts;
-            } else if (announcementsData && Array.isArray(announcementsData.data)) {
-                rawAnnouncements = announcementsData.data;
-            }
-
-            if (rawAnnouncements.length > 0) {
-                const mappedAnnouncements: Post[] = rawAnnouncements.map((p: any) => ({
-                    id: `annc_${p.id}`,
-                    authorId: 'admin',
-                    authorName: 'Pandara Samaja Admin',
-                    authorAvatar: 'https://cdn-icons-png.flaticon.com/512/9133/9133036.png', // Default megaphone/admin icon
-                    location: undefined,
-                    content: `📢 **OFFICIAL ANNOUNCEMENT: ${p.title}**\n\n${p.content}`,
-                    images: [p.image_url, p.video_url].filter(Boolean) as string[],
-                    media: [
-                        ...(p.image_url ? [{ url: p.image_url, type: 'image' }] : []),
-                        ...(p.video_url ? [{ url: p.video_url, type: 'video' }] : [])
-                    ] as MediaItem[],
-                    likes: 0,
-                    reactions: { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
-                    comments: [],
-                    commentsCount: 0,
-                    timestamp: p.created_at,
-                    isLiked: false,
-                    isBookmarked: false,
-                    shareCount: 0
-                }));
-                allPosts = [...allPosts, ...mappedAnnouncements];
-            }
-
-            // Sort all items combined by descending date
-            allPosts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-            setPosts(allPosts);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleAddStory = (file: File, textOverlay?: string, textPosition?: 'top' | 'center' | 'bottom', textColor?: string) => {
         if (!member) return;

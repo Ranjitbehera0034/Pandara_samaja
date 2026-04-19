@@ -35,7 +35,11 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
     // Watch Session Tracking
     const watchedSegments = useRef<Set<number>>(new Set());
     const [totalWatchTime, setTotalWatchTime] = useState(0);
-    const lastSessionUpdate = useRef<number>(Date.now());
+    const lastSessionUpdate = useRef<number>(0);
+
+    useEffect(() => {
+        lastSessionUpdate.current = Date.now();
+    }, []);
 
     const controlsTimeoutRef = useRef<number | null>(null);
     const volumeTimeoutRef = useRef<number | null>(null);
@@ -163,7 +167,8 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
         if (!videoRef.current) return;
         
         const currentPos = videoRef.current.currentTime;
-        const currentProgress = (currentPos / videoRef.current.duration) * 100;
+        const dur = videoRef.current.duration || 0;
+        const currentProgress = dur > 0 ? (currentPos / dur) * 100 : 0;
         setProgress(currentProgress);
         setCurrentTime(currentPos);
 
@@ -192,7 +197,8 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
 
     const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!videoRef.current) return;
-        const seekTime = (parseFloat(e.target.value) / 100) * videoRef.current.duration;
+        const dur = videoRef.current.duration || 0;
+        const seekTime = (parseFloat(e.target.value) / 100) * dur;
         videoRef.current.currentTime = seekTime;
         setProgress(parseFloat(e.target.value));
         setCurrentTime(seekTime);

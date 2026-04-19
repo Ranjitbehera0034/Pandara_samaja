@@ -1,18 +1,30 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Users, Search, Plus, Trash2, Edit2, Save, X, Image as ImageIcon, Briefcase, Layers } from 'lucide-react';
 import api from '../services/api';
 import { toast } from 'sonner';
 import { getImageUrl } from '../utils/imageUtils';
 
+interface Leader {
+    id: number;
+    name: string;
+    name_or?: string;
+    role: string;
+    role_or?: string;
+    level: string;
+    location?: string;
+    display_order?: number;
+    image_url?: string;
+}
+
 export default function Leaders() {
-    const [leaders, setLeaders] = useState<any[]>([]);
+    const [leaders, setLeaders] = useState<Leader[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [levelFilter, setLevelFilter] = useState('All');
     const [locationFilter, setLocationFilter] = useState('');
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingLeader, setEditingLeader] = useState<any>(null);
+    const [editingLeader, setEditingLeader] = useState<Leader | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         name_or: '',
@@ -33,12 +45,7 @@ export default function Leaders() {
 
     const [allMembers, setAllMembers] = useState<any[]>([]);
 
-    useEffect(() => {
-        fetchLeaders();
-        fetchMembers();
-    }, []);
-
-    const fetchMembers = async () => {
+    const fetchMembers = useCallback(async () => {
         try {
             const res = await api.get('/members');
             if (res.data.success) {
@@ -46,27 +53,32 @@ export default function Leaders() {
             } else if (Array.isArray(res.data)) {
                 setAllMembers(res.data);
             }
-        } catch (error) {
-            console.error('Failed to fetch members for locations:', error);
+        } catch (_error) {
+            console.error('Failed to fetch members for locations:', _error);
         }
-    };
+    }, []);
 
-    const fetchLeaders = async () => {
+    const fetchLeaders = useCallback(async () => {
         try {
             setLoading(true);
             const res = await api.get('/leaders');
             if (res.data.success) {
                 setLeaders(res.data.data || []);
             }
-        } catch (error) {
-            console.error('Failed to fetch leaders:', error);
+        } catch (_error) {
+            console.error('Failed to fetch leaders:', _error);
             toast.error('Failed to load leaders');
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const handleOpenModal = (leader: any = null) => {
+    useEffect(() => {
+        fetchLeaders();
+        fetchMembers();
+    }, [fetchLeaders, fetchMembers]);
+
+    const handleOpenModal = (leader: Leader | null = null) => {
         if (leader) {
             setEditingLeader(leader);
             setFormData({
@@ -132,8 +144,8 @@ export default function Leaders() {
             }
             setIsModalOpen(false);
             fetchLeaders();
-        } catch (error) {
-            console.error('Failed to save leader:', error);
+        } catch (_error) {
+            console.error('Failed to save leader:', _error);
             toast.error('Failed to save leader');
         }
     };
@@ -144,8 +156,8 @@ export default function Leaders() {
             await api.delete(`/leaders/${id}`);
             toast.success('Leader deleted successfully');
             fetchLeaders();
-        } catch (error) {
-            console.error('Failed to delete leader:', error);
+        } catch (_error) {
+            console.error('Failed to delete leader:', _error);
             toast.error('Failed to delete leader');
         }
     };

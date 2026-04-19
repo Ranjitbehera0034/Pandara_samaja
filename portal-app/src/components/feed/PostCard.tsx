@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { PollDisplay } from './Poll';
-import type { Post, ReactionType, Comment, MediaItem } from '../../types';
+import type { Post, Comment, ReactionType, StatusUpdate, Poll, MediaItem } from '../../types';
 import { PORTAL_API_URL, resolveMediaUrl } from '../../config/apiConfig';
 
 // ─── Content Moderation ──────────────────────────────

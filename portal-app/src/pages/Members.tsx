@@ -66,7 +66,7 @@ function MemberCard({ member, expanded, onToggle, subscribing, onSubscribe, onMe
     subscribing: boolean; onSubscribe: () => void; onMessage: () => void;
 }) {
     const fmList: FamilyMember[] = Array.isArray(member.family_members) ? member.family_members : [];
-    const isActive = wasRecentlyActive((member as any).last_portal_login);
+    const isActive = wasRecentlyActive((member as unknown as { last_portal_login?: string }).last_portal_login);
     const maleCount = member.male ?? 0;
     const femaleCount = member.female ?? 0;
     const female = isFemale(member.head_gender);
@@ -223,7 +223,7 @@ function TableView({ members, expandedRows, onToggleRow, subscribing, onSubscrib
                     {members.map(m => {
                         const fmList: FamilyMember[] = Array.isArray(m.family_members) ? m.family_members : [];
                         const exp = expandedRows.has(m.membership_no);
-                        const isActive = wasRecentlyActive((m as any).last_portal_login);
+                        const isActive = wasRecentlyActive((m as unknown as { last_portal_login?: string }).last_portal_login);
                         return (
                             <>
                                 <tr key={m.membership_no} className="bg-slate-800/40 hover:bg-slate-800/70 transition-colors">
@@ -369,7 +369,18 @@ export default function Members() {
     const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
     const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
     const [showFilters, setShowFilters] = useState(false);
-    const [stats, setStats] = useState<any>(null);
+    const [stats, setStats] = useState<{
+        total_male: number;
+        total_female: number;
+        male_today: number;
+        male_week: number;
+        male_month: number;
+        male_year: number;
+        female_today: number;
+        female_week: number;
+        female_month: number;
+        female_year: number;
+    } | null>(null);
     const [subscribing, setSubscribing] = useState<string | null>(null);
     const [filterOptions, setFilterOptions] = useState<{
         districts: string[];
@@ -395,7 +406,7 @@ export default function Members() {
             .then(data => {
                 if (data.success) setStats(data.stats);
             })
-            .catch(err => console.error('Failed to load stats', err));
+            .catch(_err => console.error('Failed to load stats', _err));
     }, [filterDistrict, filterTaluka, filterPanchayat]);
 
     // Fetch filter options once
@@ -474,14 +485,21 @@ export default function Members() {
             if (!res.ok) throw new Error(data.message);
             setMembers(prev => prev.map(m => m.membership_no === memberId ? { ...m, is_subscribed: data.subscribed } : m));
             toast.success(data.message);
-        } catch (e: any) { toast.error(e.message || 'Error'); }
+        } catch (_e: unknown) {
+            const err = _e as { message?: string };
+            toast.error(err.message || 'Error');
+        }
         finally { setSubscribing(null); }
     };
 
     const toggleExpand = (id: string) => {
         setExpandedCards(prev => {
             const n = new Set(prev);
-            n.has(id) ? n.delete(id) : n.add(id);
+            if (n.has(id)) {
+                n.delete(id);
+            } else {
+                n.add(id);
+            }
             return n;
         });
     };

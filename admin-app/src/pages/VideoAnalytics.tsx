@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import api from '../services/api';
 import { 
     Video, Users, MousePointer2, TrendingUp, 
-    Clock, Tag, Eye, ArrowUpRight, BarChart3,
+    Clock, Tag, Eye, ArrowUpRight, BarChart,
     Layers, Play
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -127,7 +127,7 @@ export default function VideoAnalytics() {
                         <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                             <Clock size={16} /> Watch Duration
                         </h2>
-                        <span className="p-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 rounded-xl"><BarChart3 size={14} /></span>
+                        <span className="p-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 rounded-xl"><BarChart size={14} /></span>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         {data?.durationEngagement.map((dur, idx) => (
