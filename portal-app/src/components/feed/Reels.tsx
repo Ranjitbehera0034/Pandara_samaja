@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-mo
 import type { PanInfo } from 'framer-motion';
 import {
     Play, Volume2, VolumeX, Heart, MessageSquare,
-    Share2, Bookmark, Music2, X, ChevronUp, ChevronDown, Plus, Trash2
+    Share2, Bookmark, Music2, X, ChevronUp, ChevronDown, Plus, Trash2, Eye
 } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -185,6 +185,12 @@ function ReelItem({
                     <MessageSquare size={26} className="text-white" />
                     <span className="text-white text-[11px] font-medium">{reel.comments_count}</span>
                 </button>
+
+                {/* Views */}
+                <div className="flex flex-col items-center gap-0.5">
+                    <Eye size={24} className="text-white/80" />
+                    <span className="text-white text-[11px] font-medium">{reel.views_count || 0}</span>
+                </div>
 
                 {/* Share */}
                 <button onClick={handleShare} className="flex flex-col items-center gap-0.5">
