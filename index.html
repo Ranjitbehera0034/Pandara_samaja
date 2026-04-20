@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://lh3.googleusercontent.com https://ui-avatars.com https://cdn-icons-png.flaticon.com https://images.unsplash.com https://firebasestorage.googleapis.com https://*.firebasestorage.app; connect-src 'self' https://pandara-samaja-backend.onrender.com wss://pandara-samaja-backend.onrender.com https://*.googleapis.com https://*.firebasestorage.app; frame-src https://challenges.cloudflare.com https://www.youtube.com https://youtu.be https://drive.google.com; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="description"
@@ -471,8 +470,9 @@
                     }
 
                     if (fileId) {
-                        // Serve from locally downloaded cache
-                        return 'assets/img/leaders/' + fileId + '.jpg';
+                        // Return the Google Drive direct thumbnail URL as a fallback if assets/img/leaders/ is missing
+                        // The assets/img/leaders/ folder only has placeholder.png currently
+                        return 'https://lh3.googleusercontent.com/d/' + fileId;
                     }
                     // Non-Google-Drive URLs (other http, blob, assets)
                     if (url.startsWith('http') || url.startsWith('blob') || url.startsWith('assets/')) {
