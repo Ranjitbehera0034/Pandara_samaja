@@ -220,6 +220,7 @@ export function PostCard({
     const [bookmarked, setBookmarked] = useState(post.isBookmarked || false);
     const [myReaction, setMyReaction] = useState<ReactionType | null>(post.myReaction || (post.isLiked ? 'like' : null));
     const [localReactions, setLocalReactions] = useState(post.reactions || { like: post.likes, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 });
+    const [localViews, setLocalViews] = useState(post.views_count || 0);
 
     useEffect(() => {
         setLocalReactions(prev => ({ ...prev, like: post.likes }));
@@ -448,6 +449,7 @@ export function PostCard({
                 body: JSON.stringify({ durationSeconds: 0, segments: [] })
             });
             setViewRecorded(true);
+            setLocalViews(prev => prev + 1);
         } catch (error) {
             console.error("Failed to record view", error);
         }
@@ -625,8 +627,8 @@ export function PostCard({
                 />
             )}
 
-            {/* ─── Reaction Summary ─── */}
-            {totalReactions > 0 && (
+            {/* ─── Reaction & Views Summary ─── */}
+            {(totalReactions > 0 || (post.views_count !== undefined && post.views_count > 0)) && (
                 <div className="flex items-center justify-between px-1 py-2 text-xs text-slate-400">
                     <div className="flex items-center gap-1">
                         {topReactions.map(r => (
@@ -640,10 +642,10 @@ export function PostCard({
                                 {post.commentsCount} {post.commentsCount === 1 ? 'comment' : 'comments'}
                             </button>
                         )}
-                        {post.views_count !== undefined && (
+                        {localViews !== undefined && (
                             <div className="flex items-center gap-1">
                                 <Eye size={12} className="opacity-50" />
-                                <span className="opacity-70">{post.views_count || 0} {t('postCard', 'views') || 'Views'}</span>
+                                <span className="opacity-70">{localViews || 0} {t('postCard', 'views') || 'Views'}</span>
                             </div>
                         )}
                     </div>

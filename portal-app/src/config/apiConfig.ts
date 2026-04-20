@@ -30,5 +30,15 @@ export const resolveMediaUrl = (url: string | null | undefined): string => {
     
     // Handle both /api/v1 and api/v1
     const normalizedPath = url.startsWith('/') ? url : `/${url}`;
-    return `${host}${normalizedPath}`;
+    
+    // Append current portal token to support authentication for tags that don't send headers
+    const token = typeof window !== 'undefined' ? localStorage.getItem('portalToken') : null;
+    const finalUrl = `${host}${normalizedPath}`;
+    
+    if (token && finalUrl.includes('/api/v1/portal/media')) {
+        const separator = finalUrl.includes('?') ? '&' : '?';
+        return `${finalUrl}${separator}token=${token}`;
+    }
+    
+    return finalUrl;
 };

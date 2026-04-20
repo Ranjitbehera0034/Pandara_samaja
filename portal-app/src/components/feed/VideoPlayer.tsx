@@ -31,15 +31,18 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
     const [showRateMenu, setShowRateMenu] = useState(false);
     const [bufferProgress, setBufferProgress] = useState(0);
     const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+    const [hasError, setHasError] = useState(false);
     
-    // Watch Session Tracking
+    // Watch Session Tracking — use REFS (not state) to avoid re-render cascades
     const watchedSegments = useRef<Set<number>>(new Set());
-    const [totalWatchTime, setTotalWatchTime] = useState(0);
-    const lastSessionUpdate = useRef<number>(0);
-
-    useEffect(() => {
-        lastSessionUpdate.current = Date.now();
-    }, []);
+    const totalWatchTimeRef = useRef<number>(0);
+    const lastSessionUpdate = useRef<number>(Date.now());
+    const onPlayFiredRef = useRef(false);
+    // Keep stable references to callbacks
+    const onWatchRef = useRef(onWatch);
+    const onPlayRef = useRef(onPlay);
+    useEffect(() => { onWatchRef.current = onWatch; }, [onWatch]);
+    useEffect(() => { onPlayRef.current = onPlay; }, [onPlay]);
 
     const controlsTimeoutRef = useRef<number | null>(null);
     const volumeTimeoutRef = useRef<number | null>(null);
@@ -48,21 +51,20 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
     const resetControlsTimeout = useCallback(() => {
         setShowControls(true);
         if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-        controlsTimeoutRef.current = setTimeout(() => {
-            if (isPlaying) setShowControls(false);
+        controlsTimeoutRef.current = window.setTimeout(() => {
+            if (videoRef.current && !videoRef.current.paused) setShowControls(false);
         }, 3000);
-    }, [isPlaying]);
+    }, []);
 
-    // Report watch session
+    // Report watch session — stable function, reads from refs
     const reportWatchSession = useCallback(() => {
-        if (watchedSegments.current.size > 0 && onWatch) {
-            onWatch({
-                durationSeconds: Math.round(totalWatchTime),
+        if (watchedSegments.current.size > 0 && onWatchRef.current) {
+            onWatchRef.current({
+                durationSeconds: Math.round(totalWatchTimeRef.current),
                 segments: Array.from(watchedSegments.current).sort((a, b) => a - b)
             });
-            // Don't clear, we might continue if just paused
         }
-    }, [onWatch, totalWatchTime]);
+    }, []); // No dependencies — reads from refs
 
     useEffect(() => {
         resetControlsTimeout();
@@ -71,20 +73,24 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
         };
     }, [resetControlsTimeout]);
 
-    // Reset state when src changes
+    // Reset state when src changes — now safe because reportWatchSession is stable
     useEffect(() => {
-        if (isPlaying) reportWatchSession();
+        reportWatchSession();
         setIsPlaying(false);
         setIsLoading(true);
         setProgress(0);
         setCurrentTime(0);
         setBufferProgress(0);
-        setTotalWatchTime(0);
+        setHasError(false);
+        totalWatchTimeRef.current = 0;
         watchedSegments.current.clear();
+        onPlayFiredRef.current = false;
+        lastSessionUpdate.current = Date.now();
         if (videoRef.current) {
             videoRef.current.load();
         }
-    }, [src, reportWatchSession]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [src]); // Only re-run when src actually changes
 
     // Sync volume to video element whenever volume or muted state changes
     useEffect(() => {
@@ -103,10 +109,8 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
                         videoRef.current?.play().catch(e => console.log("Autoplay blocked:", e));
-                        setIsPlaying(true);
                     } else {
                         videoRef.current?.pause();
-                        setIsPlaying(false);
                     }
                 });
             },
@@ -120,16 +124,34 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
         return () => observer.disconnect();
     }, [autoPlayEnabled]);
 
+    // Listen for fullscreen changes (e.g. user presses Esc)
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    // Report session when component unmounts
+    useEffect(() => {
+        return () => {
+            reportWatchSession();
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const togglePlay = (e?: React.MouseEvent) => {
         e?.stopPropagation();
         if (!videoRef.current) return;
         
-        if (isPlaying) {
-            videoRef.current.pause();
+        if (videoRef.current.paused || videoRef.current.ended) {
+            videoRef.current.play().catch(err => {
+                console.error('Play failed:', err);
+            });
         } else {
-            videoRef.current.play();
+            videoRef.current.pause();
         }
-        setIsPlaying(!isPlaying);
         resetControlsTimeout();
     };
 
@@ -138,7 +160,6 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
         if (!videoRef.current) return;
         
         if (isMuted) {
-            // Unmuting - restore previous volume (or default to 1)
             const newVol = volume === 0 ? 1 : volume;
             setVolume(newVol);
             setIsMuted(false);
@@ -146,10 +167,9 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
             setIsMuted(true);
         }
         
-        // Toggle volume slider visibility on mobile (click-based instead of hover)
         setShowVolumeSlider(prev => !prev);
         if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
-        volumeTimeoutRef.current = setTimeout(() => setShowVolumeSlider(false), 4000);
+        volumeTimeoutRef.current = window.setTimeout(() => setShowVolumeSlider(false), 4000);
     };
 
     const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,46 +178,47 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
         setVolume(val);
         setIsMuted(val === 0);
         
-        // Keep slider visible while interacting
         if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
-        volumeTimeoutRef.current = setTimeout(() => setShowVolumeSlider(false), 4000);
+        volumeTimeoutRef.current = window.setTimeout(() => setShowVolumeSlider(false), 4000);
     };
 
-    const handleProgress = () => {
+    const handleTimeUpdate = () => {
         if (!videoRef.current) return;
         
         const currentPos = videoRef.current.currentTime;
         const dur = videoRef.current.duration || 0;
-        const currentProgress = dur > 0 ? (currentPos / dur) * 100 : 0;
-        setProgress(currentProgress);
+        if (!isFinite(dur) || dur <= 0) return;
+
+        setProgress((currentPos / dur) * 100);
         setCurrentTime(currentPos);
 
-        // Track segments (5s buckets)
-        if (isPlaying) {
+        // Track segments (5s buckets) — writes to refs, no re-renders
+        if (!videoRef.current.paused) {
             const segmentIndex = Math.floor(currentPos / 5);
             watchedSegments.current.add(segmentIndex);
 
-            // Track total watch time
             const now = Date.now();
             const delta = (now - lastSessionUpdate.current) / 1000;
-            if (delta > 0 && delta < 2) { // Guard against spikes
-                setTotalWatchTime(prev => prev + delta);
+            if (delta > 0 && delta < 2) {
+                totalWatchTimeRef.current += delta;
             }
             lastSessionUpdate.current = now;
         }
+    };
 
-        if (videoRef.current.buffered.length > 0) {
-            const bufferedEnd = videoRef.current.buffered.end(videoRef.current.buffered.length - 1);
-            const dur = videoRef.current.duration;
-            if (dur > 0) {
-                setBufferProgress((bufferedEnd / dur) * 100);
-            }
+    const handleBufferProgress = () => {
+        if (!videoRef.current) return;
+        const vid = videoRef.current;
+        if (vid.buffered.length > 0 && isFinite(vid.duration) && vid.duration > 0) {
+            const bufferedEnd = vid.buffered.end(vid.buffered.length - 1);
+            setBufferProgress((bufferedEnd / vid.duration) * 100);
         }
     };
 
     const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!videoRef.current) return;
         const dur = videoRef.current.duration || 0;
+        if (!isFinite(dur) || dur <= 0) return;
         const seekTime = (parseFloat(e.target.value) / 100) * dur;
         videoRef.current.currentTime = seekTime;
         setProgress(parseFloat(e.target.value));
@@ -212,21 +233,19 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
             containerRef.current.requestFullscreen().catch(err => {
                 console.error(`Error attempting to enable full-screen mode: ${err.message}`);
             });
-            setIsFullscreen(true);
         } else {
             document.exitFullscreen();
-            setIsFullscreen(false);
         }
     };
 
     const seekBackward = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (videoRef.current) videoRef.current.currentTime -= 10;
+        if (videoRef.current) videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
     };
 
     const seekForward = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (videoRef.current) videoRef.current.currentTime += 10;
+        if (videoRef.current) videoRef.current.currentTime = Math.min(videoRef.current.duration || 0, videoRef.current.currentTime + 10);
     };
 
     const handleDoubleTap = (e: React.MouseEvent) => {
@@ -235,15 +254,16 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
         
         const x = e.clientX - rect.left;
         if (x < rect.width / 3) {
-            if (videoRef.current) videoRef.current.currentTime -= 10;
+            if (videoRef.current) videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
         } else if (x > (rect.width * 2) / 3) {
-            if (videoRef.current) videoRef.current.currentTime += 10;
+            if (videoRef.current) videoRef.current.currentTime = Math.min(videoRef.current.duration || 0, videoRef.current.currentTime + 10);
         } else {
             togglePlay();
         }
     };
 
     const formatTime = (seconds: number) => {
+        if (!isFinite(seconds) || seconds < 0) return "0:00";
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
         const s = Math.floor(seconds % 60);
@@ -266,45 +286,71 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
                 ref={videoRef}
                 src={src}
                 poster={poster}
-                loop
                 playsInline
                 preload="metadata"
                 muted={isMuted}
                 className="w-full h-full object-contain cursor-pointer"
-                onTimeUpdate={handleProgress}
-                onProgress={handleProgress}
+                onTimeUpdate={handleTimeUpdate}
+                onProgress={handleBufferProgress}
                 onLoadedMetadata={() => { 
-                    setDuration(videoRef.current?.duration || 0); 
+                    const dur = videoRef.current?.duration || 0;
+                    setDuration(isFinite(dur) ? dur : 0); 
                     setCurrentTime(videoRef.current?.currentTime || 0);
                     setIsLoading(false);
-                    // Ensure volume is synced after metadata loads
+                    setHasError(false);
                     if (videoRef.current) {
                         videoRef.current.volume = volume;
                         videoRef.current.muted = isMuted;
                     }
                 }}
                 onWaiting={() => setIsLoading(true)}
+                onCanPlay={() => setIsLoading(false)}
                 onPlaying={() => {
+                    setIsPlaying(true);
                     setIsLoading(false);
+                    setHasError(false);
                     lastSessionUpdate.current = Date.now();
-                    if (onPlay) onPlay();
+                    if (!onPlayFiredRef.current) {
+                        onPlayFiredRef.current = true;
+                        if (onPlayRef.current) onPlayRef.current();
+                    }
                 }}
-                onPause={reportWatchSession}
-                onEnded={reportWatchSession}
+                onPause={() => {
+                    setIsPlaying(false);
+                    reportWatchSession();
+                }}
+                onEnded={() => {
+                    setIsPlaying(false);
+                    setProgress(100);
+                    reportWatchSession();
+                }}
                 onClick={togglePlay}
                 onDoubleClick={handleDoubleTap}
+                onError={(e) => {
+                    const videoError = (e.target as HTMLVideoElement).error;
+                    console.error('Video Player Error:', {
+                        code: videoError?.code,
+                        message: videoError?.message,
+                        src: src
+                    });
+                    setIsLoading(false);
+                    setHasError(true);
+                }}
                 onVolumeChange={() => {
-                    // Sync React state if native controls change volume
                     if (videoRef.current) {
                         setVolume(videoRef.current.volume);
                         setIsMuted(videoRef.current.muted);
                     }
                 }}
+                onStalled={() => {
+                    // Video data is not forthcoming — show loading but don't error
+                    if (!videoRef.current?.paused) setIsLoading(true);
+                }}
             />
 
             {/* Premium Buffering Indicator */}
             <AnimatePresence>
-                {isLoading && (
+                {isLoading && !hasError && (
                     <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -316,9 +362,37 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
                 )}
             </AnimatePresence>
 
+            {/* Error State */}
+            <AnimatePresence>
+                {hasError && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 z-10 gap-3"
+                    >
+                        <p className="text-white/80 text-sm font-medium">Video failed to load</p>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setHasError(false);
+                                setIsLoading(true);
+                                if (videoRef.current) {
+                                    videoRef.current.load();
+                                    videoRef.current.play().catch(() => {});
+                                }
+                            }}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-lg font-medium transition-colors"
+                        >
+                            Retry
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Play/Pause Large Center Icon */}
             <AnimatePresence>
-                {!isPlaying && !isLoading && (
+                {!isPlaying && !isLoading && !hasError && (
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -387,13 +461,13 @@ export function VideoPlayer({ src, poster, autoPlayEnabled = false, onPlay, onWa
                                         if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
                                     }}
                                     onMouseLeave={() => {
-                                        volumeTimeoutRef.current = setTimeout(() => setShowVolumeSlider(false), 2000);
+                                        volumeTimeoutRef.current = window.setTimeout(() => setShowVolumeSlider(false), 2000);
                                     }}
                                     onTouchStart={() => {
                                         if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
                                     }}
                                     onTouchEnd={() => {
-                                        volumeTimeoutRef.current = setTimeout(() => setShowVolumeSlider(false), 4000);
+                                        volumeTimeoutRef.current = window.setTimeout(() => setShowVolumeSlider(false), 4000);
                                     }}
                                 >
                                     <input
