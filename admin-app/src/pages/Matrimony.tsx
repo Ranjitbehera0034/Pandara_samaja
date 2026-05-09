@@ -75,14 +75,12 @@ export default function Matrimony() {
         setDownloadingForm(true);
         toast.loading('Preparing download...', { id: 'form-download' });
         try {
-            // Use Firebase Storage SDK directly — the form is at a known path
-            const { ref, getDownloadURL } = await import('firebase/storage');
-            const { storage } = await import('../config/firebaseConfig');
-            const formRef = ref(storage, 'pandarasamaja document/matrimony form/CASTE_MATRIMONY.pdf');
-            const downloadUrl = await getDownloadURL(formRef);
+            // Direct Firebase Storage download URL (alt=media forces file content, not metadata)
+            const bucket = 'nikhila-odisha-pandara-samaja.firebasestorage.app';
+            const filePath = encodeURIComponent('pandarasamaja document/matrimony form/CASTE_MATRIMONY.pdf');
+            const directUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${filePath}?alt=media`;
 
-            // Open in new tab — browser will handle PDF download natively
-            window.open(downloadUrl, '_blank');
+            window.open(directUrl, '_blank');
             toast.success('Download started!', { id: 'form-download' });
         } catch {
             toast.error('Download failed. Trying local copy...', { id: 'form-download' });
