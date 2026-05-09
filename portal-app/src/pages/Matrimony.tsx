@@ -71,24 +71,15 @@ export default function Matrimony() {
         setDownloadingForm(true);
         toast.loading('Preparing download...', { id: 'form-download' });
         try {
-            const res = await fetch(`${PORTAL_API_URL}/documents/matrimony-form`);
-            const data = await res.json();
-            if (data.success && data.url) {
-                // Fetch the PDF as a blob to bypass cross-origin download restrictions
-                const pdfRes = await fetch(data.url);
-                const blob = await pdfRes.blob();
-                const blobUrl = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = 'CASTE_MATRIMONY.pdf';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(blobUrl);
-                toast.success('Download complete!', { id: 'form-download' });
-            } else {
-                throw new Error('No URL returned');
-            }
+            // Use Firebase Storage SDK directly — the form is at a known path
+            const { ref, getDownloadURL } = await import('firebase/storage');
+            const { storage } = await import('../config/firebase');
+            const formRef = ref(storage, 'pandarasamaja document/matrimony form/CASTE_MATRIMONY.pdf');
+            const downloadUrl = await getDownloadURL(formRef);
+
+            // Open in new tab — browser will handle PDF download natively
+            window.open(downloadUrl, '_blank');
+            toast.success('Download started!', { id: 'form-download' });
         } catch {
             toast.error('Download failed. Trying local copy...', { id: 'form-download' });
             const a = document.createElement('a');

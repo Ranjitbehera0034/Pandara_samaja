@@ -74,46 +74,15 @@ export default function Matrimony() {
         setDownloadingForm(true);
         toast.loading('Preparing download...', { id: 'form-download' });
         try {
-            // Try admin documents endpoint first (uses admin token via api service)
-            let pdfUrl = '';
-            try {
-                const adminRes = await api.get('/admin/documents', { params: { category: 'matrimony' } });
-                const docs = adminRes.data?.documents || [];
-                const matrimonyDoc = docs.find((d: any) =>
-                    d.title?.toLowerCase().includes('matrimony') ||
-                    d.file_url?.toLowerCase().includes('matrimony')
-                );
-                if (matrimonyDoc?.file_url) {
-                    pdfUrl = matrimonyDoc.file_url;
-                }
-            } catch {
-                // Admin endpoint didn't work, try portal endpoint
-            }
+            // Use Firebase Storage SDK directly — the form is at a known path
+            const { ref, getDownloadURL } = await import('firebase/storage');
+            const { storage } = await import('../config/firebaseConfig');
+            const formRef = ref(storage, 'pandarasamaja document/matrimony form/CASTE_MATRIMONY.pdf');
+            const downloadUrl = await getDownloadURL(formRef);
 
-            // Fallback: try portal endpoint without auth (it may be public)
-            if (!pdfUrl) {
-                const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
-                const portalRes = await fetch(`${baseUrl}/portal/documents/matrimony-form`);
-                const data = await portalRes.json();
-                if (data.success && data.url) {
-                    pdfUrl = data.url;
-                }
-            }
-
-            if (!pdfUrl) throw new Error('No form URL found');
-
-            // Fetch the PDF as a blob to bypass cross-origin download restrictions
-            const pdfRes = await fetch(pdfUrl);
-            const blob = await pdfRes.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = 'CASTE_MATRIMONY.pdf';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(blobUrl);
-            toast.success('Download complete!', { id: 'form-download' });
+            // Open in new tab — browser will handle PDF download natively
+            window.open(downloadUrl, '_blank');
+            toast.success('Download started!', { id: 'form-download' });
         } catch {
             toast.error('Download failed. Trying local copy...', { id: 'form-download' });
             const a = document.createElement('a');
