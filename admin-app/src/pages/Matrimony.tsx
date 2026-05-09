@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, X, Heart, User, Eye, Info, Filter, ArrowUpDown, Pencil, Trash2, ShieldCheck, Users, Plus, Upload, Download, GraduationCap, Briefcase, Phone } from 'lucide-react';
+import { Search, MapPin, X, Heart, User, Eye, Info, Filter, ArrowUpDown, Pencil, Trash2, ShieldCheck, Users, Plus, Upload, FileText, Download, GraduationCap, Briefcase, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
@@ -66,6 +66,7 @@ export default function Matrimony() {
         address: '', mobile: '', expectations: '', father_name: '',
     });
     const [directPhoto, setDirectPhoto] = useState<File | null>(null);
+    const [directFormFile, setDirectFormFile] = useState<File | null>(null);
 
     const [directSubmitting, setDirectSubmitting] = useState(false);
     const [downloadingForm, setDownloadingForm] = useState(false);
@@ -151,18 +152,29 @@ export default function Matrimony() {
     const handleDirectAddCandidate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!directForm.name.trim()) { toast.error('Candidate name is required'); return; }
+        if (!directFormFile) { toast.error('Matrimony form is required. Please upload the filled form.'); return; }
         setDirectSubmitting(true);
         try {
+            // Step 1: Upload the mandatory matrimony form to Firebase Storage
+            const { uploadFile } = await import('../services/firebaseStorage');
+            const timestamp = Date.now();
+            const formExt = directFormFile.name.split('.').pop() || 'pdf';
+            const formPath = `matrimony/forms/${directForm.name.replace(/\s+/g, '_')}_${timestamp}.${formExt}`;
+            await uploadFile(directFormFile, formPath);
+
+            // Step 2: Create the candidate profile in the backend
             const formData = new FormData();
             Object.entries(directForm).forEach(([k, v]) => { if (v) formData.append(k, v); });
             // Admin-created candidates are auto-approved — no verification needed
             formData.append('status', 'approved');
             if (directPhoto) formData.append('photo', directPhoto);
             await api.post('/candidates', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+
             toast.success(`✅ "${directForm.name}" published to the matrimony directory!`);
             setShowDirectModal(false);
             setDirectForm({ name: '', gender: '', date_of_birth: '', education: '', occupation: '', income: '', height: '', gotra: '', address: '', mobile: '', expectations: '', father_name: '' });
             setDirectPhoto(null);
+            setDirectFormFile(null);
             fetchCandidates();
         } catch (_e: any) {
             toast.error(_e.response?.data?.message || _e.response?.data?.error || 'Failed to add candidate');
@@ -869,24 +881,39 @@ export default function Matrimony() {
 
                                 {/* File Uploads */}
                                 <div className="border-t border-white/5 pt-4 space-y-4">
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Uploads (Optional)</p>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Uploads</p>
+
+                                    {/* Matrimony Form — MANDATORY */}
                                     <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1"><Upload size={12} className="inline mr-1" />Candidate Photo</label>
+                                        <label className="block text-[10px] font-black text-pink-400 uppercase tracking-widest mb-1"><FileText size={12} className="inline mr-1" />Filled Matrimony Form <span className="text-red-400">* (Required)</span></label>
+                                        <label className={`flex items-center gap-3 px-4 py-3 bg-slate-950 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${directFormFile ? 'border-green-500/50 bg-green-500/5' : 'border-pink-500/40 hover:border-pink-500/70'}`}>
+                                            <FileText size={16} className={`shrink-0 ${directFormFile ? 'text-green-400' : 'text-pink-400'}`} />
+                                            <span className={`text-sm truncate ${directFormFile ? 'text-green-300 font-bold' : 'text-slate-400'}`}>
+                                                {directFormFile ? `✓ ${directFormFile.name}` : 'Upload scanned/photographed filled form (PDF, JPG, PNG)'}
+                                            </span>
+                                            <input type="file" className="hidden" accept=".pdf,image/*" onChange={e => setDirectFormFile(e.target.files?.[0] || null)} />
+                                        </label>
+                                        <div className="flex items-center justify-between mt-2">
+                                            <p className="text-[10px] text-slate-500">Download, fill manually, scan/photograph and upload here</p>
+                                            <button
+                                                type="button"
+                                                onClick={handleDownloadForm}
+                                                disabled={downloadingForm}
+                                                className="inline-flex items-center gap-1.5 text-[10px] text-pink-400 hover:text-pink-300 font-bold transition-colors disabled:opacity-60"
+                                            >
+                                                <Download size={12} /> {downloadingForm ? 'Preparing...' : 'Download blank form'}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Candidate Photo — Optional */}
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1"><Upload size={12} className="inline mr-1" />Candidate Photo <span className="text-slate-600">(Optional)</span></label>
                                         <label className="flex items-center gap-3 px-4 py-3 bg-slate-950 border border-dashed border-slate-700 rounded-xl cursor-pointer hover:border-pink-500/50 transition-colors">
                                             <User size={16} className="text-pink-400 shrink-0" />
                                             <span className="text-sm text-slate-400 truncate">{directPhoto ? directPhoto.name : 'Click to upload candidate photo (JPG, PNG)'}</span>
                                             <input type="file" className="hidden" accept="image/*" onChange={e => setDirectPhoto(e.target.files?.[0] || null)} />
                                         </label>
-                                    </div>
-
-                                    <div>
-                                        <button
-                                            onClick={handleDownloadForm}
-                                            disabled={downloadingForm}
-                                            className="inline-flex items-center gap-2 text-xs text-pink-400 hover:text-pink-300 font-bold transition-colors disabled:opacity-60"
-                                        >
-                                            <Download size={14} /> {downloadingForm ? 'Preparing...' : 'Download blank matrimony form'}
-                                        </button>
                                     </div>
                                 </div>
                             </form>
@@ -897,7 +924,7 @@ export default function Matrimony() {
                                 </button>
                                 <button
                                     onClick={handleDirectAddCandidate as any}
-                                    disabled={directSubmitting || !directForm.name.trim()}
+                                    disabled={directSubmitting || !directForm.name.trim() || !directFormFile}
                                     className="flex-1 py-4 bg-gradient-to-r from-pink-600 to-red-600 hover:opacity-90 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-pink-500/20 flex items-center justify-center gap-2"
                                 >
                                     {directSubmitting ? (
