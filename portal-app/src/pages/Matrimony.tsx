@@ -74,14 +74,18 @@ export default function Matrimony() {
             const res = await fetch(`${PORTAL_API_URL}/documents/matrimony-form`);
             const data = await res.json();
             if (data.success && data.url) {
-                toast.success('Download starting!', { id: 'form-download' });
-                // Trigger browser download
+                // Fetch the PDF as a blob to bypass cross-origin download restrictions
+                const pdfRes = await fetch(data.url);
+                const blob = await pdfRes.blob();
+                const blobUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = data.url;
+                a.href = blobUrl;
                 a.download = 'CASTE_MATRIMONY.pdf';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+                toast.success('Download complete!', { id: 'form-download' });
             } else {
                 throw new Error('No URL returned');
             }
@@ -117,8 +121,10 @@ export default function Matrimony() {
         setLoading(true);
         try {
             const token = localStorage.getItem("portalToken");
-            const genderParam = genderFilter !== 'All' ? `?gender=${genderFilter}` : '';
-            const res = await fetch(`${API_BASE_URL}/candidates${genderParam}`, {
+            const params = new URLSearchParams();
+            params.append('status', 'approved');
+            if (genderFilter !== 'All') params.append('gender', genderFilter);
+            const res = await fetch(`${API_BASE_URL}/candidates?${params.toString()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!res.ok) throw new Error('Failed');
@@ -200,7 +206,12 @@ export default function Matrimony() {
     };
 
 
-    const sortedCandidates = (Array.isArray(candidates) ? [...candidates] : []).sort((a, b) => {
+    // Only show approved candidates to portal members
+    const approvedCandidates = (Array.isArray(candidates) ? candidates : []).filter(
+        c => c.status === 'approved'
+    );
+
+    const sortedCandidates = [...approvedCandidates].sort((a, b) => {
         if (sortBy === 'Age') {
             const ageA = calculateAge(a.date_of_birth || a.dob) || 0;
             const ageB = calculateAge(b.date_of_birth || b.dob) || 0;
