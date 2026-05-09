@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, X, Heart, User, Eye, Info, Filter, ArrowUpDown, Pencil, Trash2, ShieldCheck, Users, Plus, Upload, FileText, Download, GraduationCap, Briefcase, Phone } from 'lucide-react';
+import { Search, MapPin, X, Heart, User, Eye, Info, Filter, ArrowUpDown, Pencil, Trash2, ShieldCheck, Users, Plus, Upload, Download, GraduationCap, Briefcase, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
