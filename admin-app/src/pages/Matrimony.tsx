@@ -66,7 +66,7 @@ export default function Matrimony() {
         address: '', mobile: '', expectations: '', father_name: '',
     });
     const [directPhoto, setDirectPhoto] = useState<File | null>(null);
-    const [directFormFile, setDirectFormFile] = useState<File | null>(null);
+
     const [directSubmitting, setDirectSubmitting] = useState(false);
     const [downloadingForm, setDownloadingForm] = useState(false);
 
@@ -74,23 +74,46 @@ export default function Matrimony() {
         setDownloadingForm(true);
         toast.loading('Preparing download...', { id: 'form-download' });
         try {
-            const token = localStorage.getItem('adminToken');
-            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
-            const res = await fetch(`${baseUrl}/portal/documents/matrimony-form`, {
-                headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-            });
-            const data = await res.json();
-            if (data.success && data.url) {
-                toast.success('Download starting!', { id: 'form-download' });
-                const a = document.createElement('a');
-                a.href = data.url;
-                a.download = 'CASTE_MATRIMONY.pdf';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            } else {
-                throw new Error('No URL returned');
+            // Try admin documents endpoint first (uses admin token via api service)
+            let pdfUrl = '';
+            try {
+                const adminRes = await api.get('/admin/documents', { params: { category: 'matrimony' } });
+                const docs = adminRes.data?.documents || [];
+                const matrimonyDoc = docs.find((d: any) =>
+                    d.title?.toLowerCase().includes('matrimony') ||
+                    d.file_url?.toLowerCase().includes('matrimony')
+                );
+                if (matrimonyDoc?.file_url) {
+                    pdfUrl = matrimonyDoc.file_url;
+                }
+            } catch {
+                // Admin endpoint didn't work, try portal endpoint
             }
+
+            // Fallback: try portal endpoint without auth (it may be public)
+            if (!pdfUrl) {
+                const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+                const portalRes = await fetch(`${baseUrl}/portal/documents/matrimony-form`);
+                const data = await portalRes.json();
+                if (data.success && data.url) {
+                    pdfUrl = data.url;
+                }
+            }
+
+            if (!pdfUrl) throw new Error('No form URL found');
+
+            // Fetch the PDF as a blob to bypass cross-origin download restrictions
+            const pdfRes = await fetch(pdfUrl);
+            const blob = await pdfRes.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = 'CASTE_MATRIMONY.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+            toast.success('Download complete!', { id: 'form-download' });
         } catch {
             toast.error('Download failed. Trying local copy...', { id: 'form-download' });
             const a = document.createElement('a');
@@ -163,14 +186,14 @@ export default function Matrimony() {
         try {
             const formData = new FormData();
             Object.entries(directForm).forEach(([k, v]) => { if (v) formData.append(k, v); });
+            // Admin-created candidates are auto-approved — no verification needed
+            formData.append('status', 'approved');
             if (directPhoto) formData.append('photo', directPhoto);
-            if (directFormFile) formData.append('manual_form', directFormFile);
             await api.post('/candidates', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             toast.success(`✅ "${directForm.name}" published to the matrimony directory!`);
             setShowDirectModal(false);
             setDirectForm({ name: '', gender: '', date_of_birth: '', education: '', occupation: '', income: '', height: '', gotra: '', address: '', mobile: '', expectations: '', father_name: '' });
             setDirectPhoto(null);
-            setDirectFormFile(null);
             fetchCandidates();
         } catch (_e: any) {
             toast.error(_e.response?.data?.message || _e.response?.data?.error || 'Failed to add candidate');
@@ -886,14 +909,7 @@ export default function Matrimony() {
                                             <input type="file" className="hidden" accept="image/*" onChange={e => setDirectPhoto(e.target.files?.[0] || null)} />
                                         </label>
                                     </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1"><FileText size={12} className="inline mr-1" />Filled Matrimony Form (Scan/Photo)</label>
-                                        <label className="flex items-center gap-3 px-4 py-3 bg-slate-950 border border-dashed border-slate-700 rounded-xl cursor-pointer hover:border-pink-500/50 transition-colors">
-                                            <FileText size={16} className="text-pink-400 shrink-0" />
-                                            <span className="text-sm text-slate-400 truncate">{directFormFile ? directFormFile.name : 'Upload scanned form (PDF, JPG, PNG)'}</span>
-                                            <input type="file" className="hidden" accept=".pdf,image/*" onChange={e => setDirectFormFile(e.target.files?.[0] || null)} />
-                                        </label>
-                                    </div>
+
                                     <div>
                                         <button
                                             onClick={handleDownloadForm}

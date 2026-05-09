@@ -145,11 +145,13 @@ export default function MatrimonyVerificationQueue() {
                 remarks: remarks.trim() || 'Approved'
             });
 
-            // Step 2: Create the candidate profile
+            // Step 2: Create the candidate profile with auto-approved status
             const formData = new FormData();
             Object.entries(candidateForm).forEach(([key, value]) => {
                 if (value) formData.append(key, value);
             });
+            // Admin-approved candidates go live immediately
+            formData.append('status', 'approved');
             if (candidatePhoto) {
                 formData.append('photo', candidatePhoto);
             }
