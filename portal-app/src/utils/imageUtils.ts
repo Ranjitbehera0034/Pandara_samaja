@@ -49,10 +49,5 @@ export function getImageUrl(url: string | null | undefined): string {
     if (url.startsWith('http') || url.startsWith('blob:')) return url;
 
     // Fallback: treat as a relative path to our backend image proxy.
-    // Ensure we don't produce malformed URLs like 'https://api/v1'.
-    if (url.startsWith('/api/v1') || url.startsWith('api/v1')) {
-        return url.startsWith('/') ? url : `/${url}`;
-    }
-
     return `${BACKEND_URL}/${url.replace(/^\//, '')}`;
 }
