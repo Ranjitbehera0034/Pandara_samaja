@@ -48,6 +48,14 @@ export function getImageUrl(url: string | null | undefined): string {
     // Already an absolute URL
     if (url.startsWith('http') || url.startsWith('blob:')) return url;
 
+    // Private Firebase media proxy: requires a token, since <img>/<iframe> tags
+    // can't send an Authorization header. Backend accepts it as ?token=.
+    if (url.includes('/portal/media')) {
+        const token = localStorage.getItem('portalToken');
+        const sep = url.includes('?') ? '&' : '?';
+        return `${BACKEND_URL}/${url.replace(/^\//, '')}${token ? `${sep}token=${token}` : ''}`;
+    }
+
     // Fallback: treat as a relative path to our backend image proxy.
     return `${BACKEND_URL}/${url.replace(/^\//, '')}`;
 }
