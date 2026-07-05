@@ -155,6 +155,9 @@ export default function MatrimonyVerificationQueue() {
             if (candidatePhoto) {
                 formData.append('photo', candidatePhoto);
             }
+            if (reviewApp.uploaded_file_url) {
+                formData.append('manual_form', reviewApp.uploaded_file_url);
+            }
 
             await api.post('/candidates', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }

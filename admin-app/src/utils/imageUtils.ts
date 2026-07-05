@@ -44,9 +44,26 @@ export function getImageUrl(url: string | null | undefined): string {
     if (url.startsWith('assets/')) return `https://nikhilaodishapandarasamaja.in/${url}`;
 
     // Already an absolute URL (blob: for preview, http: for external)
-    if (url.startsWith('http') || url.startsWith('blob:')) return url;
+    if (url.startsWith('http') || url.startsWith('blob:')) {
+        if (url.includes('/portal/media') && !url.includes('token=')) {
+            const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+            if (token) {
+                const separator = url.includes('?') ? '&' : '?';
+                return `${url}${separator}token=${token}`;
+            }
+        }
+        return url;
+    }
 
     // Relative backend path
     // Fallback: treat as a relative path to our backend image proxy.
-    return `${BACKEND_URL}/${url.replace(/^\//, '')}`;
+    const resolvedUrl = `${BACKEND_URL}/${url.replace(/^\//, '')}`;
+    if (resolvedUrl.includes('/portal/media') && !resolvedUrl.includes('token=')) {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+        if (token) {
+            const separator = resolvedUrl.includes('?') ? '&' : '?';
+            return `${resolvedUrl}${separator}token=${token}`;
+        }
+    }
+    return resolvedUrl;
 }

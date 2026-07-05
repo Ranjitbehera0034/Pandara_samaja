@@ -26,11 +26,18 @@ type Candidate = {
     phone?: string;
     expectations: string | null;
     photo: string | null;
+    manual_form?: string | null;
     status: string;
     admin_comments?: string;
     is_matched?: boolean;
     matched_status?: string;
     matched_partner_name?: string;
+    matched_partner_member_id?: string | null;
+    match_date?: string | null;
+    associated_member_id?: string | null;
+    district?: string | null;
+    taluka?: string | null;
+    village?: string | null;
 };
 
 export default function Matrimony() {
@@ -56,14 +63,15 @@ export default function Matrimony() {
     const [actionType, setActionType] = useState<'status' | 'match' | null>(null);
     const [adminComments, setAdminComments] = useState('');
     const [newStatus, setNewStatus] = useState<string>('');
-    const [matchData, setMatchData] = useState({ status: 'Matched', partnerName: '', partnerGender: '' });
+    const [matchData, setMatchData] = useState({ status: 'Matched', partnerName: '', partnerGender: '', partnerMemberId: '', matchDate: '' });
 
     // Direct Admin Add Candidate State
     const [showDirectModal, setShowDirectModal] = useState(false);
+    const [editingCandidateId, setEditingCandidateId] = useState<number | null>(null);
     const [directForm, setDirectForm] = useState({
         name: '', gender: '', date_of_birth: '', education: '',
         occupation: '', income: '', height: '', gotra: '',
-        address: '', mobile: '', expectations: '', father_name: '',
+        address: '', mobile: '', expectations: '', father_name: '', associated_member_id: ''
     });
     const [directPhoto, setDirectPhoto] = useState<File | null>(null);
     const [directFormFile, setDirectFormFile] = useState<File | null>(null);
@@ -134,7 +142,9 @@ export default function Matrimony() {
             await api.put(`/admin/candidates/${id}/match`, {
                 matched_status: matchData.status,
                 matched_partner_name: matchData.partnerName,
-                matched_partner_gender: matchData.partnerGender
+                matched_partner_gender: matchData.partnerGender,
+                matched_partner_member_id: matchData.partnerMemberId || null,
+                match_date: matchData.matchDate
             });
             toast.success(lang === 'or' ? 'ସଫଳତାର ସହ ମ୍ୟାଚ୍ କରାଗଲା' : `Candidate marked as ${matchData.status}`);
             setAdminActionCandidate(null);
@@ -147,35 +157,61 @@ export default function Matrimony() {
         }
     };
 
+    const openEditModal = (c: any) => {
+        setEditingCandidateId(c.id);
+        setDirectForm({
+            name: c.name || '',
+            gender: c.gender || '',
+            date_of_birth: c.date_of_birth || c.dob || '',
+            education: c.education || '',
+            occupation: c.occupation || '',
+            income: c.income || '',
+            height: c.height || '',
+            gotra: c.gotra || '',
+            address: c.address || '',
+            mobile: c.mobile || c.phone || '',
+            expectations: c.expectations || '',
+            father_name: c.father_name || c.father || '',
+            associated_member_id: c.associated_member_id || ''
+        });
+        setDirectPhoto(null);
+        setDirectFormFile(null);
+        setShowDirectModal(true);
+    };
+
     const handleDirectAddCandidate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!directForm.name.trim()) { toast.error('Candidate name is required'); return; }
-        if (!directFormFile) { toast.error('Matrimony form is required. Please upload the filled form.'); return; }
+        if (!editingCandidateId && !directFormFile) { toast.error('Matrimony form is required for new candidates.'); return; }
         setDirectSubmitting(true);
         try {
-            // Step 1: Upload the mandatory matrimony form to Firebase Storage
-            const { uploadFile } = await import('../services/firebaseStorage');
-            const timestamp = Date.now();
-            const formExt = directFormFile.name.split('.').pop() || 'pdf';
-            const formPath = `matrimony/forms/${directForm.name.replace(/\s+/g, '_')}_${timestamp}.${formExt}`;
-            await uploadFile(directFormFile, formPath);
-
-            // Step 2: Create the candidate profile in the backend
             const formData = new FormData();
+            
+            // Step 2: Create or Update the candidate profile in the backend
             Object.entries(directForm).forEach(([k, v]) => { if (v) formData.append(k, v); });
-            // Admin-created candidates are auto-approved — no verification needed
-            formData.append('status', 'approved');
+            
             if (directPhoto) formData.append('photo', directPhoto);
-            await api.post('/candidates', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            if (directFormFile) formData.append('manual_form', directFormFile);
+            
+            if (editingCandidateId) {
+                // Edit existing candidate
+                await api.put(`/candidates/${editingCandidateId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                toast.success(`✅ Candidate "${directForm.name}" updated!`);
+            } else {
+                // Admin-created candidates are auto-approved — no verification needed
+                formData.append('status', 'approved');
+                await api.post('/candidates', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                toast.success(`✅ "${directForm.name}" published to the matrimony directory!`);
+            }
 
-            toast.success(`✅ "${directForm.name}" published to the matrimony directory!`);
             setShowDirectModal(false);
-            setDirectForm({ name: '', gender: '', date_of_birth: '', education: '', occupation: '', income: '', height: '', gotra: '', address: '', mobile: '', expectations: '', father_name: '' });
+            setEditingCandidateId(null);
+            setDirectForm({ name: '', gender: '', date_of_birth: '', education: '', occupation: '', income: '', height: '', gotra: '', address: '', mobile: '', expectations: '', father_name: '', associated_member_id: '' });
             setDirectPhoto(null);
             setDirectFormFile(null);
             fetchCandidates();
         } catch (_e: any) {
-            toast.error(_e.response?.data?.message || _e.response?.data?.error || 'Failed to add candidate');
+            toast.error(_e.response?.data?.message || _e.response?.data?.error || 'Failed to save candidate');
         } finally {
             setDirectSubmitting(false);
         }
@@ -410,9 +446,9 @@ export default function Matrimony() {
                                         >
                                             {/* Card Media Header */}
                                             <div className="h-[280px] relative overflow-hidden bg-slate-100 dark:bg-slate-950">
-                                                {c.photo ? (
+                                                {c.photo || c.manual_form ? (
                                                     <img
-                                                        src={getImageUrl(c.photo)}
+                                                        src={getImageUrl((c.photo || c.manual_form) as string)}
                                                         alt={c.name}
                                                         className="w-full h-full object-cover object-top transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
                                                     />
@@ -458,7 +494,7 @@ export default function Matrimony() {
                                                 {/* Image Preview Hover */}
                                                 <div className="absolute inset-0 bg-pink-600/10 dark:bg-pink-600/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 pointer-events-none">
                                                     <button
-                                                        onClick={() => setSelectedPhoto(getImageUrl(c.photo))}
+                                                        onClick={() => setSelectedPhoto(getImageUrl((c.photo || c.manual_form) as string))}
                                                         className="w-14 h-14 rounded-2xl bg-white text-slate-900 flex items-center justify-center shadow-xl hover:bg-pink-50 hover:text-pink-600 transition-colors pointer-events-auto"
                                                     >
                                                         <Eye size={24} />
@@ -485,21 +521,32 @@ export default function Matrimony() {
                                                     </div>
                                                     <div className="min-w-0">
                                                         <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[1.5px]">{lang === 'or' ? 'ସ୍ଥାନ' : 'Location'}</p>
-                                                        <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{c.address || 'Unknown'}</p>
+                                                        <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
+                                                            {c.district ? [c.village, c.taluka, c.district].filter(Boolean).join(', ') : (c.address || 'Unknown')}
+                                                        </p>
+                                                        {c.associated_member_id && (
+                                                            <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5">Linked to Member: {c.associated_member_id}</p>
+                                                        )}
                                                     </div>
                                                 </div>
 
                                                 {/* Admin Action Buttons */}
                                                 <div className="grid grid-cols-2 gap-2 mt-4">
                                                     <button
+                                                        onClick={() => openEditModal(c)}
+                                                        className="col-span-2 px-4 py-2 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-white border border-slate-200 dark:border-white/10 transition-all flex items-center justify-center gap-2"
+                                                    >
+                                                        <Pencil size={14} /> Edit Profile Info
+                                                    </button>
+                                                    <button
                                                         onClick={() => { setAdminActionCandidate(c); setActionType('status'); setNewStatus(c.status); setAdminComments(c.admin_comments || ''); }}
                                                         className="px-4 py-3 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-white border border-slate-200 dark:border-white/10 transition-all flex items-center justify-center gap-2"
                                                     >
-                                                        <Pencil size={14} /> Update
+                                                        <ShieldCheck size={14} /> Status
                                                     </button>
                                                     {!c.is_matched && (
                                                         <button
-                                                            onClick={() => { setAdminActionCandidate(c); setActionType('match'); setMatchData({ status: 'Matched', partnerName: '', partnerGender: '' }); }}
+                                                            onClick={() => { setAdminActionCandidate(c); setActionType('match'); setMatchData({ status: 'Matched', partnerName: '', partnerGender: '', partnerMemberId: '', matchDate: '' }); }}
                                                             className="px-4 py-3 bg-pink-50 dark:bg-pink-600/20 hover:bg-pink-100 dark:hover:bg-pink-600/40 rounded-xl text-[10px] font-black uppercase tracking-widest text-pink-600 dark:text-pink-300 border border-pink-200 dark:border-pink-500/30 transition-all flex items-center justify-center gap-2"
                                                         >
                                                             <Heart size={14} /> Match
@@ -634,12 +681,31 @@ export default function Matrimony() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">{lang === 'or' ? 'ସାଥୀଙ୍କ ନାମ' : 'Partner Name'} (Optional)</label>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">{lang === 'or' ? 'ସାଥୀଙ୍କ ନାମ' : 'Partner Name'} <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
                                         value={matchData.partnerName}
                                         onChange={(e) => setMatchData({ ...matchData, partnerName: e.target.value })}
                                         placeholder="Who did they match with?"
+                                        className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">Match Date <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="date"
+                                        value={matchData.matchDate}
+                                        onChange={(e) => setMatchData({ ...matchData, matchDate: e.target.value })}
+                                        className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[2.5px]">Partner Member No. (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={matchData.partnerMemberId}
+                                        onChange={(e) => setMatchData({ ...matchData, partnerMemberId: e.target.value })}
+                                        placeholder="If they are in the portal, enter their Member No."
                                         className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold"
                                     />
                                 </div>
@@ -801,12 +867,16 @@ export default function Matrimony() {
                             <div className="px-5 sm:px-8 py-5 sm:py-6 border-b border-white/5 flex justify-between items-center shrink-0">
                                 <div>
                                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-pink-500/10 text-pink-400 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 border border-pink-500/20">
-                                        <Heart size={12} fill="currentColor" /> Admin Direct Entry
+                                        <Heart size={12} fill="currentColor" /> Admin Action
                                     </div>
-                                    <h2 className="text-xl font-black text-white tracking-tight">Add Candidate Directly</h2>
-                                    <p className="text-xs text-slate-400 mt-1">Admin-created candidates are auto-approved and immediately visible in the directory.</p>
+                                    <h2 className="text-xl font-black text-white tracking-tight">
+                                        {editingCandidateId ? 'Edit Candidate' : 'Add Candidate Directly'}
+                                    </h2>
+                                    <p className="text-xs text-slate-400 mt-1">
+                                        {editingCandidateId ? 'Update candidate information.' : 'Admin-created candidates are auto-approved.'}
+                                    </p>
                                 </div>
-                                <button onClick={() => setShowDirectModal(false)} className="p-2 text-slate-400 hover:text-white rounded-full bg-slate-800">
+                                <button onClick={() => { setShowDirectModal(false); setEditingCandidateId(null); }} className="p-2 text-slate-400 hover:text-white rounded-full bg-slate-800">
                                     <X size={22} />
                                 </button>
                             </div>
@@ -822,6 +892,17 @@ export default function Matrimony() {
                                         placeholder="Full legal name of the candidate"
                                         className="w-full px-4 py-3 bg-slate-950 border border-pink-500/40 rounded-xl text-sm text-white focus:border-pink-500 outline-none font-bold"
                                     />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-pink-400 uppercase tracking-widest mb-1">Associated Member No. <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="text" required
+                                        value={directForm.associated_member_id}
+                                        onChange={e => setDirectForm(f => ({ ...f, associated_member_id: e.target.value }))}
+                                        placeholder="Enter the Member ID responsible for this candidate"
+                                        className="w-full px-4 py-3 bg-slate-950 border border-pink-500/40 rounded-xl text-sm text-white focus:border-pink-500 outline-none font-bold"
+                                    />
+                                    <p className="text-[10px] text-slate-500 mt-1">This links the candidate to a verified member, allowing us to fetch district/taluka info.</p>
                                 </div>
 
                                 {/* Optional Profile Fields */}
@@ -881,9 +962,9 @@ export default function Matrimony() {
                                 <div className="border-t border-white/5 pt-4 space-y-4">
                                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Uploads</p>
 
-                                    {/* Matrimony Form — MANDATORY */}
+                                    {/* Matrimony Form */}
                                     <div>
-                                        <label className="block text-[10px] font-black text-pink-400 uppercase tracking-widest mb-1"><FileText size={12} className="inline mr-1" />Filled Matrimony Form <span className="text-red-400">* (Required)</span></label>
+                                        <label className="block text-[10px] font-black text-pink-400 uppercase tracking-widest mb-1"><FileText size={12} className="inline mr-1" />Filled Matrimony Form {!editingCandidateId && <span className="text-red-400">* (Required)</span>}</label>
                                         <label className={`flex items-center gap-3 px-4 py-3 bg-slate-950 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${directFormFile ? 'border-green-500/50 bg-green-500/5' : 'border-pink-500/40 hover:border-pink-500/70'}`}>
                                             <FileText size={16} className={`shrink-0 ${directFormFile ? 'text-green-400' : 'text-pink-400'}`} />
                                             <span className={`text-sm truncate ${directFormFile ? 'text-green-300 font-bold' : 'text-slate-400'}`}>
@@ -891,20 +972,12 @@ export default function Matrimony() {
                                             </span>
                                             <input type="file" className="hidden" accept=".pdf,image/*" onChange={e => setDirectFormFile(e.target.files?.[0] || null)} />
                                         </label>
-                                        <div className="flex items-center justify-between mt-2">
-                                            <p className="text-[10px] text-slate-500">Download, fill manually, scan/photograph and upload here</p>
-                                            <button
-                                                type="button"
-                                                onClick={handleDownloadForm}
-                                                disabled={downloadingForm}
-                                                className="inline-flex items-center gap-1.5 text-[10px] text-pink-400 hover:text-pink-300 font-bold transition-colors disabled:opacity-60"
-                                            >
-                                                <Download size={12} /> {downloadingForm ? 'Preparing...' : 'Download blank form'}
-                                            </button>
-                                        </div>
+                                        <p className="text-[10px] text-slate-500 mt-2">
+                                            {editingCandidateId ? 'Upload new form to replace existing one (Optional)' : 'Filled form is mandatory to publish candidate'}
+                                        </p>
                                     </div>
 
-                                    {/* Candidate Photo — Optional */}
+                                    {/* Candidate Photo */}
                                     <div>
                                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1"><Upload size={12} className="inline mr-1" />Candidate Photo <span className="text-slate-600">(Optional)</span></label>
                                         <label className="flex items-center gap-3 px-4 py-3 bg-slate-950 border border-dashed border-slate-700 rounded-xl cursor-pointer hover:border-pink-500/50 transition-colors">
