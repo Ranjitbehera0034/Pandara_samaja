@@ -46,7 +46,16 @@ export function getImageUrl(url: string | null | undefined): string {
     if (url.startsWith('assets/')) return `https://nikhilaodishapandarasamaja.in/${url}`;
 
     // Already an absolute URL
-    if (url.startsWith('http') || url.startsWith('blob:')) return url;
+    if (url.startsWith('http') || url.startsWith('blob:')) {
+        if (url.includes('/portal/media') && !url.includes('token=')) {
+            const token = typeof window !== 'undefined' ? localStorage.getItem('portalToken') : null;
+            if (token) {
+                const separator = url.includes('?') ? '&' : '?';
+                return `${url}${separator}token=${token}`;
+            }
+        }
+        return url;
+    }
 
     // Private Firebase media proxy: requires a token, since <img>/<iframe> tags
     // can't send an Authorization header. Backend accepts it as ?token=.
@@ -57,5 +66,13 @@ export function getImageUrl(url: string | null | undefined): string {
     }
 
     // Fallback: treat as a relative path to our backend image proxy.
-    return `${BACKEND_URL}/${url.replace(/^\//, '')}`;
+    const resolvedUrl = `${BACKEND_URL}/${url.replace(/^\//, '')}`;
+    if (resolvedUrl.includes('/portal/media') && !resolvedUrl.includes('token=')) {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('portalToken') : null;
+        if (token) {
+            const separator = resolvedUrl.includes('?') ? '&' : '?';
+            return `${resolvedUrl}${separator}token=${token}`;
+        }
+    }
+    return resolvedUrl;
 }

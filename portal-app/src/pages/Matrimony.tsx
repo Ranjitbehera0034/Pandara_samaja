@@ -34,7 +34,14 @@ type Candidate = {
     phone?: string;
     expectations: string | null;
     photo: string | null;
+    manual_form?: string | null;
     status: string;
+    is_matched?: boolean;
+    matched_status?: string;
+    associated_member_id?: string | null;
+    district?: string | null;
+    taluka?: string | null;
+    village?: string | null;
 };
 
 export default function Matrimony() {
@@ -143,17 +150,8 @@ export default function Matrimony() {
             const formData = new FormData(e.currentTarget);
             const token = localStorage.getItem("portalToken");
 
-            // Upload file to Firebase Storage first
-            const file = formData.get('form_file') as File;
-            const memberId = memberObj?.id || memberObj?._id || 'anonymous';
-            
-            if (file && file.size > 0) {
-                const { uploadMatrimonyFile } = await import('../services/firebaseStorage');
-                const fileUrl = await uploadMatrimonyFile(file, memberId);
-                // Replace file with URL in form data
-                formData.delete('form_file');
-                formData.append('form_file_url', fileUrl);
-            }
+            // Submit the form containing the raw file to the backend
+            // which will handle Firebase Storage upload server-side.
 
             const res = await fetch(`${PORTAL_API_URL}/matrimony/submit`, {
                 method: 'POST',
@@ -413,9 +411,9 @@ export default function Matrimony() {
                             >
                                 {/* Card Media Header */}
                                 <div className="h-[340px] relative overflow-hidden bg-slate-950">
-                                    {c.photo ? (
+                                    {c.photo || c.manual_form ? (
                                         <img
-                                            src={getImageUrl(c.photo)}
+                                            src={getImageUrl((c.photo || c.manual_form) as string)}
                                             alt={c.name}
                                             className="w-full h-full object-cover object-top transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
                                         />
@@ -476,7 +474,7 @@ export default function Matrimony() {
                                                 <Info size={24} />
                                             </button>
                                             <button
-                                                onClick={() => setSelectedPhoto(getImageUrl(c.photo))}
+                                                onClick={() => setSelectedPhoto(getImageUrl((c.photo || c.manual_form) as string))}
                                                 className="w-14 h-14 rounded-2xl bg-white text-slate-900 flex items-center justify-center shadow-xl hover:bg-pink-50 transition-colors"
                                             >
                                                 <Eye size={24} />
@@ -504,7 +502,9 @@ export default function Matrimony() {
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-[1.5px]">Location</p>
-                                            <p className="text-xs font-bold text-slate-300 truncate">{c.address || 'Location Unknown'}</p>
+                                            <p className="text-xs font-bold text-slate-300 truncate">
+                                                {c.district ? [c.village, c.taluka, c.district].filter(Boolean).join(', ') : (c.address || 'Location Unknown')}
+                                            </p>
                                         </div>
                                     </div>
 
@@ -574,7 +574,14 @@ export default function Matrimony() {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                         <DetailItem icon={<GraduationCap size={18} />} label={t('matrimony', 'education')} value={selectedCandidate.education} />
                                         <DetailItem icon={<Briefcase size={18} />} label={t('matrimony', 'occupation')} value={selectedCandidate.occupation} />
-                                        <DetailItem icon={<MapPin size={18} />} label={t('matrimony', 'address')} value={selectedCandidate.address} />
+                                        <DetailItem 
+                                            icon={<MapPin size={18} />} 
+                                            label={t('matrimony', 'address')} 
+                                            value={selectedCandidate.district ? [selectedCandidate.village, selectedCandidate.taluka, selectedCandidate.district].filter(Boolean).join(', ') : (selectedCandidate.address || 'Not Specified')} 
+                                        />
+                                        {selectedCandidate.associated_member_id && (
+                                            <DetailItem icon={<User size={18} />} label="Linked Member" value={selectedCandidate.associated_member_id} />
+                                        )}
                                         <DetailItem icon={<User size={18} />} label={t('matrimony', 'fatherName')} value={selectedCandidate.father_name || selectedCandidate.father} />
                                         <DetailItem icon={<Star size={18} />} label="Gotra" value={selectedCandidate.gotra || 'Not Specified'} />
                                         <DetailItem icon={<ArrowUpDown size={18} />} label={t('matrimony', 'income').split(' / ')[1] || 'Height'} value={selectedCandidate.height || 'Not Specified'} />
